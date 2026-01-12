@@ -1,4 +1,4 @@
-﻿name: deploy-main.yml
+name: deploy-main.yml
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: "Log in to Azure"
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
