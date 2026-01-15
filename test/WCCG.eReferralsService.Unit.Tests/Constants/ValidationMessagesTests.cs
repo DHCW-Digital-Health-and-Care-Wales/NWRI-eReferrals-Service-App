@@ -7,11 +7,11 @@ namespace WCCG.eReferralsService.Unit.Tests.Constants;
 public class ValidationMessagesTests
 {
     [Fact]
-    public void ShouldCamelCasePropertyNameForMissingEntityField()
+    public void ShouldUsePropertyNameAsProvidedForMissingEntityField()
     {
         var message = ValidationMessages.MissingEntityField<ServiceRequest>(nameof(ServiceRequest.BasedOn));
 
-        message.Should().Be("ServiceRequest.basedOn is required");
+        message.Should().Be("ServiceRequest.BasedOn is required");
     }
 
     [Fact]

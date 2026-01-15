@@ -519,7 +519,12 @@ public class ReferralServiceTests
     {
         var messageHeader = new MessageHeader
         {
-            Reason = new CodeableConcept(FhirConstants.BarsMessageReasonSystem, reasonCode)
+            Reason = new CodeableConcept(FhirConstants.BarsMessageReasonSystem, reasonCode),
+            Event = new Coding("https://example.org/fhir/message-events", "ereferral"),
+            Source = new MessageHeader.MessageSourceComponent
+            {
+                Endpoint = "https://unit-tests/source"
+            }
         };
 
         return new Bundle

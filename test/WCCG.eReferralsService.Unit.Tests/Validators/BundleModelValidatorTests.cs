@@ -129,7 +129,7 @@ public class BundleModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class BundleModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "ServiceRequest.basedOn is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "ServiceRequest.BasedOn is required");
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class BundleModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Encounter.period is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Encounter.Period is required");
     }
 
     [Fact]
@@ -177,6 +177,6 @@ public class BundleModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.address is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Address is required");
     }
 }
