@@ -2,16 +2,6 @@ namespace WCCG.eReferralsService.API.Constants;
 
 public static class ValidationMessages
 {
-    private static string ToFhirName(string propertyName)
-    {
-        if (string.IsNullOrEmpty(propertyName))
-        {
-            return propertyName;
-        }
-
-        return char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
-    }
-
     public static string InvalidFhirObject(string headerName, string typeName)
     {
         return $"Header '{headerName}' is not a valid '{typeName}' encoded FHIR object";
@@ -39,6 +29,6 @@ public static class ValidationMessages
 
     public static string MissingEntityField<TResource>(string propertyName)
     {
-        return $"{typeof(TResource).Name}.{ToFhirName(propertyName)} is required";
+        return $"{typeof(TResource).Name}.{propertyName} is required";
     }
 }

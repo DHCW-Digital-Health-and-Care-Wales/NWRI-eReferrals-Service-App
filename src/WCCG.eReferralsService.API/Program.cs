@@ -19,10 +19,8 @@ builder.Services.AddSingleton<IValidateOptions<PasReferralsApiConfig>, ValidateP
 builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSection(ResilienceConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResilienceConfigOptions>();
 
-builder.Services.AddOptions<FhirValidationConfig>().Bind(builder.Configuration.GetSection(FhirValidationConfig.SectionName));
+builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
-
-builder.Services.AddSingleton<IAuditLogService, AuditLogService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

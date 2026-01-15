@@ -26,7 +26,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public async Task CreateReferralShouldCallCreateReferralAsync()
+    public async Task ProcessMessageShouldCallProcessMessageAsync()
     {
         //Arrange
         var body = _fixture.Create<string>();
@@ -35,17 +35,17 @@ public class ReferralsControllerTests
         SetRequestDetails(headers, body);
 
         var headerArgs = new List<IHeaderDictionary>();
-        _fixture.Mock<IReferralService>().Setup(x => x.CreateReferralAsync(Capture.In(headerArgs), It.IsAny<string>()));
+        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(Capture.In(headerArgs), It.IsAny<string>()));
         //Act
-        await _sut.CreateReferral();
+        await _sut.ProcessMessage();
 
         //Assert
         headerArgs[0].Should().ContainKeys(headers.Keys);
-        _fixture.Mock<IReferralService>().Verify(x => x.CreateReferralAsync(It.IsAny<IHeaderDictionary>(), body));
+        _fixture.Mock<IReferralService>().Verify(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), body));
     }
 
     [Fact]
-    public async Task CreateReferralShouldReturn200()
+    public async Task ProcessMessageShouldReturn200()
     {
         //Arrange
         var body = _fixture.Create<string>();
@@ -54,11 +54,11 @@ public class ReferralsControllerTests
 
         var outputBundleJson = _fixture.Create<string>();
 
-        _fixture.Mock<IReferralService>().Setup(x => x.CreateReferralAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>()))
+        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>()))
             .ReturnsAsync(outputBundleJson);
 
         //Act
-        var result = await _sut.CreateReferral();
+        var result = await _sut.ProcessMessage();
 
         //Assert
         var contentResult = result.Should().BeOfType<ContentResult>().Subject;
@@ -127,4 +127,5 @@ public class ReferralsControllerTests
         _sut.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         _sut.ControllerContext.HttpContext.Request.ContentLength = body.Length;
     }
+
 }

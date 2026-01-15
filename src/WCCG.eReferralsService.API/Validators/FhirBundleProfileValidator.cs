@@ -5,45 +5,21 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Helpers;
+using WCCG.eReferralsService.API.Extensions;
 
 namespace WCCG.eReferralsService.API.Validators
 {
-    public partial class FhirBundleProfileValidator : IFhirBundleProfileValidator
+    public class FhirBundleProfileValidator : IFhirBundleProfileValidator
     {
-        private static partial class Log
-        {
-            [LoggerMessage(Level = LogLevel.Debug, Message = "FHIR profile validation disabled (FhirValidation:Enabled=false)")]
-            public static partial void FhirProfileValidationDisabled(ILogger logger);
-
-            [LoggerMessage(Level = LogLevel.Debug, Message = "Starting FHIR profile validation (bundleType={BundleType}, entryCount={EntryCount})")]
-            public static partial void StartingFhirProfileValidation(ILogger logger, string bundleType, int entryCount);
-
-            [LoggerMessage(Level = LogLevel.Debug, Message = "Completed FHIR profile validation (issues={IssueCount})")]
-            public static partial void CompletedFhirProfileValidation(ILogger logger, int issueCount);
-
-            [LoggerMessage(Level = LogLevel.Debug, Message = "Building FHIR validator (configuredPackagePaths={ConfiguredCount}, foundPackageFiles={FoundCount})")]
-            public static partial void BuildingFhirValidator(ILogger logger, int configuredCount, int foundCount);
-
-            [LoggerMessage(Level = LogLevel.Warning, Message = "Some configured FHIR package files were not found and will be ignored (missingCount={MissingCount})")]
-            public static partial void SomeConfiguredPackageFilesMissing(ILogger logger, int missingCount);
-
-            [LoggerMessage(Level = LogLevel.Debug, Message = "Missing FHIR package paths: {MissingPaths}")]
-            public static partial void MissingFhirPackagePaths(ILogger logger, string missingPaths);
-
-            [LoggerMessage(Level = LogLevel.Debug, Message = "Using FHIR package files: {PackagePaths}")]
-            public static partial void UsingFhirPackageFiles(ILogger logger, string packagePaths);
-        }
-
-        private readonly FhirValidationConfig _config;
-        private readonly IHostEnvironment _hostEnvironment;
+        private const string FhirPackagesDirectory = "FhirPackages";
+        private readonly FhirBundleProfileValidationConfig _config;
         private readonly ILogger<FhirBundleProfileValidator> _logger;
+        private readonly IHostEnvironment _hostEnvironment;
 
         private readonly Lazy<Validator> _validator;
 
         public FhirBundleProfileValidator(
-            IOptions<FhirValidationConfig> config,
+            IOptions<FhirBundleProfileValidationConfig> config,
             IHostEnvironment hostEnvironment,
             ILogger<FhirBundleProfileValidator> logger)
         {
@@ -53,75 +29,59 @@ namespace WCCG.eReferralsService.API.Validators
             _validator = new Lazy<Validator>(BuildValidator, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-        public OperationOutcome Validate(Bundle bundle)
+        public ProfileValidationOutput Validate(Bundle bundle)
         {
             if (!_config.Enabled)
             {
-                Log.FhirProfileValidationDisabled(_logger);
-                return OperationOutcomeCreator.CreateEmptyOperationOutcome();
+                _logger.FhirBundleProfileValidationDisabled();
+                return new ProfileValidationOutput
+                {
+                    IsSuccessful = true,
+                    Errors = new List<string>()
+                };
             }
 
-            Log.StartingFhirProfileValidation(
-                _logger,
-                bundle.Type?.ToString() ?? "(null)",
-                bundle.Entry?.Count ?? 0);
+            _logger.StartingFhirProfileValidation();
+            var result = _validator.Value.Validate(bundle);
+            _logger.CompletedFhirProfileValidation(result.Issue.Count);
 
-            var outcome = _validator.Value.Validate(bundle);
-
-            outcome.Id ??= Guid.NewGuid().ToString();
-            outcome.Meta ??= new Meta();
-            outcome.Meta.Profile = [FhirConstants.OperationOutcomeProfile];
-
-            Log.CompletedFhirProfileValidation(_logger, outcome.Issue?.Count ?? 0);
-
-            return outcome;
+            return new ProfileValidationOutput
+            {
+                IsSuccessful = result.Success,
+                Errors = result.Issue.Select(x => x.ToString()).ToList()
+            };
         }
 
         private Validator BuildValidator()
         {
             var coreSource = ZipSource.CreateValidationSource();
 
-            var packagePaths = _config.PackagePaths
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .Select(p => p.Trim())
-                .ToArray();
-
-            var resolvedPackagePaths = packagePaths
-                .Select(ResolvePath)
-                .ToArray();
-
-            var existingPackagePaths = resolvedPackagePaths
-                .Where(File.Exists)
-                .ToArray();
-
-            var missingPackagePaths = resolvedPackagePaths
-                .Where(p => !File.Exists(p))
-                .ToArray();
-
-            Log.BuildingFhirValidator(_logger, packagePaths.Length, existingPackagePaths.Length);
-
-            if (missingPackagePaths.Length > 0)
-            {
-                Log.SomeConfiguredPackageFilesMissing(_logger, missingPackagePaths.Length);
-                Log.MissingFhirPackagePaths(_logger, string.Join("; ", missingPackagePaths));
-            }
-
-            if (packagePaths.Length == 0)
+            var packageDirectory = Path.Combine(_hostEnvironment.ContentRootPath, FhirPackagesDirectory);
+            if (!Directory.Exists(packageDirectory))
             {
                 throw new InvalidOperationException(
-                    "FHIR profile validation is enabled, but no package paths are configured (FhirValidation:PackagePaths is empty).");
+                    $"FHIR profile validation is enabled, but the package directory '{packageDirectory}' does not exist.");
             }
 
-            if (missingPackagePaths.Length > 0)
+            var packageFiles = Directory
+                .EnumerateFiles(packageDirectory, "*", SearchOption.TopDirectoryOnly)
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (packageFiles.Length == 0)
             {
                 throw new InvalidOperationException(
-                    "FHIR profile validation is enabled, but one or more configured package files do not exist. See debug logs for missing paths.");
+                    $"FHIR profile validation is enabled, but no package files were found in '{packageDirectory}'.");
             }
 
-            Log.UsingFhirPackageFiles(_logger, string.Join("; ", existingPackagePaths));
+            var packageFileNames = packageFiles
+                .Select(Path.GetFileName)
+                .Where(n => !string.IsNullOrWhiteSpace(n));
+
+            _logger.UsingFhirPackageFiles(string.Join("; ", packageFileNames));
             var packageSource = new FhirPackageSource(
                 ModelInfo.ModelInspector,
-                existingPackagePaths
+                packageFiles
             );
 
             var multiResolver = new MultiResolver(coreSource, packageSource);
@@ -133,13 +93,6 @@ namespace WCCG.eReferralsService.API.Validators
 
             var terminologyService = new LocalTerminologyService(resolver);
             return new Validator(resolver, terminologyService);
-        }
-
-        private string ResolvePath(string packagePath)
-        {
-            return Path.IsPathRooted(packagePath)
-                ? packagePath
-                : Path.Combine(_hostEnvironment.ContentRootPath, packagePath);
         }
     }
 }

@@ -4,5 +4,5 @@ namespace WCCG.eReferralsService.API.Validators;
 
 public interface IFhirBundleProfileValidator
 {
-    OperationOutcome Validate(Bundle bundle);
+    ProfileValidationOutput Validate(Bundle bundle);
 }

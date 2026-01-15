@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Exceptions;
+using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using WCCG.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
@@ -22,42 +23,41 @@ public class ReferralService : IReferralService
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly PasReferralsApiConfig _pasReferralsApiConfig;
-    private readonly IAuditLogService _auditLogService;
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
         IValidator<BundleModel> bundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
-        IAuditLogService auditLogService,
         JsonSerializerOptions jsonSerializerOptions)
     {
         _httpClient = httpClient;
         _bundleValidator = bundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
-        _auditLogService = auditLogService;
         _jsonSerializerOptions = jsonSerializerOptions;
         _pasReferralsApiConfig = pasReferralsApiOptions.Value;
     }
 
-    public async Task<string> CreateReferralAsync(IHeaderDictionary headers, string requestBody)
+    public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
     {
         await ValidateHeaders(headers);
 
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions);
-        await ValidateFhirProfile(headers, bundle!);
-        await ValidateMandatoryData(headers, bundle!);
-
-        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
-
-        if (response.IsSuccessStatusCode)
+        if (bundle is null)
         {
-            return await response.Content.ReadAsStringAsync();
+            throw new JsonException("Request body deserialized to null Bundle");
         }
 
-        throw await GetNotSuccessfulApiCallException(response);
+        var reasonCode = GetMessageReasonCode(bundle);
+        return reasonCode switch
+        {
+            FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle),
+            FhirConstants.BarsMessageReasonDelete => await CancelReferralAsync(requestBody, bundle),
+            null => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required"),
+            _ => throw new RequestParameterValidationException("MessageHeader.reason",
+                $"Unsupported message reason '{reasonCode}'. Supported: '{FhirConstants.BarsMessageReasonNew}', '{FhirConstants.BarsMessageReasonDelete}'")
+        };
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
@@ -97,60 +97,72 @@ public class ReferralService : IReferralService
 
     private async Task ValidateHeaders(IHeaderDictionary headers)
     {
-        try
-        {
-            var headersModel = HeadersModel.FromHeaderDictionary(headers);
+        var headersModel = HeadersModel.FromHeaderDictionary(headers);
 
-            var headersValidationResult = await _headerValidator.ValidateAsync(headersModel);
-            if (!headersValidationResult.IsValid)
-            {
-                throw new HeaderValidationException(headersValidationResult.Errors);
-            }
-
-            await _auditLogService.LogAsync(headers, AuditEvents.HeadersValidationSucceeded);
-        }
-        catch (HeaderValidationException)
+        var headersValidationResult = await _headerValidator.ValidateAsync(headersModel);
+        if (!headersValidationResult.IsValid)
         {
-            await _auditLogService.LogAsync(headers, AuditEvents.HeadersValidationFailed);
-            throw;
+            // TODO: Add audit log HeadersValidationFailed
+            throw new HeaderValidationException(headersValidationResult.Errors);
         }
+
+        // TODO: Add audit log HeadersValidationSucceeded
     }
 
-    private async Task ValidateFhirProfile(IHeaderDictionary headers, Bundle bundle)
+    private Task ValidateFhirProfile(Bundle bundle)
     {
-        var profileOutcome = _fhirBundleProfileValidator.Validate(bundle);
-        if (!IsSuccessful(profileOutcome))
+        var validationOutput = _fhirBundleProfileValidator.Validate(bundle);
+        if (!validationOutput.IsSuccessful)
         {
-            await _auditLogService.LogAsync(headers, AuditEvents.FhirProfileValidationFailed);
-            throw new FhirProfileValidationException(profileOutcome);
+            // TODO: Add audit log FhirProfileValidationFailed
+            throw new FhirProfileValidationException(validationOutput.Errors!);
         }
 
-        await _auditLogService.LogAsync(headers, AuditEvents.FhirProfileValidationSucceeded);
+        // TODO: Add audit log FhirProfileValidationSucceeded
+        return Task.CompletedTask;
     }
 
-    private async Task ValidateMandatoryData(IHeaderDictionary headers, Bundle bundle)
+    private async Task ValidateMandatoryData(Bundle bundle)
     {
-        try
-        {
-            var bundleModel = BundleModel.FromBundle(bundle);
+        var bundleModel = BundleModel.FromBundle(bundle);
 
-            var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
-            if (!bundleValidationResult.IsValid)
-            {
-                throw new BundleValidationException(bundleValidationResult.Errors);
-            }
-
-            await _auditLogService.LogAsync(headers, AuditEvents.MandatoryDataValidationSucceeded);
-        }
-        catch (BundleValidationException)
+        var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
+        if (!bundleValidationResult.IsValid)
         {
-            await _auditLogService.LogAsync(headers, AuditEvents.MandatoryDataValidationFailed);
-            throw;
+            // TODO: Add audit log MandatoryDataValidationFailed
+            throw new BundleValidationException(bundleValidationResult.Errors);
         }
+
+        // TODO: Add audit log MandatoryDataValidationSucceeded
     }
 
-    private static bool IsSuccessful(OperationOutcome outcome)
+    private static string? GetMessageReasonCode(Bundle bundle)
     {
-        return !outcome.Issue.Any(i => i.Severity is OperationOutcome.IssueSeverity.Error or OperationOutcome.IssueSeverity.Fatal);
+        var messageHeader = bundle.ResourceByType<MessageHeader>();
+        return messageHeader?.Reason?.Coding
+            .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.Ordinal))
+            ?.Code;
+    }
+
+    private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
+    {
+        await ValidateFhirProfile(bundle);
+        await ValidateMandatoryData(bundle);
+
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        throw await GetNotSuccessfulApiCallException(response);
+    }
+
+    private Task<string> CancelReferralAsync(string requestBody, Bundle bundle)
+    {
+        // TODO: Implement cancel referral flow
+        throw new NotImplementedException("CancelReferralAsync is not implemented yet");
     }
 }

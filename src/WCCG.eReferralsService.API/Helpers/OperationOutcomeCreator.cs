@@ -7,16 +7,6 @@ namespace WCCG.eReferralsService.API.Helpers;
 
 public static class OperationOutcomeCreator
 {
-    public static OperationOutcome CreateEmptyOperationOutcome()
-    {
-        return new OperationOutcome
-        {
-            Id = Guid.NewGuid().ToString(),
-            Meta = new Meta { Profile = [FhirConstants.OperationOutcomeProfile] },
-            Issue = [],
-        };
-    }
-
     public static OperationOutcome CreateOperationOutcome(params BaseFhirHttpError[] errors)
     {
         var issues = errors.Select(error => new OperationOutcome.IssueComponent
@@ -37,11 +27,6 @@ public static class OperationOutcomeCreator
 
     public static OperationOutcome CreateOperationOutcome(BaseFhirException fhirException)
     {
-        if (fhirException is FhirProfileValidationException fhirProfileValidationException)
-        {
-            return fhirProfileValidationException.OperationOutcome;
-        }
-
         return CreateOperationOutcome(fhirException.Errors.ToArray());
     }
 }

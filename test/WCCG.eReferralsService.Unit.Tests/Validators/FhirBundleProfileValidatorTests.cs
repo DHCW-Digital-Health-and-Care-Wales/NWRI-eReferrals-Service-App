@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Validators;
 
 namespace WCCG.eReferralsService.Unit.Tests.Validators;
@@ -13,73 +12,93 @@ namespace WCCG.eReferralsService.Unit.Tests.Validators;
 public class FhirBundleProfileValidatorTests
 {
     [Fact]
-    public void ValidateShouldReturnEmptyOperationOutcomeWhenDisabled()
+    public void ValidateShouldReturnSuccessfulOutputWhenDisabled()
     {
         // Arrange
-        var config = Options.Create(new FhirValidationConfig
+        var config = Options.Create(new FhirBundleProfileValidationConfig
         {
-            Enabled = false,
-            PackagePaths = []
+            Enabled = false
         });
 
         var hostEnvironment = new Mock<IHostEnvironment>();
-        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns("/tmp");
+        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
         var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
 
         // Act
-        var outcome = sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+        var output = sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
 
         // Assert
-        outcome.Id.Should().NotBeNullOrWhiteSpace();
-        outcome.Meta.Should().NotBeNull();
-        outcome.Meta!.Profile.Should().Contain(FhirConstants.OperationOutcomeProfile);
-        outcome.Issue.Should().BeEmpty();
+        output.IsSuccessful.Should().BeTrue();
+        output.Errors.Should().BeEmpty();
     }
 
     [Fact]
-    public void ValidateShouldThrowWhenEnabledAndNoPackagePathsConfigured()
+    public void ValidateShouldThrowWhenEnabledAndNoPackageFilesFoundInDirectory()
     {
         // Arrange
-        var config = Options.Create(new FhirValidationConfig
+        var config = Options.Create(new FhirBundleProfileValidationConfig
         {
-            Enabled = true,
-            PackagePaths = []
+            Enabled = true
         });
 
+        var contentRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var packageDir = Path.Combine(contentRoot, "FhirPackages");
+        Directory.CreateDirectory(packageDir);
+
         var hostEnvironment = new Mock<IHostEnvironment>();
-        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns("/tmp");
+        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
 
         var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
 
-        // Act
-        var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+        try
+        {
+            // Act
+            var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
 
-        // Assert
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*no package paths are configured*");
+            // Assert
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("*no package files were found*");
+        }
+        finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, recursive: true);
+            }
+        }
     }
 
     [Fact]
-    public void ValidateShouldThrowWhenEnabledAndConfiguredPackageFileDoesNotExist()
+    public void ValidateShouldThrowWhenEnabledAndPackageDirectoryDoesNotExist()
     {
         // Arrange
-        var config = Options.Create(new FhirValidationConfig
+        var config = Options.Create(new FhirBundleProfileValidationConfig
         {
-            Enabled = true,
-            PackagePaths = ["does-not-exist.tgz"]
+            Enabled = true
         });
 
+        var contentRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
         var hostEnvironment = new Mock<IHostEnvironment>();
-        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns("/tmp");
+        hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
 
         var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
 
-        // Act
-        var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+        try
+        {
+            // Act
+            var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
 
-        // Assert
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*do not exist*");
+            // Assert
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("*package directory*does not exist*");
+        }
+        finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, recursive: true);
+            }
+        }
     }
 }

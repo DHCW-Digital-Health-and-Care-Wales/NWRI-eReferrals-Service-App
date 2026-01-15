@@ -1,25 +1,16 @@
-using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Errors;
 
 namespace WCCG.eReferralsService.API.Exceptions;
 
 public class FhirProfileValidationException : BaseFhirException
 {
-    public FhirProfileValidationException(OperationOutcome operationOutcome)
+    private readonly IEnumerable<string> _validationErrors;
+
+    public FhirProfileValidationException(IEnumerable<string> validationErrors)
     {
-        OperationOutcome = operationOutcome ?? throw new ArgumentNullException(nameof(operationOutcome));
+        _validationErrors = validationErrors;
     }
 
-    public OperationOutcome OperationOutcome { get; }
-
-    public override IEnumerable<BaseFhirHttpError> Errors =>
-        (OperationOutcome.Issue)
-        .Select(i => new InvalidBundleError(
-            i.Details?.Text
-            ?? i.Diagnostics
-            ?? i.Code?.ToString()
-            ?? "FHIR profile validation failed."));
-
-    public override string Message =>
-        $"FHIR profile validation failure: {OperationOutcome.Issue?.Count ?? 0} issue(s).";
+    public override IEnumerable<BaseFhirHttpError> Errors => _validationErrors.Select(error => new InvalidBundleError(error));
+    public override string Message => $"FHIR profile validation failure: {string.Join(';', _validationErrors.Select(x => x))}.";
 }

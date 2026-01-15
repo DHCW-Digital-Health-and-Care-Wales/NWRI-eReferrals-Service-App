@@ -49,18 +49,84 @@ public class ReferralServiceTests
 
         _fixture.Mock<IFhirBundleProfileValidator>()
             .Setup(x => x.Validate(It.IsAny<Bundle>()))
-            .Returns(new OperationOutcome());
+            .Returns(new ProfileValidationOutput
+            {
+                IsSuccessful = true,
+                Errors = new List<string>()
+            });
+    }
 
-        _fixture.Mock<IAuditLogService>()
-            .Setup(x => x.LogAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<AuditEvents>()))
-            .Returns(Task.CompletedTask);
+    [Fact]
+    public async Task ProcessMessageAsyncShouldRouteToCreateWhenReasonIsNew()
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
+        var expectedResponse = _fixture.Create<string>();
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        _fixture.Mock<IValidator<HeadersModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        _fixture.Mock<IValidator<BundleModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+            .WithContent(bundleJson)
+            .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
+            .Respond(FhirConstants.FhirMediaType, expectedResponse);
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri("https://some.com");
+
+        var sut = CreateReferralService(httpClient);
+
+        //Act
+        var result = await sut.ProcessMessageAsync(headers, bundleJson);
+
+        //Assert
+        result.Should().Be(expectedResponse);
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsDeleteUntilCancelImplemented()
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonDelete), _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+
+        //Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+
+        //Assert
+        await action.Should().ThrowAsync<NotImplementedException>();
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonUnsupported()
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("update"), _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+
+        //Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+
+        //Assert
+        await action.Should().ThrowAsync<RequestParameterValidationException>();
     }
 
     [Fact]
     public async Task CreateReferralAsyncShouldValidateHeaders()
     {
         //Arrange
-        var bundle = _fixture.Create<Bundle>();
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -79,7 +145,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        await sut.CreateReferralAsync(headers, bundleJson);
+        await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
@@ -90,7 +156,7 @@ public class ReferralServiceTests
     public async Task CreateReferralAsyncShouldThrowWhenInvalidHeaders()
     {
         //Arrange
-        var bundle = _fixture.Create<Bundle>();
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -112,7 +178,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         (await action.Should().ThrowAsync<HeaderValidationException>())
@@ -123,7 +189,7 @@ public class ReferralServiceTests
     public async Task CreateReferralAsyncShouldValidateBundle()
     {
         //Arrange
-        var bundle = _fixture.Create<Bundle>();
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -142,7 +208,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        await sut.CreateReferralAsync(headers, bundleJson);
+        await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
@@ -153,7 +219,7 @@ public class ReferralServiceTests
     public async Task CreateReferralAsyncShouldThrowWhenValidationFailed()
     {
         //Arrange
-        var bundle = _fixture.Create<Bundle>();
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -168,7 +234,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         (await action.Should().ThrowAsync<BundleValidationException>())
@@ -176,10 +242,10 @@ public class ReferralServiceTests
     }
 
     [Fact]
-    public async Task CreateReferralAsyncShouldLogAuditEventWhenFhirProfileValidationFailed()
+    public async Task CreateReferralAsyncShouldThrowWhenFhirProfileValidationFailed()
     {
         //Arrange
-        var bundle = _fixture.Create<Bundle>();
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -191,44 +257,30 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        var failureOutcome = new OperationOutcome
+        var failureOutput = new ProfileValidationOutput
         {
-            Issue =
-            [
-                new OperationOutcome.IssueComponent
-                {
-                    Severity = OperationOutcome.IssueSeverity.Error,
-                    Diagnostics = "Profile validation failed"
-                }
-            ]
+            IsSuccessful = false,
+            Errors = new List<string> { "Profile validation failed" }
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
             .Setup(x => x.Validate(It.IsAny<Bundle>()))
-            .Returns(failureOutcome);
+            .Returns(failureOutput);
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         await action.Should().ThrowAsync<FhirProfileValidationException>();
-
-        _fixture.Mock<IAuditLogService>().Verify(
-            x => x.LogAsync(It.IsAny<IHeaderDictionary>(), AuditEvents.FhirProfileValidationFailed),
-            Times.Once);
-
-        _fixture.Mock<IAuditLogService>().Verify(
-            x => x.LogAsync(It.IsAny<IHeaderDictionary>(), AuditEvents.FhirProfileValidationSucceeded),
-            Times.Never);
     }
 
     [Fact]
     public async Task CreateReferralAsyncShouldReturnOutputBundleJson()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(_fixture.Create<Bundle>(), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
         var expectedResponse = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -244,7 +296,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var result = await sut.CreateReferralAsync(headers, bundleJson);
+        var result = await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         result.Should().Be(expectedResponse);
@@ -257,7 +309,7 @@ public class ReferralServiceTests
     public async Task CreateReferralAsyncShouldThrowWhenNot200ResponseWithProblemDetails(HttpStatusCode statusCode)
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(_fixture.Create<Bundle>(), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
         var problemDetails = _fixture.Create<ProblemDetails>();
 
         var headers = _fixture.Create<IHeaderDictionary>();
@@ -272,7 +324,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
@@ -287,7 +339,7 @@ public class ReferralServiceTests
     public async Task CreateReferralAsyncShouldThrowWhenNotJsonAndNot200Response(HttpStatusCode statusCode)
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(_fixture.Create<Bundle>(), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
         var stringContent = _fixture.Create<string>();
 
         var headers = _fixture.Create<IHeaderDictionary>();
@@ -302,7 +354,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
@@ -459,8 +511,27 @@ public class ReferralServiceTests
             _fixture.Mock<IValidator<BundleModel>>().Object,
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
-            _fixture.Mock<IAuditLogService>().Object,
             _jsonSerializerOptions
         );
+    }
+
+    private static Bundle CreateMessageBundle(string reasonCode)
+    {
+        var messageHeader = new MessageHeader
+        {
+            Reason = new CodeableConcept(FhirConstants.BarsMessageReasonSystem, reasonCode)
+        };
+
+        return new Bundle
+        {
+            Type = Bundle.BundleType.Message,
+            Entry =
+            [
+                new Bundle.EntryComponent
+                {
+                    Resource = messageHeader
+                }
+            ]
+        };
     }
 }

@@ -13,23 +13,23 @@ public class BundleModel
     public required Encounter? Encounter { get; set; }
     public required CarePlan? CarePlan { get; set; }
     public Location? IncidentLocation { get; set; }
-    public List<Location> Locations { get; set; } = [];
-    public List<Organization> Organizations { get; set; } = [];
-    public List<Practitioner> Practitioners { get; set; } = [];
-    public List<PractitionerRole> PractitionerRoles { get; set; } = [];
-    public List<Observation> Observations { get; set; } = [];
-    public List<Flag> SceneSafetyFlags { get; set; } = [];
-    public List<Flag> Flags { get; set; } = [];
-    public List<MedicationStatement> MedicationStatements { get; set; } = [];
-    public List<AllergyIntolerance> AllergyIntolerances { get; set; } = [];
-    public List<Questionnaire> Questionnaires { get; set; } = [];
-    public List<QuestionnaireResponse> QuestionnaireResponses { get; set; } = [];
-    public List<Consent> Consents { get; set; } = [];
+    public List<Location>? Locations { get; set; }
+    public required List<Organization>? Organizations { get; set; }
+    public required List<Practitioner>? Practitioners { get; set; }
+    public required List<PractitionerRole>? PractitionerRoles { get; set; }
+    public List<Observation>? Observations { get; set; }
+    public List<Flag>? SceneSafetyFlags { get; set; }
+    public List<Flag>? Flags { get; set; }
+    public List<MedicationStatement>? MedicationStatements { get; set; }
+    public List<AllergyIntolerance>? AllergyIntolerances { get; set; }
+    public List<Questionnaire>? Questionnaires { get; set; }
+    public List<QuestionnaireResponse>? QuestionnaireResponses { get; set; }
+    public required List<Consent>? Consents { get; set; }
     public required HealthcareService? HealthcareService { get; set; }
-    public List<Condition> Conditions { get; set; } = [];
-    public List<Task> Tasks { get; set; } = [];
-    public List<Communication> Communications { get; set; } = [];
-    public List<Procedure> Procedures { get; set; } = [];
+    public List<Condition>? Conditions { get; set; }
+    public List<Task>? Tasks { get; set; }
+    public List<Communication>? Communications { get; set; }
+    public List<Procedure>? Procedures { get; set; }
 
     public static BundleModel FromBundle(Bundle bundle)
     {
@@ -40,7 +40,7 @@ public class BundleModel
             Patient = bundle.ResourceByType<Patient>(),
             Encounter = bundle.ResourceByType<Encounter>(),
             CarePlan = bundle.ResourceByType<CarePlan>(),
-            IncidentLocation = bundle.ResourcesByProfile<Location>(FhirConstants.BarsLocationIncidentLocation).FirstOrDefault(),
+            IncidentLocation = bundle.ResourcesByProfile<Location>(FhirConstants.BarsLocationIncidentLocation).SingleOrDefault(),
             Locations = bundle.ResourcesExcludingProfile<Location>(FhirConstants.BarsLocationIncidentLocation).ToList(),
             Organizations = bundle.ResourcesByType<Organization>().ToList(),
             Practitioners = bundle.ResourcesByType<Practitioner>().ToList(),
