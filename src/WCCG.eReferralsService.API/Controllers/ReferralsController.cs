@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Swagger;
 using WCCG.eReferralsService.API.Constants;
+using WCCG.eReferralsService.API.Extensions.Logger;
 
 namespace WCCG.eReferralsService.API.Controllers;
 

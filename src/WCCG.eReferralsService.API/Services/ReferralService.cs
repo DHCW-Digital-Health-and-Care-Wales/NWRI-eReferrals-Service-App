@@ -49,14 +49,12 @@ public class ReferralService : IReferralService
             throw new JsonException("Request body deserialized to null Bundle");
         }
 
-        var reasonCode = GetMessageReasonCode(bundle);
-        return reasonCode switch
+        return GetMessageReasonCode(bundle) switch
         {
             FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle),
             FhirConstants.BarsMessageReasonDelete => await CancelReferralAsync(requestBody, bundle),
             null => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required"),
-            _ => throw new RequestParameterValidationException("MessageHeader.reason",
-                $"Unsupported message reason '{reasonCode}'. Supported: '{FhirConstants.BarsMessageReasonNew}', '{FhirConstants.BarsMessageReasonDelete}'")
+            _ => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is invalid")
         };
     }
 
@@ -140,7 +138,7 @@ public class ReferralService : IReferralService
     {
         var messageHeader = bundle.ResourceByType<MessageHeader>();
         return messageHeader?.Reason?.Coding
-            .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.Ordinal))
+            .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.OrdinalIgnoreCase))
             ?.Code;
     }
 

@@ -8,7 +8,9 @@ using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
 using WCCG.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Extensions.Logger;
 using WCCG.eReferralsService.API.Helpers;
+using LoggerExtensions = WCCG.eReferralsService.API.Extensions.Logger.LoggerExtensions;
 using Task = System.Threading.Tasks.Task;
 
 namespace WCCG.eReferralsService.API.Middleware;

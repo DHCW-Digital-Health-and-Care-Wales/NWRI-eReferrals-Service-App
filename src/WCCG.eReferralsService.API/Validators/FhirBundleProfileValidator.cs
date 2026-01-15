@@ -5,7 +5,7 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Extensions.Logger;
 
 namespace WCCG.eReferralsService.API.Validators
 {
@@ -15,7 +15,6 @@ namespace WCCG.eReferralsService.API.Validators
         private readonly FhirBundleProfileValidationConfig _config;
         private readonly ILogger<FhirBundleProfileValidator> _logger;
         private readonly IHostEnvironment _hostEnvironment;
-
         private readonly Lazy<Validator> _validator;
 
         public FhirBundleProfileValidator(
@@ -37,7 +36,7 @@ namespace WCCG.eReferralsService.API.Validators
                 return new ProfileValidationOutput
                 {
                     IsSuccessful = true,
-                    Errors = new List<string>()
+                    Errors = []
                 };
             }
 
@@ -56,29 +55,24 @@ namespace WCCG.eReferralsService.API.Validators
         {
             var coreSource = ZipSource.CreateValidationSource();
 
-            var packageDirectory = Path.Combine(_hostEnvironment.ContentRootPath, FhirPackagesDirectory);
-            if (!Directory.Exists(packageDirectory))
+            var packagesPath = Path.Combine(_hostEnvironment.ContentRootPath, FhirPackagesDirectory);
+            if (!Directory.Exists(packagesPath))
             {
                 throw new InvalidOperationException(
-                    $"FHIR profile validation is enabled, but the package directory '{packageDirectory}' does not exist.");
+                    $"FHIR profile validation is enabled, but the package directory '{packagesPath}' does not exist.");
             }
 
             var packageFiles = Directory
-                .EnumerateFiles(packageDirectory, "*", SearchOption.TopDirectoryOnly)
-                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .EnumerateFiles(packagesPath, "*", SearchOption.TopDirectoryOnly)
                 .ToArray();
 
             if (packageFiles.Length == 0)
             {
                 throw new InvalidOperationException(
-                    $"FHIR profile validation is enabled, but no package files were found in '{packageDirectory}'.");
+                    $"FHIR profile validation is enabled, but no package files were found in '{packagesPath}'.");
             }
 
-            var packageFileNames = packageFiles
-                .Select(Path.GetFileName)
-                .Where(n => !string.IsNullOrWhiteSpace(n));
-
-            _logger.UsingFhirPackageFiles(string.Join("; ", packageFileNames));
+            _logger.FhirPackagesAmountFilesInUse(packageFiles.Length);
             var packageSource = new FhirPackageSource(
                 ModelInfo.ModelInspector,
                 packageFiles
@@ -89,7 +83,7 @@ namespace WCCG.eReferralsService.API.Validators
 
             var snapshotSource = new SnapshotSource(cachedMultiResolver);
 
-            IAsyncResourceResolver resolver = new CachedResolver(snapshotSource);
+            var resolver = new CachedResolver(snapshotSource);
 
             var terminologyService = new LocalTerminologyService(resolver);
             return new Validator(resolver, terminologyService);
