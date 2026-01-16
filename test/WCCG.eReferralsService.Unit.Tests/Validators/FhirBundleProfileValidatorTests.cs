@@ -49,12 +49,13 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
-
         try
         {
             // Act
-            var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+            var action = () => _ = new FhirBundleProfileValidator(
+                config,
+                hostEnvironment.Object,
+                NullLogger<FhirBundleProfileValidator>.Instance);
 
             // Assert
             action.Should().Throw<InvalidOperationException>()
@@ -82,12 +83,13 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
-
         try
         {
             // Act
-            var action = () => sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+            var action = () => _ = new FhirBundleProfileValidator(
+                config,
+                hostEnvironment.Object,
+                NullLogger<FhirBundleProfileValidator>.Instance);
 
             // Assert
             action.Should().Throw<InvalidOperationException>()

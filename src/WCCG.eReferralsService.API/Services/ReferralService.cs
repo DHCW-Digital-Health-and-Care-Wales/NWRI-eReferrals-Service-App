@@ -41,12 +41,17 @@ public class ReferralService : IReferralService
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
     {
-        await ValidateHeaders(headers);
+        await ValidateHeadersAsync(headers);
+
+        if (string.IsNullOrWhiteSpace(requestBody))
+        {
+            throw new RequestBodyValidationException("Request body is required and must be a FHIR Bundle (JSON object)");
+        }
 
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions);
         if (bundle is null)
         {
-            throw new JsonException("Request body deserialized to null Bundle");
+            throw new RequestBodyValidationException("Request body is invalid. It must be a FHIR Bundle (JSON object)");
         }
 
         return GetMessageReasonCode(bundle) switch
@@ -65,7 +70,7 @@ public class ReferralService : IReferralService
             throw new RequestParameterValidationException(nameof(id), "Id should be a valid GUID");
         }
 
-        await ValidateHeaders(headers);
+        await ValidateHeadersAsync(headers);
 
         var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
         using var response = await _httpClient.GetAsync(endpoint);
@@ -75,10 +80,10 @@ public class ReferralService : IReferralService
             return await response.Content.ReadAsStringAsync();
         }
 
-        throw await GetNotSuccessfulApiCallException(response);
+        throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
-    private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)
+    private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
 
@@ -93,7 +98,7 @@ public class ReferralService : IReferralService
         }
     }
 
-    private async Task ValidateHeaders(IHeaderDictionary headers)
+    private async Task ValidateHeadersAsync(IHeaderDictionary headers)
     {
         var headersModel = HeadersModel.FromHeaderDictionary(headers);
 
@@ -107,7 +112,7 @@ public class ReferralService : IReferralService
         // TODO: Add audit log HeadersValidationSucceeded
     }
 
-    private Task ValidateFhirProfile(Bundle bundle)
+    private void ValidateFhirProfile(Bundle bundle)
     {
         var validationOutput = _fhirBundleProfileValidator.Validate(bundle);
         if (!validationOutput.IsSuccessful)
@@ -117,10 +122,9 @@ public class ReferralService : IReferralService
         }
 
         // TODO: Add audit log FhirProfileValidationSucceeded
-        return Task.CompletedTask;
     }
 
-    private async Task ValidateMandatoryData(Bundle bundle)
+    private async Task ValidateMandatoryDataAsync(Bundle bundle)
     {
         var bundleModel = BundleModel.FromBundle(bundle);
 
@@ -144,8 +148,8 @@ public class ReferralService : IReferralService
 
     private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
     {
-        await ValidateFhirProfile(bundle);
-        await ValidateMandatoryData(bundle);
+        ValidateFhirProfile(bundle);
+        await ValidateMandatoryDataAsync(bundle);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
@@ -155,7 +159,7 @@ public class ReferralService : IReferralService
             return await response.Content.ReadAsStringAsync();
         }
 
-        throw await GetNotSuccessfulApiCallException(response);
+        throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
     private Task<string> CancelReferralAsync(string requestBody, Bundle bundle)

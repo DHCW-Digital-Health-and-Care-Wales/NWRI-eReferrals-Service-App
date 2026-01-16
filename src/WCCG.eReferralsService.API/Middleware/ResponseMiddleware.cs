@@ -7,10 +7,8 @@ using Hl7.Fhir.Serialization;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Extensions.Logger;
 using WCCG.eReferralsService.API.Helpers;
-using LoggerExtensions = WCCG.eReferralsService.API.Extensions.Logger.LoggerExtensions;
 using Task = System.Threading.Tasks.Task;
 
 namespace WCCG.eReferralsService.API.Middleware;
@@ -50,6 +48,12 @@ public class ResponseMiddleware
 
         switch (exception)
         {
+            case RequestBodyValidationException requestBodyValidationException:
+                _logger.RequestBodyValidationError(requestBodyValidationException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(requestBodyValidationException);
+                break;
+
             case HeaderValidationException headerValidationException:
                 _logger.HeadersValidationError(headerValidationException);
 
