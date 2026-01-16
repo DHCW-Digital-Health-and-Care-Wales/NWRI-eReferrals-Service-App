@@ -13,15 +13,17 @@ namespace WCCG.eReferralsService.API.Validators
     {
         private const string FhirPackagesDirectory = "FhirPackages";
 
+        private readonly FhirBundleProfileValidationConfig _config;
         private readonly ILogger<FhirBundleProfileValidator> _logger;
         private readonly IHostEnvironment _hostEnvironment;
-        private readonly Validator? _validator;
+        private Validator? _validator;
 
         public FhirBundleProfileValidator(
             IOptions<FhirBundleProfileValidationConfig> config,
             IHostEnvironment hostEnvironment,
             ILogger<FhirBundleProfileValidator> logger)
         {
+            _config = config.Value;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
             _validator = config.Value.Enabled ? BuildValidator() : null;
@@ -31,12 +33,19 @@ namespace WCCG.eReferralsService.API.Validators
         {
             if (_validator == null)
             {
-                _logger.FhirBundleProfileValidationDisabled();
-                return new ProfileValidationOutput
+                if (_config.Enabled)
                 {
-                    IsSuccessful = true,
-                    Errors = []
-                };
+                    _validator = BuildValidator();
+                }
+                else
+                {
+                    _logger.FhirBundleProfileValidationDisabled();
+                    return new ProfileValidationOutput
+                    {
+                        IsSuccessful = true,
+                        Errors = []
+                    };
+                }
             }
 
             _logger.StartingFhirProfileValidation();
