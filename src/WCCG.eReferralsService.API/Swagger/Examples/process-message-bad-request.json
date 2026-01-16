@@ -14,7 +14,7 @@
         "coding": [
           {
             "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
-            "code": "REC_BAD_REQUEST"
+            "code": "SEND_BAD_REQUEST"
           }
         ],
         "text": "400: The Receiver was unable to process the request."
