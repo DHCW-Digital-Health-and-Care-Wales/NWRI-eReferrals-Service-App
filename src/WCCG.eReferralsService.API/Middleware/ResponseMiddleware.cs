@@ -48,12 +48,6 @@ public class ResponseMiddleware
 
         switch (exception)
         {
-            case RequestBodyValidationException requestBodyValidationException:
-                _logger.RequestBodyValidationError(requestBodyValidationException);
-
-                body = OperationOutcomeCreator.CreateOperationOutcome(requestBodyValidationException);
-                break;
-
             case HeaderValidationException headerValidationException:
                 _logger.HeadersValidationError(headerValidationException);
 

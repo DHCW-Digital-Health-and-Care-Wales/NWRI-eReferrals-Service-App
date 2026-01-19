@@ -12,6 +12,7 @@ using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using WCCG.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace WCCG.eReferralsService.API.Services;
 
@@ -42,22 +43,12 @@ public class ReferralService : IReferralService
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
     {
         await ValidateHeadersAsync(headers);
-
-        if (string.IsNullOrWhiteSpace(requestBody))
-        {
-            throw new RequestBodyValidationException("Request body is required and must be a FHIR Bundle (JSON object)");
-        }
-
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions);
-        if (bundle is null)
-        {
-            throw new RequestBodyValidationException("Request body is invalid. It must be a FHIR Bundle (JSON object)");
-        }
 
-        return GetMessageReasonCode(bundle) switch
+        return GetMessageReasonCode(bundle!) switch
         {
-            FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle),
-            FhirConstants.BarsMessageReasonDelete => await CancelReferralAsync(requestBody, bundle),
+            FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle!),
+            FhirConstants.BarsMessageReasonDelete => await CancelReferralAsync(requestBody, bundle!),
             null => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required"),
             _ => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is invalid")
         };

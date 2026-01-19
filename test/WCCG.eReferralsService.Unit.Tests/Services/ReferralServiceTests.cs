@@ -91,44 +91,6 @@ public class ReferralServiceTests
     }
 
     [Fact]
-    public async Task ProcessMessageAsyncShouldThrowWhenBodyIsEmpty()
-    {
-        //Arrange
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        _fixture.Mock<IValidator<HeadersModel>>()
-            .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
-
-        //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, string.Empty);
-
-        //Assert
-        await action.Should().ThrowAsync<RequestBodyValidationException>();
-    }
-
-    [Fact]
-    public async Task ProcessMessageAsyncShouldThrowWhenBodyIsJsonNull()
-    {
-        //Arrange
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        _fixture.Mock<IValidator<HeadersModel>>()
-            .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
-
-        //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, "null");
-
-        //Assert
-        await action.Should().ThrowAsync<RequestBodyValidationException>();
-    }
-
-    [Fact]
     public async Task ProcessMessageAsyncShouldThrowWhenReasonIsDeleteUntilCancelImplemented()
     {
         //Arrange
