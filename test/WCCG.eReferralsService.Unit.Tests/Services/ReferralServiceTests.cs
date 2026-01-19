@@ -94,7 +94,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldThrowWhenReasonIsDeleteUntilCancelImplemented()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonDelete), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());

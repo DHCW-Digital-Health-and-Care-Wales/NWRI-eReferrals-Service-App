@@ -48,7 +48,7 @@ public class ReferralService : IReferralService
         return GetMessageReasonCode(bundle!) switch
         {
             FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle!),
-            FhirConstants.BarsMessageReasonDelete => await CancelReferralAsync(requestBody, bundle!),
+            FhirConstants.BarsMessageReasonUpdate => await CancelReferralAsync(requestBody, bundle!),
             null => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required"),
             _ => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is invalid")
         };
