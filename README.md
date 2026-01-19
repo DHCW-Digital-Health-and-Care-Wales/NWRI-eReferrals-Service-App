@@ -80,17 +80,35 @@ Example payloads, responses and errors can be found in the `Swagger/Examples` fo
 ### POST /$process-message
 
 #### Description
-Creates a referral and returns enriched response.
+Accepts a FHIR `Bundle` message and processes it as a referral workflow.
+Depending on the message content, the API will either:
+
+- **Create** a new referral, or
+- **Cancel** an existing referral
 
 #### Request details
-Request body should be a valid FHIR Bundle JSON object. [Example Payload](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+Request body must be a valid FHIR `Bundle` JSON object.
+See [Example Payload](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json).
+
+#### Workflow determination
+The API determines the workflow action by inspecting:
+
+- `MessageHeader.reason.coding.code`
+- `ServiceRequest.status`
+
+Supported combinations:
+
+- **Create**: `reason = new` AND `status = active`
+- **Cancel**: `reason = update` AND `status` is (`revoked` or `entered-in-error`)
+
+If either field is missing, or the combination does not match the supported set, the endpoint returns `400`.
 
 #### Responses
-  - 200 - FHIR Bundle but enriched with new values generated while the creation process. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
-  - 400 - Headers of bundle validation errors [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
-  - 429 - Too many requests [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
-  - 500 - Internal error [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
-  - 503 - PAS API Unavailable or returned 500 [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+  - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
+  - 429 - Too many requests. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
+  - 500 - Internal error. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
+  - 503 - PAS API unavailable or returned 500. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
 
 ### GET /ServiceRequest/&#123;id&#125;
 
