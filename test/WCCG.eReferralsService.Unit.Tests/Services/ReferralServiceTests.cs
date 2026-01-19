@@ -68,8 +68,8 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        _fixture.Mock<IValidator<BundleModel>>()
-            .Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
+        _fixture.Mock<IValidator<BundleCreateReferralModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
         var mockHttp = new MockHttpMessageHandler();
@@ -209,10 +209,10 @@ public class ReferralServiceTests
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
-        var expectedModel = BundleModel.FromBundle(bundle);
+        var expectedModel = BundleCreateReferralModel.FromBundle(bundle);
 
-        var modelArgs = new List<BundleModel>();
-        _fixture.Mock<IValidator<BundleModel>>().Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()));
+        var modelArgs = new List<BundleCreateReferralModel>();
+        _fixture.Mock<IValidator<BundleCreateReferralModel>>().Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()));
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
@@ -228,7 +228,7 @@ public class ReferralServiceTests
 
         //Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
-        _fixture.Mock<IValidator<BundleModel>>().Verify(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()));
+        _fixture.Mock<IValidator<BundleCreateReferralModel>>().Verify(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()));
     }
 
     [Fact]
@@ -244,7 +244,7 @@ public class ReferralServiceTests
             .With(x => x.Errors, validationFailures)
             .Create();
 
-        _fixture.Mock<IValidator<BundleModel>>().Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
+        _fixture.Mock<IValidator<BundleCreateReferralModel>>().Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
@@ -269,8 +269,8 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        _fixture.Mock<IValidator<BundleModel>>()
-            .Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
+        _fixture.Mock<IValidator<BundleCreateReferralModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
         var failureOutput = new ProfileValidationOutput
@@ -524,7 +524,7 @@ public class ReferralServiceTests
         return new ReferralService(
             httpClient,
             _fixture.Mock<IOptions<PasReferralsApiConfig>>().Object,
-            _fixture.Mock<IValidator<BundleModel>>().Object,
+            _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object,
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
             _jsonSerializerOptions

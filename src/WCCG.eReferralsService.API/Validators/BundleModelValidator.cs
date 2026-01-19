@@ -6,7 +6,7 @@ using static WCCG.eReferralsService.API.Constants.ValidationMessages;
 
 namespace WCCG.eReferralsService.API.Validators;
 
-public class BundleModelValidator : AbstractValidator<BundleModel>
+public class BundleModelValidator : AbstractValidator<BundleCreateReferralModel>
 {
     public BundleModelValidator()
     {

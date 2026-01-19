@@ -26,7 +26,7 @@ public class ReferralService : IReferralService
     }
 
     private readonly HttpClient _httpClient;
-    private readonly IValidator<BundleModel> _bundleValidator;
+    private readonly IValidator<BundleCreateReferralModel> _bundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -34,7 +34,7 @@ public class ReferralService : IReferralService
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
-        IValidator<BundleModel> bundleValidator,
+        IValidator<BundleCreateReferralModel> bundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions)
@@ -152,7 +152,7 @@ public class ReferralService : IReferralService
 
     private async Task ValidateMandatoryDataAsync(Bundle bundle)
     {
-        var bundleModel = BundleModel.FromBundle(bundle);
+        var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
 
         var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
         if (!bundleValidationResult.IsValid)

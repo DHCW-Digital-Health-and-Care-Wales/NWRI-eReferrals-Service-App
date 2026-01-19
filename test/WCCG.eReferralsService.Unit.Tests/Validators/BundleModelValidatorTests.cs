@@ -24,7 +24,7 @@ public class BundleModelValidatorTests
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
     }
 
-    private static BundleModel CreateValidModelFromExampleBundle()
+    private static BundleCreateReferralModel CreateValidModelFromExampleBundle()
     {
         var bundleJson = File.ReadAllText("TestData/example-bundle.json");
 
@@ -32,7 +32,7 @@ public class BundleModelValidatorTests
             .ForFhir(ModelInfo.ModelInspector);
 
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
-        return BundleModel.FromBundle(bundle);
+        return BundleCreateReferralModel.FromBundle(bundle);
     }
 
     [Fact]

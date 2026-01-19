@@ -5,7 +5,7 @@ using Task = Hl7.Fhir.Model.Task;
 
 namespace WCCG.eReferralsService.API.Models;
 
-public class BundleModel
+public class BundleCreateReferralModel
 {
     public required MessageHeader? MessageHeader { get; set; }
     public required ServiceRequest? ServiceRequest { get; set; }
@@ -31,9 +31,9 @@ public class BundleModel
     public List<Communication>? Communications { get; set; }
     public List<Procedure>? Procedures { get; set; }
 
-    public static BundleModel FromBundle(Bundle bundle)
+    public static BundleCreateReferralModel FromBundle(Bundle bundle)
     {
-        return new BundleModel
+        return new BundleCreateReferralModel
         {
             MessageHeader = bundle.ResourceByType<MessageHeader>(),
             ServiceRequest = bundle.ResourceByType<ServiceRequest>(),

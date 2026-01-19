@@ -8,7 +8,7 @@ using WCCG.eReferralsService.Unit.Tests.Extensions;
 
 namespace WCCG.eReferralsService.Unit.Tests.Models;
 
-public class BundleModelTests
+public class BundleCreateReferralModelTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
@@ -23,7 +23,7 @@ public class BundleModelTests
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
 
         //Act
-        var model = BundleModel.FromBundle(bundle);
+        var model = BundleCreateReferralModel.FromBundle(bundle);
 
         //Assert
         model.MessageHeader.Should().NotBeNull();
@@ -45,7 +45,7 @@ public class BundleModelTests
         var bundle = new Bundle { Id = _fixture.Create<string>() };
 
         //Act
-        var model = BundleModel.FromBundle(bundle);
+        var model = BundleCreateReferralModel.FromBundle(bundle);
 
         //Assert
         model.MessageHeader.Should().BeNull();
