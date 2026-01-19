@@ -6,9 +6,9 @@ using static WCCG.eReferralsService.API.Constants.ValidationMessages;
 
 namespace WCCG.eReferralsService.API.Validators;
 
-public class BundleModelValidator : AbstractValidator<BundleCreateReferralModel>
+public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreateReferralModel>
 {
-    public BundleModelValidator()
+    public BundleCreateReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
 

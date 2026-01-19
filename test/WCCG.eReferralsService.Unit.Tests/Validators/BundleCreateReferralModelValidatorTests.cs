@@ -12,15 +12,15 @@ using WCCG.eReferralsService.Unit.Tests.Extensions;
 
 namespace WCCG.eReferralsService.Unit.Tests.Validators;
 
-public class BundleModelValidatorTests
+public class BundleCreateReferralModelValidatorTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
-    private readonly BundleModelValidator _sut;
+    private readonly BundleCreateReferralModelValidator _sut;
 
-    public BundleModelValidatorTests()
+    public BundleCreateReferralModelValidatorTests()
     {
-        _sut = _fixture.CreateWithFrozen<BundleModelValidator>();
+        _sut = _fixture.CreateWithFrozen<BundleCreateReferralModelValidator>();
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
     }
 
