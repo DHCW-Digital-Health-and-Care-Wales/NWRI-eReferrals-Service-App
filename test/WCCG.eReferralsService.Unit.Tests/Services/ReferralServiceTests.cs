@@ -60,7 +60,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldRouteToCreateWhenReasonIsNew()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, RequestStatus.Active), _jsonSerializerOptions);
         var expectedResponse = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -91,10 +91,10 @@ public class ReferralServiceTests
     }
 
     [Fact]
-    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsDeleteUntilCancelImplemented()
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsUpdateAndStatusIsRevokedUntilCancelImplemented()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, RequestStatus.Revoked), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
@@ -110,7 +110,23 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldThrowWhenReasonUnsupported()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("update"), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported", RequestStatus.Active), _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+
+        //Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+
+        //Assert
+        await action.Should().ThrowAsync<RequestParameterValidationException>();
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsNewAndStatusIsNotActive()
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, RequestStatus.Revoked), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
@@ -515,8 +531,9 @@ public class ReferralServiceTests
         );
     }
 
-    private static Bundle CreateMessageBundle(string reasonCode)
+    private static Bundle CreateMessageBundle(string reasonCode, RequestStatus? serviceRequestStatus = RequestStatus.Active)
     {
+        const string serviceRequestId = "sr-1";
         var messageHeader = new MessageHeader
         {
             Reason = new CodeableConcept(FhirConstants.BarsMessageReasonSystem, reasonCode),
@@ -524,7 +541,8 @@ public class ReferralServiceTests
             Source = new MessageHeader.MessageSourceComponent
             {
                 Endpoint = "https://unit-tests/source"
-            }
+            },
+            Focus = [new ResourceReference($"ServiceRequest/{serviceRequestId}")]
         };
 
         return new Bundle
@@ -535,6 +553,16 @@ public class ReferralServiceTests
                 new Bundle.EntryComponent
                 {
                     Resource = messageHeader
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = new ServiceRequest
+                    {
+                        Id = serviceRequestId,
+                        StatusElement = serviceRequestStatus is null ? null : new Code<RequestStatus>(serviceRequestStatus),
+                        IntentElement = new Code<RequestIntent>(RequestIntent.Order),
+                        Subject = new ResourceReference("Patient/pat-1")
+                    }
                 }
             ]
         };

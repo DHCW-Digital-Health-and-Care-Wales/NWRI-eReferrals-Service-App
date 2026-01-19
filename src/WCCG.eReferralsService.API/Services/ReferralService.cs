@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentValidation;
+using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -18,6 +19,12 @@ namespace WCCG.eReferralsService.API.Services;
 
 public class ReferralService : IReferralService
 {
+    private enum ReferralWorkflowAction
+    {
+        Create,
+        Cancel
+    }
+
     private readonly HttpClient _httpClient;
     private readonly IValidator<BundleModel> _bundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
@@ -43,15 +50,43 @@ public class ReferralService : IReferralService
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
     {
         await ValidateHeadersAsync(headers);
-        var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions);
+        var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
 
-        return GetMessageReasonCode(bundle!) switch
+        var workflowAction = DetermineReferralWorkflowAction(bundle);
+        return workflowAction switch
         {
-            FhirConstants.BarsMessageReasonNew => await CreateReferralAsync(requestBody, bundle!),
-            FhirConstants.BarsMessageReasonUpdate => await CancelReferralAsync(requestBody, bundle!),
-            null => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required"),
-            _ => throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is invalid")
+            ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle),
+            ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle),
+            _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
+    }
+
+    private static ReferralWorkflowAction DetermineReferralWorkflowAction( Bundle bundle)
+    {
+        var reasonCode = GetMessageReasonCode(bundle);
+        if (reasonCode is null)
+        {
+            throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required");
+        }
+
+        var serviceRequestStatus = GetServiceRequestStatus(bundle);
+        if (serviceRequestStatus is null)
+        {
+            throw new RequestParameterValidationException("ServiceRequest.status", "ServiceRequest.status is required");
+        }
+
+        if (reasonCode == FhirConstants.BarsMessageReasonNew && serviceRequestStatus == RequestStatus.Active)
+        {
+            return ReferralWorkflowAction.Create;
+        }
+
+        if (reasonCode == FhirConstants.BarsMessageReasonUpdate &&
+            serviceRequestStatus is RequestStatus.Revoked or RequestStatus.EnteredInError)
+        {
+            return ReferralWorkflowAction.Cancel;
+        }
+
+        throw new RequestParameterValidationException("", "Invalid MessageHeader.reason and ServiceRequest.status combination.");
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
@@ -135,6 +170,12 @@ public class ReferralService : IReferralService
         return messageHeader?.Reason?.Coding
             .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.OrdinalIgnoreCase))
             ?.Code;
+    }
+
+    private static RequestStatus? GetServiceRequestStatus(Bundle bundle)
+    {
+        var serviceRequest = bundle.ResourceByType<ServiceRequest>();
+        return serviceRequest?.Status;
     }
 
     private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
