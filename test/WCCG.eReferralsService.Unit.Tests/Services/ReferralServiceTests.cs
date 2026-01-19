@@ -119,7 +119,7 @@ public class ReferralServiceTests
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
-        await action.Should().ThrowAsync<RequestParameterValidationException>();
+        await action.Should().ThrowAsync<BundleValidationException>();
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class ReferralServiceTests
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
 
         //Assert
-        await action.Should().ThrowAsync<RequestParameterValidationException>();
+        await action.Should().ThrowAsync<BundleValidationException>();
     }
 
     [Fact]

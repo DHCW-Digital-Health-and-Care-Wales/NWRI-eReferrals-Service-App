@@ -86,7 +86,7 @@ public class ReferralService : IReferralService
             return ReferralWorkflowAction.Cancel;
         }
 
-        throw new RequestParameterValidationException("", "Invalid MessageHeader.reason and ServiceRequest.status combination.");
+        throw new BundleValidationException([new ValidationFailure("","Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
