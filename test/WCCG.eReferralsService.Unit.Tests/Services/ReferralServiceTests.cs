@@ -545,6 +545,18 @@ public class ReferralServiceTests
             Focus = [new ResourceReference($"ServiceRequest/{serviceRequestId}")]
         };
 
+        var serviceRequest = new ServiceRequest
+        {
+            Id = serviceRequestId,
+            IntentElement = new Code<RequestIntent>(RequestIntent.Order),
+            Subject = new ResourceReference("Patient/pat-1")
+        };
+
+        if (serviceRequestStatus is not null)
+        {
+            serviceRequest.StatusElement = new Code<RequestStatus>(serviceRequestStatus.Value);
+        }
+
         return new Bundle
         {
             Type = Bundle.BundleType.Message,
@@ -556,13 +568,7 @@ public class ReferralServiceTests
                 },
                 new Bundle.EntryComponent
                 {
-                    Resource = new ServiceRequest
-                    {
-                        Id = serviceRequestId,
-                        StatusElement = serviceRequestStatus is null ? null : new Code<RequestStatus>(serviceRequestStatus),
-                        IntentElement = new Code<RequestIntent>(RequestIntent.Order),
-                        Subject = new ResourceReference("Patient/pat-1")
-                    }
+                    Resource = serviceRequest
                 }
             ]
         };
