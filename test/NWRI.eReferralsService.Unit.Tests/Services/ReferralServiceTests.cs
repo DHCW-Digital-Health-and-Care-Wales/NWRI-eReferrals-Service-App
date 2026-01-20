@@ -12,19 +12,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Moq;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Services;
+using NWRI.eReferralsService.API.Validators;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 using RichardSzalay.MockHttp;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.API.Services;
-using WCCG.eReferralsService.API.Validators;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
 
-namespace WCCG.eReferralsService.Unit.Tests.Services;
+namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class ReferralServiceTests
 {
@@ -60,7 +60,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldRouteToCreateWhenReasonIsNew()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, RequestStatus.Active), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
         var expectedResponse = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -110,7 +110,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldThrowWhenReasonUnsupported()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported", RequestStatus.Active), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported"), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());

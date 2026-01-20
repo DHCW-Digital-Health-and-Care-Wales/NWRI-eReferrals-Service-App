@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace WCCG.eReferralsService.API.Swagger;
+namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method)]

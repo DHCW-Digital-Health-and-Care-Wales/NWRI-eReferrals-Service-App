@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace WCCG.eReferralsService.API.Configuration.OptionValidators;
+namespace NWRI.eReferralsService.API.Configuration.OptionValidators;
 
 [OptionsValidator]
 public partial class ValidatePasReferralsApiConfigOptions : IValidateOptions<PasReferralsApiConfig>;

@@ -11,14 +11,14 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions;
-using WCCG.eReferralsService.API.Middleware;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Middleware;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
 
-namespace WCCG.eReferralsService.Integration.Tests.Middleware;
+namespace NWRI.eReferralsService.Integration.Tests.Middleware;
 
 public class ResponseMiddlewareTests
 {

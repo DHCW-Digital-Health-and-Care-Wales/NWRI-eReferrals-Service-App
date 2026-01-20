@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.Unit.Tests.Constants;
+namespace NWRI.eReferralsService.Unit.Tests.Constants;
 
 public class ValidationMessagesTests
 {

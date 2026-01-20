@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WCCG.eReferralsService.API.Configuration.Resilience;
+namespace NWRI.eReferralsService.API.Configuration.Resilience;
 
 public class RetryConfig
 {

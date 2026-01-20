@@ -3,13 +3,13 @@ using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 using FooObject = (string strValue, int intVal);
 
-namespace WCCG.eReferralsService.Unit.Tests.Exceptions;
+namespace NWRI.eReferralsService.Unit.Tests.Exceptions;
 
 public class NotSuccessfulApiCallExceptionTests
 {

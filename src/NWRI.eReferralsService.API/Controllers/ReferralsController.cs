@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using WCCG.eReferralsService.API.Services;
-using WCCG.eReferralsService.API.Swagger;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Services;
+using NWRI.eReferralsService.API.Swagger;
 
-namespace WCCG.eReferralsService.API.Controllers;
+namespace NWRI.eReferralsService.API.Controllers;
 
 [ApiController]
 public class ReferralsController : ControllerBase

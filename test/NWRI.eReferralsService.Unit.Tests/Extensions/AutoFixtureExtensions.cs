@@ -2,7 +2,7 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
 
-namespace WCCG.eReferralsService.Unit.Tests.Extensions;
+namespace NWRI.eReferralsService.Unit.Tests.Extensions;
 
 public static class AutoFixtureExtensions
 {

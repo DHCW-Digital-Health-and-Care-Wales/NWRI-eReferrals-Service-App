@@ -1,11 +1,11 @@
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Models;
+namespace NWRI.eReferralsService.Unit.Tests.Models;
 
 public class HeadersModelTests
 {

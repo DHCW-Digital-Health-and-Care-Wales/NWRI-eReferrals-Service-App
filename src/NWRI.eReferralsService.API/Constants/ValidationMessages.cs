@@ -1,4 +1,4 @@
-namespace WCCG.eReferralsService.API.Constants;
+namespace NWRI.eReferralsService.API.Constants;
 
 public static class ValidationMessages
 {

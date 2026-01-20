@@ -1,12 +1,12 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using WCCG.eReferralsService.API.Configuration.OptionValidators;
-using WCCG.eReferralsService.API.Extensions;
-using WCCG.eReferralsService.API.Middleware;
-using WCCG.eReferralsService.API.Swagger;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Configuration.Resilience;
-using WCCG.eReferralsService.API.Validators;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Configuration.OptionValidators;
+using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Middleware;
+using NWRI.eReferralsService.API.Swagger;
+using NWRI.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 

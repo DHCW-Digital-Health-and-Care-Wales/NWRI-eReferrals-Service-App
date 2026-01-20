@@ -4,10 +4,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Validators;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Validators;
 
-namespace WCCG.eReferralsService.Unit.Tests.Validators;
+namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
 public class FhirBundleProfileValidatorTests
 {

@@ -1,9 +1,9 @@
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
 
-namespace WCCG.eReferralsService.API.Helpers;
+namespace NWRI.eReferralsService.API.Helpers;
 
 public static class OperationOutcomeCreator
 {

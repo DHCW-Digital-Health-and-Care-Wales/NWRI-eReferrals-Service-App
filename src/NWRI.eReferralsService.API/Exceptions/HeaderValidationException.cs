@@ -1,8 +1,8 @@
 using FluentValidation.Results;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
 
-namespace WCCG.eReferralsService.API.Exceptions;
+namespace NWRI.eReferralsService.API.Exceptions;
 
 public class HeaderValidationException : BaseFhirException
 {

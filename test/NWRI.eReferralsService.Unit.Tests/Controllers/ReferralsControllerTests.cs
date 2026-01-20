@@ -4,12 +4,12 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Controllers;
-using WCCG.eReferralsService.API.Services;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Controllers;
+using NWRI.eReferralsService.API.Services;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Controllers;
+namespace NWRI.eReferralsService.Unit.Tests.Controllers;
 
 public class ReferralsControllerTests
 {

@@ -1,6 +1,6 @@
 using Hl7.Fhir.Model;
 
-namespace WCCG.eReferralsService.API.Extensions;
+namespace NWRI.eReferralsService.API.Extensions;
 
 public static class FhirSearchExtensions
 {

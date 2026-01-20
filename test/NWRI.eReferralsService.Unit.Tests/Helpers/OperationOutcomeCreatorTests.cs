@@ -2,13 +2,13 @@ using AutoFixture;
 using FluentAssertions;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Helpers;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Helpers;
+namespace NWRI.eReferralsService.Unit.Tests.Helpers;
 
 public class OperationOutcomeCreatorTests
 {

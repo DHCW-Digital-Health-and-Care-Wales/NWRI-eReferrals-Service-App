@@ -1,11 +1,11 @@
 using AutoFixture;
 using FluentAssertions;
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Errors;
+namespace NWRI.eReferralsService.Unit.Tests.Errors;
 
 public class NotSuccessfulApiResponseErrorTests
 {

@@ -1,6 +1,6 @@
 using Hl7.Fhir.Model;
 
-namespace WCCG.eReferralsService.API.Errors;
+namespace NWRI.eReferralsService.API.Errors;
 
 public class InvalidHeaderError : BaseHeaderError
 {

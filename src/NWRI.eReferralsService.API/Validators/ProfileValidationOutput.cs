@@ -1,4 +1,4 @@
-namespace WCCG.eReferralsService.API.Validators;
+namespace NWRI.eReferralsService.API.Validators;
 
 public class ProfileValidationOutput
 {

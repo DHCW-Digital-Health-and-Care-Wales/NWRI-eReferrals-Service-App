@@ -4,14 +4,14 @@ using System.Text;
 using System.Text.Json;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions.Logger;
-using WCCG.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Helpers;
 using Task = System.Threading.Tasks.Task;
 
-namespace WCCG.eReferralsService.API.Middleware;
+namespace NWRI.eReferralsService.API.Middleware;
 
 public class ResponseMiddleware
 {

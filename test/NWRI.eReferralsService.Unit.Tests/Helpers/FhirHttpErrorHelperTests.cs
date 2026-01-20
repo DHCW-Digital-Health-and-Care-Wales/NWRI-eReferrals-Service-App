@@ -1,10 +1,10 @@
 using AutoFixture;
 using FluentAssertions;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Helpers;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Helpers;
+namespace NWRI.eReferralsService.Unit.Tests.Helpers;
 
 public class FhirHttpErrorHelperTests
 {

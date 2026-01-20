@@ -1,7 +1,7 @@
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Errors;
+namespace NWRI.eReferralsService.API.Errors;
 
 public class InvalidRequestParameterError : BaseFhirHttpError
 {

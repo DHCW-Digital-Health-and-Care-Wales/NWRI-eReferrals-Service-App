@@ -6,16 +6,16 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.API.Validators;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
-namespace WCCG.eReferralsService.API.Services;
+namespace NWRI.eReferralsService.API.Services;
 
 public class ReferralService : IReferralService
 {

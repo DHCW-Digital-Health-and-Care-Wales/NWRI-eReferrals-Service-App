@@ -3,7 +3,7 @@ using System.Text.Json;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 
-namespace WCCG.eReferralsService.API.Extensions;
+namespace NWRI.eReferralsService.API.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class JsonSerializerOptionsExtensions

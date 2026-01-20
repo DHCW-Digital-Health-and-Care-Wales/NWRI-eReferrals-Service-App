@@ -1,4 +1,4 @@
-namespace WCCG.eReferralsService.API.Services;
+namespace NWRI.eReferralsService.API.Services;
 
 public interface IReferralService
 {

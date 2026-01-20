@@ -1,4 +1,4 @@
-namespace WCCG.eReferralsService.API.Configuration;
+namespace NWRI.eReferralsService.API.Configuration;
 
 public class FhirBundleProfileValidationConfig
 {

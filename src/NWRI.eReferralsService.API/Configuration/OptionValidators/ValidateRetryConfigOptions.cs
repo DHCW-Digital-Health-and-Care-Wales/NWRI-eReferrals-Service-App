@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
-using WCCG.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.Configuration.Resilience;
 
-namespace WCCG.eReferralsService.API.Configuration.OptionValidators;
+namespace NWRI.eReferralsService.API.Configuration.OptionValidators;
 
 [OptionsValidator]
 public partial class ValidateRetryConfigOptions : IValidateOptions<RetryConfig>;

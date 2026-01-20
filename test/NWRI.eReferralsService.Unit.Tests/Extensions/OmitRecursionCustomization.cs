@@ -1,6 +1,6 @@
 using AutoFixture;
 
-namespace WCCG.eReferralsService.Unit.Tests.Extensions;
+namespace NWRI.eReferralsService.Unit.Tests.Extensions;
 
 public class OmitRecursionCustomization : ICustomization
 {

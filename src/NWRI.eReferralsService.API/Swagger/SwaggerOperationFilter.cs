@@ -2,10 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using NWRI.eReferralsService.API.Constants;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using WCCG.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Swagger;
+namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
 public class SwaggerOperationFilter : IOperationFilter

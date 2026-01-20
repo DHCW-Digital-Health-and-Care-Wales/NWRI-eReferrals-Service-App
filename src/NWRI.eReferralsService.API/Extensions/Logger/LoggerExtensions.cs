@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Hl7.Fhir.Serialization;
-using WCCG.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Exceptions;
 
-namespace WCCG.eReferralsService.API.Extensions.Logger;
+namespace NWRI.eReferralsService.API.Extensions.Logger;
 
 [ExcludeFromCodeCoverage]
 public static partial class LoggerExtensions

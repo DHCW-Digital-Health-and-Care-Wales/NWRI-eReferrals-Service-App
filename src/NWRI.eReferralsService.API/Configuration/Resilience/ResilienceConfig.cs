@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 
-namespace WCCG.eReferralsService.API.Configuration.Resilience;
+namespace NWRI.eReferralsService.API.Configuration.Resilience;
 
 [ExcludeFromCodeCoverage]
 public class ResilienceConfig

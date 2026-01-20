@@ -1,11 +1,11 @@
 using AutoFixture;
 using FluentAssertions;
 using FluentValidation.Results;
-using WCCG.eReferralsService.API.Errors;
-using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Exceptions;
+namespace NWRI.eReferralsService.Unit.Tests.Exceptions;
 
 public class BundleValidationExceptionTests
 {

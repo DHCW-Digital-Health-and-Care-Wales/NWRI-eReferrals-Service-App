@@ -3,10 +3,10 @@ using AutoFixture;
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
 
-namespace WCCG.eReferralsService.Unit.Tests.Models;
+namespace NWRI.eReferralsService.Unit.Tests.Models;
 
 public class BundleCreateReferralModelTests
 {

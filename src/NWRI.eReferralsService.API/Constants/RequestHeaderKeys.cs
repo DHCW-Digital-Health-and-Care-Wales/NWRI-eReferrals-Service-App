@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace WCCG.eReferralsService.API.Constants;
+namespace NWRI.eReferralsService.API.Constants;
 
 [ExcludeFromCodeCoverage]
 public static class RequestHeaderKeys

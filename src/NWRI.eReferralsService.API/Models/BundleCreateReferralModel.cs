@@ -1,9 +1,9 @@
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Extensions;
 using Task = Hl7.Fhir.Model.Task;
 
-namespace WCCG.eReferralsService.API.Models;
+namespace NWRI.eReferralsService.API.Models;
 
 public class BundleCreateReferralModel
 {

@@ -1,8 +1,8 @@
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Helpers;
 
-namespace WCCG.eReferralsService.API.Errors;
+namespace NWRI.eReferralsService.API.Errors;
 
 public abstract class BaseFhirHttpError
 {

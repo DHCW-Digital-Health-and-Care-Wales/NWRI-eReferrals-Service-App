@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace WCCG.eReferralsService.API.Extensions.Logger;
+namespace NWRI.eReferralsService.API.Extensions.Logger;
 
 [ExcludeFromCodeCoverage]
 public static partial class FhirBundleProfileValidatorLoggerExtensions

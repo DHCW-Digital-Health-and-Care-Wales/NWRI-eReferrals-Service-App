@@ -1,6 +1,6 @@
-using WCCG.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Helpers;
+namespace NWRI.eReferralsService.API.Helpers;
 
 public static class FhirHttpErrorHelper
 {

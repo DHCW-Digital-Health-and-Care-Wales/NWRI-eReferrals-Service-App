@@ -1,7 +1,7 @@
 using Hl7.Fhir.Utility;
-using WCCG.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Models;
+namespace NWRI.eReferralsService.API.Models;
 
 public class HeadersModel
 {

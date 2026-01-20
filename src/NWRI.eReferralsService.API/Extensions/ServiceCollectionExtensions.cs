@@ -5,16 +5,16 @@ using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Services;
+using NWRI.eReferralsService.API.Validators;
 using Polly;
 using Polly.Retry;
 using Polly.Timeout;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Configuration.Resilience;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.API.Services;
-using WCCG.eReferralsService.API.Validators;
 
-namespace WCCG.eReferralsService.API.Extensions;
+namespace NWRI.eReferralsService.API.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions

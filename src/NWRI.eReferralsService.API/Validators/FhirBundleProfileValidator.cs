@@ -4,10 +4,10 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
-using WCCG.eReferralsService.API.Configuration;
-using WCCG.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Extensions.Logger;
 
-namespace WCCG.eReferralsService.API.Validators
+namespace NWRI.eReferralsService.API.Validators
 {
     public class FhirBundleProfileValidator : IFhirBundleProfileValidator
     {

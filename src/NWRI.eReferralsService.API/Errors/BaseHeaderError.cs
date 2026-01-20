@@ -1,6 +1,6 @@
-using WCCG.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Errors;
+namespace NWRI.eReferralsService.API.Errors;
 
 public abstract class BaseHeaderError : BaseFhirHttpError
 {

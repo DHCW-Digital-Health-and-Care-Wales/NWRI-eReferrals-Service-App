@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace WCCG.eReferralsService.Integration.Tests;
+namespace NWRI.eReferralsService.Integration.Tests;
 
 public static class HostProvider
 {

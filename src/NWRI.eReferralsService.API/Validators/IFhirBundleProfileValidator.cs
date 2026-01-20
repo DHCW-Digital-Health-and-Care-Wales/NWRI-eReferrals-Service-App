@@ -1,6 +1,6 @@
 using Hl7.Fhir.Model;
 
-namespace WCCG.eReferralsService.API.Validators;
+namespace NWRI.eReferralsService.API.Validators;
 
 public interface IFhirBundleProfileValidator
 {
