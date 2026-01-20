@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCCG.eReferralsService.API", "src\WCCG.eReferralsService.API\WCCG.eReferralsService.API.csproj", "{C7305F63-5FE8-4443-A3E2-782E71A4CCD2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWRI.eReferralsService.API", "src\NWRI.eReferralsService.API\NWRI.eReferralsService.API.csproj", "{C7305F63-5FE8-4443-A3E2-782E71A4CCD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCCG.eReferralsService.Unit.Tests", "test\WCCG.eReferralsService.Unit.Tests\WCCG.eReferralsService.Unit.Tests.csproj", "{30A34BA8-C41C-4870-B930-8FD69E647247}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWRI.eReferralsService.Unit.Tests", "test\NWRI.eReferralsService.Unit.Tests\NWRI.eReferralsService.Unit.Tests.csproj", "{30A34BA8-C41C-4870-B930-8FD69E647247}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCCG.eReferralsService.Integration.Tests", "test\WCCG.eReferralsService.Integration.Tests\WCCG.eReferralsService.Integration.Tests.csproj", "{55994566-1BAC-47D1-8F7B-21122A289106}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWRI.eReferralsService.Integration.Tests", "test\NWRI.eReferralsService.Integration.Tests\NWRI.eReferralsService.Integration.Tests.csproj", "{55994566-1BAC-47D1-8F7B-21122A289106}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
