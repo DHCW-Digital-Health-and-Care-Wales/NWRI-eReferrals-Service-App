@@ -27,8 +27,8 @@ public static class ValidationMessages
         return $"The required FHIR bundle entity '{resourceName}' is missing";
     }
 
-    public static string MissingBundleEntity(string resourceName, string id)
+    public static string MissingEntityField<TResource>(string propertyName)
     {
-        return $"The required FHIR bundle entity '{resourceName}' with ID: '{id}' is missing";
+        return $"{typeof(TResource).Name}.{propertyName} is required";
     }
 }

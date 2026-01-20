@@ -11,7 +11,6 @@ public static class JsonSerializerOptionsExtensions
     public static JsonSerializerOptions ForFhirExtended(this JsonSerializerOptions options)
     {
         return options.ForFhir(ModelInfo.ModelInspector)
-            .UsingMode(DeserializerModes.BackwardsCompatible)
             .Pretty();
     }
 }

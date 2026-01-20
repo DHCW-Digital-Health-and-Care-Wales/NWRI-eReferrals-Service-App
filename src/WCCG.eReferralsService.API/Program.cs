@@ -6,6 +6,8 @@ using WCCG.eReferralsService.API.Middleware;
 using WCCG.eReferralsService.API.Swagger;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Configuration.Resilience;
+using WCCG.eReferralsService.API.Services;
+using WCCG.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,9 @@ builder.Services.AddSingleton<IValidateOptions<PasReferralsApiConfig>, ValidateP
 //Resilience
 builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSection(ResilienceConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResilienceConfigOptions>();
+
+builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
+builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

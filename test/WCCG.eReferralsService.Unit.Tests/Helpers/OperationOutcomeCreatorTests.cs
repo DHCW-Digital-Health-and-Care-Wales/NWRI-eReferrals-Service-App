@@ -33,7 +33,8 @@ public class OperationOutcomeCreatorTests
 
         //Assert
         result.Id.Should().NotBeEmpty();
-        result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
+        result.Meta.Should().NotBeNull();
+        result.Meta!.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
         result.Issue.Should().BeEquivalentTo(expectedIssues);
     }
 
@@ -59,7 +60,8 @@ public class OperationOutcomeCreatorTests
 
         //Assert
         result.Id.Should().NotBeEmpty();
-        result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
+        result.Meta.Should().NotBeNull();
+        result.Meta!.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
         result.Issue.Should().BeEquivalentTo(expectedIssues);
     }
 }

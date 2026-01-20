@@ -7,7 +7,7 @@ using Hl7.Fhir.Serialization;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
-using WCCG.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Extensions.Logger;
 using WCCG.eReferralsService.API.Helpers;
 using Task = System.Threading.Tasks.Task;
 
@@ -58,6 +58,12 @@ public class ResponseMiddleware
                 _logger.BundleValidationError(bundleValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(bundleValidationException);
+                break;
+
+            case FhirProfileValidationException fhirProfileValidationException:
+                _logger.FhirProfileValidationError(fhirProfileValidationException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(fhirProfileValidationException);
                 break;
 
             case DeserializationFailedException deserializationFailedException:

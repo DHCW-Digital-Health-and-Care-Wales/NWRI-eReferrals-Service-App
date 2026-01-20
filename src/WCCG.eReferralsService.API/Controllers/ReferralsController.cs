@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Swagger;
 using WCCG.eReferralsService.API.Constants;
+using WCCG.eReferralsService.API.Extensions.Logger;
 
 namespace WCCG.eReferralsService.API.Controllers;
 
@@ -20,14 +20,14 @@ public class ReferralsController : ControllerBase
 
     [HttpPost("/$process-message")]
     [SwaggerProcessMessageRequest]
-    public async Task<IActionResult> CreateReferral()
+    public async Task<IActionResult> ProcessMessage()
     {
-        _logger.CalledMethod(nameof(CreateReferral));
+        _logger.CalledMethod(nameof(ProcessMessage));
 
         using var reader = new StreamReader(HttpContext.Request.Body);
         var body = await reader.ReadToEndAsync();
 
-        var outputBundleJson = await _referralService.CreateReferralAsync(HttpContext.Request.Headers, body);
+        var outputBundleJson = await _referralService.ProcessMessageAsync(HttpContext.Request.Headers, body);
 
         return new ContentResult
         {

@@ -7,8 +7,6 @@ using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using System.Text.RegularExpressions;
-using Range = System.Range;
-using System;
 
 namespace WCCG.eReferralsService.API.Validators;
 
