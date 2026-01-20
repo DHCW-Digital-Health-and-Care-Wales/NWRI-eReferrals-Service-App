@@ -6,7 +6,6 @@ using WCCG.eReferralsService.API.Middleware;
 using WCCG.eReferralsService.API.Swagger;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Configuration.Resilience;
-using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
