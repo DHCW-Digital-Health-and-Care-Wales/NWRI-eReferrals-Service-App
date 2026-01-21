@@ -9,3 +9,5 @@ public class ApplicationInsightsConfig
 
     public required string ConnectionString { get; set; }
 }
+
+

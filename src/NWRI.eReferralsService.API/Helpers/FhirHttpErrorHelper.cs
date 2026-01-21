@@ -21,3 +21,5 @@ public static class FhirHttpErrorHelper
             : string.Empty;
     }
 }
+
+

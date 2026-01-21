@@ -29,3 +29,5 @@ public class UnexpectedErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
+
+

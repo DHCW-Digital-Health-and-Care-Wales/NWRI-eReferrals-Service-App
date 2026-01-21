@@ -28,3 +28,5 @@ public class InvalidHeaderErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
+
+

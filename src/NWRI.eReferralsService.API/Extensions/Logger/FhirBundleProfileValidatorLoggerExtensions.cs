@@ -17,3 +17,5 @@ public static partial class FhirBundleProfileValidatorLoggerExtensions
     [LoggerMessage(Level = LogLevel.Debug, Message = "FHIR package files loaded for validation: {PackagesNumber}")]
     public static partial void FhirPackageFilesLoadedForValidation(this ILogger logger, int packagesNumber);
 }
+
+

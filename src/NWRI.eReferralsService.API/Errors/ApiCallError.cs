@@ -16,3 +16,5 @@ public class ApiCallError : BaseFhirHttpError
     public override string DiagnosticsMessage => $"Unexpected receiver error: {_errorMessage}";
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
 }
+
+

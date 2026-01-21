@@ -5,3 +5,5 @@ namespace NWRI.eReferralsService.API.Swagger;
 [ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method)]
 public class SwaggerGetReferralRequestAttribute : Attribute;
+
+

@@ -20,3 +20,5 @@ public class ResilienceConfig
     [Range(0, 60)]
     public required int AttemptTimeoutSeconds { get; set; }
 }
+
+

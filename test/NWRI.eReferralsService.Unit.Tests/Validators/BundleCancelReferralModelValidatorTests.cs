@@ -5,9 +5,9 @@ using FluentValidation;
 using FluentValidation.TestHelper;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Models;
-using WCCG.eReferralsService.API.Validators;
+using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Validators;
 using WCCG.eReferralsService.Unit.Tests.Extensions;
 
 namespace WCCG.eReferralsService.Unit.Tests.Validators
@@ -144,3 +144,5 @@ namespace WCCG.eReferralsService.Unit.Tests.Validators
         }
     }
 }
+
+

@@ -20,3 +20,5 @@ public class RequestParameterValidationException : BaseFhirException
     public override string Message =>
         $"Request parameter validation failure. Parameter name: {_parameterName}, Error: {_validationErrorMessage}.";
 }
+
+

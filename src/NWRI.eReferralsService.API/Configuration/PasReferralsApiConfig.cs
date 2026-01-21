@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-namespace WCCG.eReferralsService.API.Configuration;
+namespace NWRI.eReferralsService.API.Configuration;
 
 [ExcludeFromCodeCoverage]
 public class PasReferralsApiConfig
@@ -21,3 +21,5 @@ public class PasReferralsApiConfig
     [Required]
     public required int TimeoutSeconds { get; set; }
 }
+
+

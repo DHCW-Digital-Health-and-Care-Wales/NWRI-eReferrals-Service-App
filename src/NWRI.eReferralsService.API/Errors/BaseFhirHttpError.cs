@@ -12,3 +12,5 @@ public abstract class BaseFhirHttpError
     public abstract string DiagnosticsMessage { get; }
     public abstract OperationOutcome.IssueType IssueType { get; }
 }
+
+

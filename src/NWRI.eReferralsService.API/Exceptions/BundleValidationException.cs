@@ -15,3 +15,5 @@ public class BundleValidationException : BaseFhirException
     public override IEnumerable<BaseFhirHttpError> Errors => _validationErrors.Select(error => new InvalidBundleError(error.ErrorMessage));
     public override string Message => $"Bundle validation failure: {string.Join(';', _validationErrors.Select(x => x.ErrorMessage))}.";
 }
+
+

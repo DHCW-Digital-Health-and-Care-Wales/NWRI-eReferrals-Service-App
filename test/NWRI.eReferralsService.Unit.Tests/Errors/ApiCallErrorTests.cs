@@ -28,3 +28,5 @@ public class ApiCallErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
+
+

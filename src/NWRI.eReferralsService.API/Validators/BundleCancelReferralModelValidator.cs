@@ -1,8 +1,8 @@
 using FluentValidation;
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Models;
-using static WCCG.eReferralsService.API.Constants.ValidationMessages;
-namespace WCCG.eReferralsService.API.Validators;
+using NWRI.eReferralsService.API.Models;
+using static NWRI.eReferralsService.API.Constants.ValidationMessages;
+namespace NWRI.eReferralsService.API.Validators;
 
 public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
 {
@@ -147,3 +147,5 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
     }
 }
+
+

@@ -34,3 +34,5 @@ public static class AutoFixtureExtensions
         return fixture.Freeze<Mock<T>>();
     }
 }
+
+

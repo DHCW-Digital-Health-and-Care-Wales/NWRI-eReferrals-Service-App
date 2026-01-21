@@ -41,3 +41,5 @@ public static class FhirSearchExtensions
         return profiles != null && profiles.Any(p => p != null && p.Contains(profile, StringComparison.OrdinalIgnoreCase));
     }
 }
+
+

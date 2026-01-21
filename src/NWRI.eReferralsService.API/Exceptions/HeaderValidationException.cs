@@ -32,3 +32,5 @@ public class HeaderValidationException : BaseFhirException
 
     public override string Message => $"Header(s) validation failure: {string.Join(';', _validationErrors.Select(x => x.ErrorMessage))}";
 }
+
+

@@ -5,3 +5,5 @@ namespace NWRI.eReferralsService.API.Configuration.OptionValidators;
 
 [OptionsValidator]
 public partial class ValidateResilienceConfigOptions : IValidateOptions<ResilienceConfig>;
+
+

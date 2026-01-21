@@ -16,3 +16,5 @@ public class UnexpectedError : BaseFhirHttpError
     public override string DiagnosticsMessage => $"Unexpected error: {_exceptionMessage}";
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
 }
+
+
