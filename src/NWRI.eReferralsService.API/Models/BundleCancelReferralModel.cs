@@ -1,7 +1,7 @@
 using Hl7.Fhir.Model;
-using WCCG.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Extensions;
 
-namespace WCCG.eReferralsService.API.Models;
+namespace NWRI.eReferralsService.API.Models;
 
 public sealed class BundleCancelReferralModel
 {
