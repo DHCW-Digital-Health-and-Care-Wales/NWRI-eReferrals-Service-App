@@ -148,14 +148,14 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
         {
             RuleFor(m => m.MessageHeader!)
                 .Must(h => string.Equals(h.Reason?.Coding?.FirstOrDefault()?.Code, "update", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("For ServiceRequest.status 'entered-in-error', MessageHeader.reason should be 'update' as per example");
+                .WithMessage("For ServiceRequest.status 'entered-in-error', MessageHeader.reason must be 'update'.");
         });
 
         When(m => m.MessageHeader != null && m.ServiceRequest?.Status == RequestStatus.Revoked, () =>
         {
             RuleFor(m => m.MessageHeader!)
                 .Must(h => string.Equals(h.Reason?.Coding?.FirstOrDefault()?.Code, "update", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("For ServiceRequest.status 'revoked', MessageHeader.reason should be 'update' as per example");
+                .WithMessage("For ServiceRequest.status 'revoked', MessageHeader.reason must be 'update'.");
         });
         When(m => m.ServiceRequest != null, () =>
         {
