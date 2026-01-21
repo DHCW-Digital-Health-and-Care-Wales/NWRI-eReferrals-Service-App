@@ -17,7 +17,7 @@ public sealed class BundleCancelReferralModel
             MessageHeader = bundle.ResourceByType<MessageHeader>(),
             ServiceRequest = bundle.ResourceByType<ServiceRequest>(),
             Patient = bundle.ResourceByType<Patient>(),
-            Organizations = [.. bundle.ResourcesByType<Organization>()]
+            Organizations = bundle.ResourcesByType<Organization>().ToList()
         };
     }
 }
