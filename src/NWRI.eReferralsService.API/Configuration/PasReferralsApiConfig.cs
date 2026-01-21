@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-
-namespace NWRI.eReferralsService.API.Configuration;
+namespace WCCG.eReferralsService.API.Configuration;
 
 [ExcludeFromCodeCoverage]
 public class PasReferralsApiConfig
