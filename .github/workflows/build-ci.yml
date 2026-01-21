@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: "Checkout branch"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: "Setup .NET Core v8 SDK"
         uses: actions/setup-dotnet@v5
@@ -30,7 +30,7 @@ jobs:
         run: dotnet test --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --logger trx --collect "XPlat Code Coverage" --settings coverlet.runsettings
 
       - name: "Coverage Report Generator"
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.4.18
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
         with:
           reports: "**/*.cobertura.xml"
           targetdir: "${{ github.workspace }}"
@@ -41,7 +41,7 @@ jobs:
           toolpath: "reportgeneratortool"
 
       - name: "Upload Combined Coverage XML"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: "${{ github.workspace }}/Cobertura.xml"
@@ -61,14 +61,14 @@ jobs:
           thresholds: "60 80"
 
       - name: "Upload Test Result Files"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-results
           path: ${{ github.workspace }}/**/TestResults/**/*
           retention-days: 5
 
       - name: "Publish Test Results"
-        uses: EnricoMi/publish-unit-test-result-action@v2.20.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.22.0
         if: always()
         with:
           trx_files: "${{ github.workspace }}/**/*.trx"
