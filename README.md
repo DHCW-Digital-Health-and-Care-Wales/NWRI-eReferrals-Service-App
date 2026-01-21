@@ -1,4 +1,4 @@
-# NWRI eReferrals Service
+# NWRI eReferrals Service App
 
 ## Description
 This project is an ASP.NET Core API that provides endpoints for handling Referrals.
@@ -25,26 +25,45 @@ NWRI.eReferralsService.API/
 │   └── launchSettings.json
 |
 ├── Configuration
-│   └── Configuration files and their validation
+│   ├── Configuration files and their validation
+│   ├── OptionValidators/
+│   └── Resilience/
+│
+├── Constants
+│   └── Application-wide constants and message definitions
 │
 ├── Controllers
-│   └── v1
-|       └── Controllers for API of version 1
+│   └── API controllers for handling HTTP requests
 |
 ├── Errors
 │   └── FHIR HTTP error models
 |
+├── Exceptions
+│   └── Custom exception classes
+|
+├── Extensions
+│   └── Extension methods for services and utilities
+|
+├── FhirPackages
+│   └── FHIR profile packages for validation
+|
+├── Helpers
+│   └── Helper classes for common operations
+|
 ├── Middleware
 │   └── Response finalisation and error handling process
 |
+├── Models
+│   └── Data models and DTOs
+|
 ├── Services
-│   └── Service classes
+│   └── Service classes implementing business logic
 |
 ├── Swagger
-│   └── Helper classes for Swagger
+│   └── Swagger configuration and example definitions
 │
 ├── Validators
-│   └── Validation classes
+│   └── Validation classes for request validation
 |
 ├── appsettings.json
 |   └── appsettings.Development.json
@@ -58,7 +77,7 @@ To run the project locally, follow these steps:
 2. Don't forget `az login --tenant <YOUR_TENNANT>`.
 3. Setup local configuration according to `Required configuration for local development` section.
 4. Rebuild and run the project.
-5. Open your web browser and navigate to `https://localhost:xxxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
+5. Open your web browser and navigate to `https://localhost:xxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
 
 ## Resilience
 All HTTP requests using resilience policy, which can be configured in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
