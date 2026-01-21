@@ -1,15 +1,13 @@
 using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Extensions;
-
 namespace WCCG.eReferralsService.API.Models;
 
-public sealed class BundleCancelReferralModel
+public sealed class BundleCancelReferralModel : IBundleModel<BundleCancelReferralModel>
 {
     public required MessageHeader? MessageHeader { get; set; }
     public required ServiceRequest? ServiceRequest { get; set; }
     public required Patient? Patient { get; set; }
     public required List<Organization>? Organizations { get; set; }
-
     public static BundleCancelReferralModel FromBundle(Bundle bundle)
     {
         return new BundleCancelReferralModel

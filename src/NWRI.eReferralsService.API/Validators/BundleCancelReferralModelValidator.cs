@@ -2,8 +2,6 @@ using FluentValidation;
 using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Models;
 using static WCCG.eReferralsService.API.Constants.ValidationMessages;
-
-
 namespace WCCG.eReferralsService.API.Validators;
 
 public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
@@ -57,9 +55,8 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 messageHeader.RuleFor(x => x.Source)
                     .NotNull()
-                    .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Source)));             
+                    .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Source)));
             });
-
         RuleFor(x => x.ServiceRequest!)
             .NotNull()
             .WithMessage(MissingBundleEntity(nameof(ServiceRequest)))
@@ -100,10 +97,8 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                 serviceRequest.RuleFor(x => x.Occurrence)
                     .NotNull()
                     .WithMessage(MissingEntityField<ServiceRequest>("occurrencePeriod"));
-               
-            });
 
-       
+            });
         RuleFor(x => x.Patient!)
             .NotNull()
             .WithMessage(MissingBundleEntity(nameof(Patient)))
@@ -130,7 +125,6 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Address)));
             });
-
         RuleFor(x => x.Organizations!)
             .NotNull()
             .WithMessage(MissingBundleEntity(nameof(Organization)))
@@ -142,23 +136,14 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .Must(orgs => orgs.Any(o => o.Identifier?.Any(id => !string.IsNullOrWhiteSpace(id.Value)) == true))
                     .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
             });
-
-
         When(m => m.MessageHeader != null &&
-                   (m.ServiceRequest?.Status == RequestStatus.EnteredInError ||
-                    m.ServiceRequest?.Status == RequestStatus.Revoked), () =>
-        {
-            RuleFor(m => m.MessageHeader!)
-                .Must(h => string.Equals(h.Reason?.Coding?.FirstOrDefault()?.Code, "update", StringComparison.OrdinalIgnoreCase))
-                .WithMessage("For ServiceRequest.status 'entered-in-error' or 'revoked', MessageHeader.reason should be 'update' as per example");
-        });
-        When(m => m.ServiceRequest != null, () =>
-        {
-            RuleFor(m => m.ServiceRequest!)
-                .Must(sr => sr.Status == RequestStatus.Revoked || sr.Status == RequestStatus.EnteredInError)
-                .WithMessage("For Request Cancel, ServiceRequest.status must be 'revoked' or 'entered-in-error'");
-        });
-
+                  (m.ServiceRequest?.Status == RequestStatus.EnteredInError ||
+                   m.ServiceRequest?.Status == RequestStatus.Revoked), () =>
+                   {
+                       RuleFor(m => m.MessageHeader!)
+                            .Must(h => string.Equals(h.Reason?.Coding?.FirstOrDefault()?.Code, "update", StringComparison.OrdinalIgnoreCase))
+                            .WithMessage("For ServiceRequest.status 'entered-in-error' or 'revoked', MessageHeader.reason should be 'update' .");
+                   });
 
     }
 }

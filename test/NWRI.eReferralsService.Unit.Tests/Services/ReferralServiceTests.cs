@@ -12,19 +12,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Moq;
-using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.Errors;
-using NWRI.eReferralsService.API.Exceptions;
-using NWRI.eReferralsService.API.Extensions;
-using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Services;
-using NWRI.eReferralsService.API.Validators;
-using NWRI.eReferralsService.Unit.Tests.Extensions;
 using RichardSzalay.MockHttp;
+using WCCG.eReferralsService.API.Configuration;
+using WCCG.eReferralsService.API.Constants;
+using WCCG.eReferralsService.API.Errors;
+using WCCG.eReferralsService.API.Exceptions;
+using WCCG.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Models;
+using WCCG.eReferralsService.API.Services;
+using WCCG.eReferralsService.API.Validators;
+using WCCG.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
-
-namespace NWRI.eReferralsService.Unit.Tests.Services;
+namespace WCCG.eReferralsService.Unit.Tests.Services;
 
 public class ReferralServiceTests
 {
@@ -35,8 +34,9 @@ public class ReferralServiceTests
     public ReferralServiceTests()
     {
         _pasReferralsApiConfig = _fixture.Build<PasReferralsApiConfig>()
-            .With(x => x.GetReferralEndpoint, _fixture.Create<string>() + "/{0}")
-            .Create();
+                                        .With(x => x.GetReferralEndpoint, _fixture.Create<string>() + "/{0}")
+                                        .With(x => x.CancelReferralEndpoint, _fixture.Create<string>())
+                                        .Create();
         _fixture.Mock<IOptions<PasReferralsApiConfig>>().SetupGet(x => x.Value).Returns(_pasReferralsApiConfig);
 
         _fixture.Register(() => new Bundle
@@ -60,7 +60,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldRouteToCreateWhenReasonIsNew()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, RequestStatus.Active), _jsonSerializerOptions);
         var expectedResponse = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -94,7 +94,7 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldThrowWhenReasonUnsupported()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported"), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported", RequestStatus.Active), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
@@ -518,13 +518,12 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-
         _fixture.Mock<IValidator<BundleCancelReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -562,7 +561,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -639,7 +638,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .Respond(statusCode, JsonContent.Create(problemDetails));
 
         var httpClient = mockHttp.ToHttpClient();
@@ -655,7 +654,6 @@ public class ReferralServiceTests
         exception[0].StatusCode.Should().Be(statusCode);
         exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
     }
-
 
     private ReferralService CreateReferralService(HttpClient httpClient)
     {

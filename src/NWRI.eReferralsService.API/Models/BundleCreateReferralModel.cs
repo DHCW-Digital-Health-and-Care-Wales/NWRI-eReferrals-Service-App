@@ -1,11 +1,10 @@
 using Hl7.Fhir.Model;
-using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Constants;
+using WCCG.eReferralsService.API.Extensions;
 using Task = Hl7.Fhir.Model.Task;
+namespace WCCG.eReferralsService.API.Models;
 
-namespace NWRI.eReferralsService.API.Models;
-
-public class BundleCreateReferralModel
+public class BundleCreateReferralModel : IBundleModel<BundleCreateReferralModel>
 {
     public required MessageHeader? MessageHeader { get; set; }
     public required ServiceRequest? ServiceRequest { get; set; }
@@ -30,7 +29,6 @@ public class BundleCreateReferralModel
     public List<Task>? Tasks { get; set; }
     public List<Communication>? Communications { get; set; }
     public List<Procedure>? Procedures { get; set; }
-
     public static BundleCreateReferralModel FromBundle(Bundle bundle)
     {
         return new BundleCreateReferralModel

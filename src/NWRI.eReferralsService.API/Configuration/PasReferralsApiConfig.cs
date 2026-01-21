@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-
-namespace NWRI.eReferralsService.API.Configuration;
+namespace WCCG.eReferralsService.API.Configuration;
 
 [ExcludeFromCodeCoverage]
 public class PasReferralsApiConfig
@@ -13,6 +12,8 @@ public class PasReferralsApiConfig
 
     [Required]
     public required string CreateReferralEndpoint { get; set; }
+    [Required]
+    public required string CancelReferralEndpoint { get; set; }
 
     [Required]
     public required string GetReferralEndpoint { get; set; }
