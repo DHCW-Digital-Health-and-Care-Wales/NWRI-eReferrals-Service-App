@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Moq;
-using RichardSzalay.MockHttp;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
@@ -21,9 +20,10 @@ using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
-using WCCG.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
+using RichardSzalay.MockHttp;
 using Task = System.Threading.Tasks.Task;
-namespace WCCG.eReferralsService.Unit.Tests.Services;
+namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class ReferralServiceTests
 {
