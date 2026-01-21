@@ -5,6 +5,7 @@ using NWRI.eReferralsService.API.Configuration.OptionValidators;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
+using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
 using NWRI.eReferralsService.API.Validators;
 
@@ -20,6 +21,8 @@ builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResili
 
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
+
+builder.Services.AddHostedService<FhirValidatorWarmupHostedService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -141,9 +141,9 @@ public class ReferralService : IReferralService
         // TODO: Add audit log HeadersValidationSucceeded
     }
 
-    private void ValidateFhirProfile(Bundle bundle)
+    private async Task ValidateFhirProfile(Bundle bundle)
     {
-        var validationOutput = _fhirBundleProfileValidator.Validate(bundle);
+        var validationOutput = await _fhirBundleProfileValidator.ValidateAsync(bundle);
         if (!validationOutput.IsSuccessful)
         {
             // TODO: Add audit log FhirProfileValidationFailed
@@ -197,7 +197,7 @@ public class ReferralService : IReferralService
 
     private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
     {
-        ValidateFhirProfile(bundle);
+        await ValidateFhirProfile(bundle);
         await ValidateMandatoryDataAsync(bundle);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
