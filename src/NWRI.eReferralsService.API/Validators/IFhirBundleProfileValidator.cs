@@ -7,4 +7,7 @@ public interface IFhirBundleProfileValidator
 {
     Task<ProfileValidationOutput> ValidateAsync(Bundle bundle, CancellationToken cancellationToken = default);
     Task InitializeAsync(CancellationToken cancellationToken = default);
+
+    bool IsInitialized { get; }
+    bool IsReady { get; }
 }

@@ -6,13 +6,14 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Validators;
+using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
 public class FhirBundleProfileValidatorTests
 {
     [Fact]
-    public void ValidateShouldReturnSuccessfulOutputWhenDisabled()
+    public async Task ValidateShouldReturnSuccessfulOutputWhenDisabled()
     {
         // Arrange
         var config = Options.Create(new FhirBundleProfileValidationConfig
@@ -26,7 +27,7 @@ public class FhirBundleProfileValidatorTests
         var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
 
         // Act
-        var output = sut.Validate(new Bundle { Type = Bundle.BundleType.Message });
+        var output = await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message });
 
         // Assert
         output.IsSuccessful.Should().BeTrue();

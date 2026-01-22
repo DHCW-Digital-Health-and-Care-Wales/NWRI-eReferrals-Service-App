@@ -86,7 +86,7 @@ dotnet_style_coalesce_expression = true:suggestion
 # primary constructor
 csharp_style_prefer_primary_constructors = false
 resharper_convert_to_primary_constructor_highlighting = none
-dotnet_diagnostic.ide0290.severity = warning
+dotnet_diagnostic.IDE0290.severity = none
 
 # var preferences
 csharp_style_var_for_built_in_types = true:suggestion

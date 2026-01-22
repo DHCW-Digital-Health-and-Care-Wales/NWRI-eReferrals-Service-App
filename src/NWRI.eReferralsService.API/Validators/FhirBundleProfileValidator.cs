@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Firely.Fhir.Packages;
 using Firely.Fhir.Validation;
 using Hl7.Fhir.Model;
@@ -5,6 +6,7 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using Task = System.Threading.Tasks.Task;
 
@@ -65,8 +67,7 @@ namespace NWRI.eReferralsService.API.Validators
             var acquired = await _semaphore!.WaitAsync(TimeSpan.FromSeconds(_config.ValidationTimeoutSeconds), cancellationToken);
             if (!acquired)
             {
-                throw new TimeoutException(
-                    $"Validation request timed out after {_config.ValidationTimeoutSeconds}s waiting for available slot.");
+                throw new TimeoutException($"Profile Bundle Validation timed out after {_config.ValidationTimeoutSeconds}s waiting for available slot.");
             }
 
             try
@@ -126,44 +127,44 @@ namespace NWRI.eReferralsService.API.Validators
 
         private async Task PerformWarmupAsync(CancellationToken cancellationToken)
         {
-            var warmupBundle = new Bundle
+            var exampleFilePath = Path.Combine(_hostEnvironment.ContentRootPath, "Swagger", "Examples", "process-message-payload&response.json");
+
+            if (!File.Exists(exampleFilePath))
             {
-                Type = Bundle.BundleType.Message,
-                Entry = new List<Bundle.EntryComponent>
-                {
-                    new() { Resource = new MessageHeader { Id = "warmup", Event = new Coding("https://fhir.nhs.uk/CodeSystem/message-events-bars", "servicerequest-request") } },
-                    new() { Resource = new ServiceRequest { Id = "warmup", Status = RequestStatus.Active, Intent = RequestIntent.Order, Meta = new Meta{Profile = ["https://fhir.nhs.uk/StructureDefinition/BARSServiceRequest-request-referral"]} } },
-                    new() { Resource = new Patient { Id = "warmup" } },
-                    new() { Resource = new Practitioner { Id = "warmup" } },
-                    new() { Resource = new PractitionerRole { Id = "warmup" } },
-                    new() { Resource = new Organization { Id = "warmup" } },
-                    new() { Resource = new Encounter { Id = "warmup", Status = Encounter.EncounterStatus.InProgress, Class = new Coding("http://warmup", "warmup") } },
-                    new() { Resource = new Condition { Id = "warmup" } },
-                    new() { Resource = new Observation { Id = "warmup", Status = ObservationStatus.Final, Code = new CodeableConcept() } },
-                    new() { Resource = new CarePlan { Id = "warmup", Status = RequestStatus.Active, Intent = CarePlan.CarePlanIntent.Plan } },
-                    new() { Resource = new Consent { Id = "warmup", Status = Consent.ConsentState.Active, Scope = new CodeableConcept() } },
-                    new() { Resource = new HealthcareService { Id = "warmup" } }
-                }
-            };
+                _logger.LogWarning("Warmup skipped: Example file not found at '{ExampleFilePath}'", exampleFilePath);
+                return;
+            }
 
             try
             {
+                var jsonContent = await File.ReadAllTextAsync(exampleFilePath, cancellationToken);
+                var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
+                var warmupBundle = JsonSerializer.Deserialize<Bundle>(jsonContent, jsonSerializerOptions);
+
+                if (warmupBundle == null)
+                {
+                    _logger.LogWarning("Warmup skipped: Failed to deserialize Bundle from '{ExampleFilePath}'", exampleFilePath);
+                    return;
+                }
+
                 await Task.Run(() =>
                 {
-                    var result = _validator!.Validate(warmupBundle);
+                    _validator!.Validate(warmupBundle);
                 }, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while validating warmup.");
                 // Ignore validation errors during warmup
+                _logger.LogError(ex, "An error occurred while warmup validator.");
             }
         }
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
             _semaphore?.Dispose();
+            _cachedResolver?.Clear();
+
+            GC.SuppressFinalize(this);
         }
     }
 }
