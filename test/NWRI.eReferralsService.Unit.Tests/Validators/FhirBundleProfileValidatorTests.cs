@@ -35,7 +35,7 @@ public class FhirBundleProfileValidatorTests
     }
 
     [Fact]
-    public void ValidateShouldThrowWhenEnabledAndNoPackageFilesFoundInDirectory()
+    public async Task ValidateShouldThrowWhenEnabledAndNoPackageFilesFoundInDirectory()
     {
         // Arrange
         var config = Options.Create(new FhirBundleProfileValidationConfig
@@ -52,14 +52,16 @@ public class FhirBundleProfileValidatorTests
 
         try
         {
-            // Act
-            var action = () => _ = new FhirBundleProfileValidator(
+            var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
                 NullLogger<FhirBundleProfileValidator>.Instance);
 
+            // Act
+            var action = async () => await sut.InitializeAsync();
+
             // Assert
-            action.Should().Throw<InvalidOperationException>()
+            await action.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("*no package files were found*");
         }
         finally
@@ -72,7 +74,7 @@ public class FhirBundleProfileValidatorTests
     }
 
     [Fact]
-    public void ValidateShouldThrowWhenEnabledAndPackageDirectoryDoesNotExist()
+    public async Task ValidateShouldThrowWhenEnabledAndPackageDirectoryDoesNotExist()
     {
         // Arrange
         var config = Options.Create(new FhirBundleProfileValidationConfig
@@ -86,14 +88,16 @@ public class FhirBundleProfileValidatorTests
 
         try
         {
-            // Act
-            var action = () => _ = new FhirBundleProfileValidator(
+            var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
                 NullLogger<FhirBundleProfileValidator>.Instance);
 
+            // Act
+            var action = async () => await sut.InitializeAsync();
+
             // Assert
-            action.Should().Throw<InvalidOperationException>()
+            await action.Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("*package directory*does not exist*");
         }
         finally
