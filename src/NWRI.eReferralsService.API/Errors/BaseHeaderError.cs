@@ -12,5 +12,3 @@ public abstract class BaseHeaderError : BaseFhirHttpError
     public override string Code => FhirHttpErrorCodes.SenderBadRequest;
     public override string DiagnosticsMessage { get; }
 }
-
-

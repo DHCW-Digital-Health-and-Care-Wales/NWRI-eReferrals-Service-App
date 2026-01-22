@@ -27,5 +27,3 @@ public class BundleValidationExceptionTests
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<InvalidBundleError>());
     }
 }
-
-

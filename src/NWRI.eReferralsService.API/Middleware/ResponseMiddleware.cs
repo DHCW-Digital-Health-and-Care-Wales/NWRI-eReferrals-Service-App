@@ -133,5 +133,3 @@ public class ResponseMiddleware
         context.Response.Headers.TryAdd("X-Operation-Id", Activity.Current?.TraceId.ToString());
     }
 }
-
-

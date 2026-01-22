@@ -144,5 +144,3 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         }
     }
 }
-
-

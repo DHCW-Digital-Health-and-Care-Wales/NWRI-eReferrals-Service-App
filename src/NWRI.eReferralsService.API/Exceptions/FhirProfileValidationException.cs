@@ -14,5 +14,3 @@ public class FhirProfileValidationException : BaseFhirException
     public override IEnumerable<BaseFhirHttpError> Errors => _validationErrors.Select(error => new InvalidBundleError(error));
     public override string Message => $"FHIR profile validation failure: {string.Join(';', _validationErrors.Select(x => x))}.";
 }
-
-

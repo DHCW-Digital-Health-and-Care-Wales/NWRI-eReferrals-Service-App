@@ -15,5 +15,3 @@ public class RetryConfig
     [Range(0, 10)]
     public int MaxRetries { get; set; }
 }
-
-

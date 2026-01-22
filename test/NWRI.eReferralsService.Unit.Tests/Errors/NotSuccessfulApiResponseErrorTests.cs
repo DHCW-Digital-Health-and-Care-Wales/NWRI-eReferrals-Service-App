@@ -30,5 +30,3 @@ public class NotSuccessfulApiResponseErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
-
-

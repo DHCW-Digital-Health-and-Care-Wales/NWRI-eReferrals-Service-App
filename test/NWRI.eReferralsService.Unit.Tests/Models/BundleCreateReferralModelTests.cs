@@ -73,5 +73,3 @@ public class BundleCreateReferralModelTests
         model.Procedures.Should().BeEmpty();
     }
 }
-
-

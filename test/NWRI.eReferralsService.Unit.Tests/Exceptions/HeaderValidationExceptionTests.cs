@@ -36,5 +36,3 @@ public class HeaderValidationExceptionTests
         exception.Errors.OfType<InvalidHeaderError>().Should().HaveCount(3);
     }
 }
-
-

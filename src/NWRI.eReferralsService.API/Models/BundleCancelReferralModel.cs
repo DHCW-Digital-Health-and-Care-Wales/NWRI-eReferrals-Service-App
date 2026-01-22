@@ -8,6 +8,7 @@ public sealed class BundleCancelReferralModel : IBundleModel<BundleCancelReferra
     public required ServiceRequest? ServiceRequest { get; set; }
     public required Patient? Patient { get; set; }
     public required List<Organization>? Organizations { get; set; }
+
     public static BundleCancelReferralModel FromBundle(Bundle bundle)
     {
         return new BundleCancelReferralModel
@@ -19,5 +20,3 @@ public sealed class BundleCancelReferralModel : IBundleModel<BundleCancelReferra
         };
     }
 }
-
-

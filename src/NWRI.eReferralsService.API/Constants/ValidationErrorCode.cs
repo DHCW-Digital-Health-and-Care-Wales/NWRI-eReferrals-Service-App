@@ -5,5 +5,3 @@ public enum ValidationErrorCode
     MissingRequiredHeaderCode,
     InvalidHeaderCode
 }
-
-

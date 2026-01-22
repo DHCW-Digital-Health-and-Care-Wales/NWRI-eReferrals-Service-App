@@ -144,7 +144,7 @@ public class ReferralService : IReferralService
 
         // TODO: Add audit log FhirProfileValidationSucceeded
     }
-    private async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
+    private static async  Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
        where TModel : IBundleModel<TModel>
     {
         var bundleModel = TModel.FromBundle(bundle);
@@ -195,12 +195,12 @@ public class ReferralService : IReferralService
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsStringAsync();
         }
+
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 }
-
-

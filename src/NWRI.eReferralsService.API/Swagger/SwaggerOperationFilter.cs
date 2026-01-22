@@ -271,5 +271,3 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 }
-
-

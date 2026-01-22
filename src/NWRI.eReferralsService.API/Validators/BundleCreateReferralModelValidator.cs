@@ -217,5 +217,3 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
             });
     }
 }
-
-

@@ -16,5 +16,3 @@ public class NotSuccessfulApiResponseError : BaseFhirHttpError
     public override string DiagnosticsMessage => $"Receiver error. {_errorMessage}";
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
 }
-
-

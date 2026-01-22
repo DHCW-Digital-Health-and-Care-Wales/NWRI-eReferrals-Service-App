@@ -142,5 +142,3 @@ public class NotSuccessfulApiCallExceptionTests
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 }
-
-

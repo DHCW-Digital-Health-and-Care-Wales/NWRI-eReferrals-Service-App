@@ -7,5 +7,3 @@ namespace NWRI.eReferralsService.API.Models
         static abstract T FromBundle(Bundle bundle);
     }
 }
-
-

@@ -38,5 +38,3 @@ public static class HostProvider
             }).Start();
     }
 }
-
-

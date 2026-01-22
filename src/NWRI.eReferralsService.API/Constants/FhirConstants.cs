@@ -11,5 +11,3 @@ public static class FhirConstants
     public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
     public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
 }
-
-

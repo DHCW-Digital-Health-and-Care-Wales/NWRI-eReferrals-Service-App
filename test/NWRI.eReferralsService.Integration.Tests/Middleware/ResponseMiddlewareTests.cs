@@ -358,5 +358,3 @@ public class ResponseMiddlewareTests
             configureApp: app => app.UseMiddleware<ResponseMiddleware>());
     }
 }
-
-

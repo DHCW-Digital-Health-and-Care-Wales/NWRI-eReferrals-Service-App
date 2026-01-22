@@ -16,5 +16,3 @@ public class BundleDeserializationError : BaseFhirHttpError
     public override string DiagnosticsMessage => $"Bundle deserialization error: {_exceptionMessage}";
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Structure;
 }
-
-

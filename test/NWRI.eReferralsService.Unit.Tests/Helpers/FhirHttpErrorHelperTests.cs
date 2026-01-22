@@ -39,5 +39,3 @@ public class FhirHttpErrorHelperTests
         message.Should().BeEmpty();
     }
 }
-
-

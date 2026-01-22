@@ -23,6 +23,7 @@ using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using RichardSzalay.MockHttp;
 using Task = System.Threading.Tasks.Task;
+
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class ReferralServiceTests
@@ -711,5 +712,3 @@ public class ReferralServiceTests
         };
     }
 }
-
-

@@ -89,5 +89,3 @@ namespace NWRI.eReferralsService.API.Validators
         }
     }
 }
-
-

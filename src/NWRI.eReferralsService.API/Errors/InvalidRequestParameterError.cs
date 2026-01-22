@@ -14,5 +14,3 @@ public class InvalidRequestParameterError : BaseFhirHttpError
     public override string DiagnosticsMessage { get; }
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Invalid;
 }
-
-

@@ -15,7 +15,6 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
             .WithMessage(MissingBundleEntity(nameof(MessageHeader)))
             .ChildRules(messageHeader =>
             {
-
                 messageHeader.RuleFor(x => x.Meta)
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Meta)));
@@ -23,7 +22,6 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                 messageHeader.RuleFor(x => x.Destination)
                     .NotEmpty()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Destination)));
-
 
                 messageHeader.RuleFor(x => x.Focus)
                     .NotEmpty()
@@ -108,7 +106,6 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)));
 
-
                 patient.RuleFor(x => x.Name)
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Name)));
@@ -126,7 +123,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Address)));
             });
         RuleFor(x => x.Organizations!)
-            .NotNull()
+            .NotEmpty()
             .WithMessage(MissingBundleEntity(nameof(Organization)))
             .Must(orgs => orgs is { Count: > 0 })
             .WithMessage(MissingBundleEntity(nameof(Organization)))
@@ -136,16 +133,5 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .Must(orgs => orgs.Any(o => o.Identifier?.Any(id => !string.IsNullOrWhiteSpace(id.Value)) == true))
                     .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
             });
-        When(m => m.MessageHeader != null &&
-                  (m.ServiceRequest?.Status == RequestStatus.EnteredInError ||
-                   m.ServiceRequest?.Status == RequestStatus.Revoked), () =>
-                   {
-                       RuleFor(m => m.MessageHeader!)
-                            .Must(h => string.Equals(h.Reason?.Coding?.FirstOrDefault()?.Code, "update", StringComparison.OrdinalIgnoreCase))
-                            .WithMessage("For ServiceRequest.status 'entered-in-error' or 'revoked', MessageHeader.reason should be 'update' .");
-                   });
-
     }
 }
-
-

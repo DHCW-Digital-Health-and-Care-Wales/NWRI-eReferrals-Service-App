@@ -28,5 +28,3 @@ public class BundleDeserializationErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
-
-

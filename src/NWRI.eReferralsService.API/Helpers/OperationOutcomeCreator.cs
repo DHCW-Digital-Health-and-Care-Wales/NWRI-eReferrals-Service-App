@@ -30,5 +30,3 @@ public static class OperationOutcomeCreator
         return CreateOperationOutcome(fhirException.Errors.ToArray());
     }
 }
-
-

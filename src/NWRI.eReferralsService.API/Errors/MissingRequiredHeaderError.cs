@@ -10,5 +10,3 @@ public class MissingRequiredHeaderError : BaseHeaderError
 
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Required;
 }
-
-

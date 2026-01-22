@@ -28,5 +28,3 @@ public class InvalidBundleErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
-
-

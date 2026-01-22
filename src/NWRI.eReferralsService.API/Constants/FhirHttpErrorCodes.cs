@@ -9,5 +9,3 @@ public static class FhirHttpErrorCodes
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string ReceiverNotFound = "REC_NOT_FOUND";
 }
-
-

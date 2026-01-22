@@ -5,5 +5,3 @@ namespace NWRI.eReferralsService.API.Configuration.OptionValidators;
 
 [OptionsValidator]
 public partial class ValidateRetryConfigOptions : IValidateOptions<RetryConfig>;
-
-

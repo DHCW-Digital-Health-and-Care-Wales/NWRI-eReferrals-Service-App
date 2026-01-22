@@ -97,4 +97,3 @@ jobs:
 #      - name: Output image digest
 #        run: |
 #          echo "Image digest: ${{ steps.docker_build.outputs.digest }}"
-

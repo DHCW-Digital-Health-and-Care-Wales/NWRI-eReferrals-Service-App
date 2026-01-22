@@ -28,5 +28,3 @@ public class MissingRequiredHeaderErrorTests
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }
-
-
