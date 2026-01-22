@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
     public static void AddValidators(this IServiceCollection services)
     {
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
+        services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
         services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
     }
 
