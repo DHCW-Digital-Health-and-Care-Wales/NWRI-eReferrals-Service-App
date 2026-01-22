@@ -30,6 +30,7 @@ public class ReferralService : IReferralService
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly PasReferralsApiConfig _pasReferralsApiConfig;
+
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
         IValidator<BundleCreateReferralModel> createbundleValidator,
@@ -46,6 +47,7 @@ public class ReferralService : IReferralService
         _jsonSerializerOptions = jsonSerializerOptions;
         _pasReferralsApiConfig = pasReferralsApiOptions.Value;
     }
+
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
     {
         await ValidateHeadersAsync(headers);
@@ -59,6 +61,7 @@ public class ReferralService : IReferralService
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
     }
+
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
     {
         var reasonCode = GetMessageReasonCode(bundle);
@@ -120,6 +123,7 @@ public class ReferralService : IReferralService
             return new NotSuccessfulApiCallException(response.StatusCode, content);
         }
     }
+
     private async Task ValidateHeadersAsync(IHeaderDictionary headers)
     {
         var headersModel = HeadersModel.FromHeaderDictionary(headers);
@@ -133,6 +137,7 @@ public class ReferralService : IReferralService
 
         // TODO: Add audit log HeadersValidationSucceeded
     }
+
     private void ValidateFhirProfile(Bundle bundle)
     {
         var validationOutput = _fhirBundleProfileValidator.Validate(bundle);
@@ -144,6 +149,7 @@ public class ReferralService : IReferralService
 
         // TODO: Add audit log FhirProfileValidationSucceeded
     }
+
     private static async  Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
        where TModel : IBundleModel<TModel>
     {
@@ -159,7 +165,6 @@ public class ReferralService : IReferralService
         // TODO: Add audit log MandatoryDataValidationSucceeded
     }
 
-
     private static string? GetMessageReasonCode(Bundle bundle)
     {
         var messageHeader = bundle.ResourceByType<MessageHeader>();
@@ -167,6 +172,7 @@ public class ReferralService : IReferralService
             .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.OrdinalIgnoreCase))
             ?.Code;
     }
+
     private static RequestStatus? GetServiceRequestStatus(Bundle bundle)
     {
         var serviceRequest = bundle.ResourceByType<ServiceRequest>();
@@ -193,6 +199,7 @@ public class ReferralService : IReferralService
     {
         ValidateFhirProfile(bundle);
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
+
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 

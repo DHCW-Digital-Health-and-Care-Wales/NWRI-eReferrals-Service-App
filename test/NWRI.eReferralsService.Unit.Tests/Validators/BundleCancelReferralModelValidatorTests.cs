@@ -43,6 +43,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
 
             result.ShouldNotHaveAnyValidationErrors();
         }
+
         [Fact]
         public void ExampleBundle_StatusEnteredInError_ShouldBeValid()
         {
@@ -52,6 +53,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
 
             result.ShouldNotHaveAnyValidationErrors();
         }
+
         [Fact]
         public void ShouldContainErrorWhenMessageHeaderNull()
         {
