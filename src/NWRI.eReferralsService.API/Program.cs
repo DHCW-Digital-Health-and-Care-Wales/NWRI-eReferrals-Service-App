@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.OptionValidators;
@@ -22,7 +23,7 @@ builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResili
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 
-builder.Services.AddHostedService<FhirValidatorWarmupHostedService>();
+builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -36,6 +37,7 @@ builder.Services.AddHttpClients();
 builder.Services.AddValidators();
 
 builder.Services.AddHealthChecks();
+builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
@@ -51,4 +53,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapCustomHealthChecks();
+
 app.Run();

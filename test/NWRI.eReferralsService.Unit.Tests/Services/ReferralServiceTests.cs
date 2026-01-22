@@ -48,8 +48,8 @@ public class ReferralServiceTests
         _fixture.Register<IHeaderDictionary>(() => new HeaderDictionary { { _fixture.Create<string>(), _fixture.Create<string>() } });
 
         _fixture.Mock<IFhirBundleProfileValidator>()
-            .Setup(x => x.Validate(It.IsAny<Bundle>()))
-            .Returns(new ProfileValidationOutput
+            .Setup(x => x.ValidateAsync(It.IsAny<Bundle>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProfileValidationOutput
             {
                 IsSuccessful = true,
                 Errors = new List<string>()
@@ -264,8 +264,8 @@ public class ReferralServiceTests
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
-            .Setup(x => x.Validate(It.IsAny<Bundle>()))
-            .Returns(failureOutput);
+            .Setup(x => x.ValidateAsync(It.IsAny<Bundle>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failureOutput);
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 

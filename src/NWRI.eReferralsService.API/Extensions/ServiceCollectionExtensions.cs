@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
@@ -53,6 +54,13 @@ public static class ServiceCollectionExtensions
             var pasApiConfig = provider.GetRequiredService<IOptions<PasReferralsApiConfig>>().Value;
             client.BaseAddress = new Uri(pasApiConfig.BaseUrl);
         }).AddResilienceHandler("default", CreateResiliencePipeline);
+    }
+
+    public static void AddCustomHealthChecks(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
+            .AddCheck<ApplicationLivenessHealthCheck>("Application Liveness", tags: ["ready"])
+            .AddCheck<FhirBundleProfileValidatorHealthCheck>("FHIR Bundle Profile Validator", tags: ["live"]);
     }
 
     private static void CreateResiliencePipeline(
