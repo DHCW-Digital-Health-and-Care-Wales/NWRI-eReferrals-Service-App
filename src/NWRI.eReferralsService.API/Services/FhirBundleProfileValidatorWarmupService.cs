@@ -1,6 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.API.Services;
@@ -29,13 +31,18 @@ public class FhirBundleProfileValidatorWarmupService : IHostedService
     {
         if (!_validationConfig.Enabled)
         {
-            _logger.LogWarning("[Startup] FHIR-Bundle-Profile-Validator is disabled.");
+            _logger.WarmupFhirBundleProfileValidationDisabled();
             return;
         }
 
-        _logger.LogInformation("[Startup] FHIR-Bundle-Profile-Validator warmup starting...");
+        var stopwatch = Stopwatch.StartNew();
+
+        _logger.WarmupFhirBundleProfileValidationStarted();
         await _fhirBundleProfileValidator.InitializeAsync(cancellationToken);
-        _logger.LogInformation("[Startup] FHIR-Bundle-Profile-Validator warmup complete. Application is ready to accept requests.");
+
+        stopwatch.Stop();
+
+        _logger.WarmupFhirBundleProfileValidationComplete(stopwatch.ElapsedMilliseconds);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

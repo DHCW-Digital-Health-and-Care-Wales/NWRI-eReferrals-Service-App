@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.OptionValidators;

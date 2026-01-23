@@ -93,12 +93,12 @@ namespace NWRI.eReferralsService.API.Validators
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                _logger.LogWarning("FHIR profile validation was canceled.");
+                _logger.FhirBundleProfileValidationCancelled();
                 throw;
             }
             catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
             {
-                _logger.LogWarning("FHIR profile validation timed out after {TimeoutSeconds} seconds.", _config.ValidationTimeoutSeconds);
+                _logger.FhirBundleProfileValidationTimeout(_config.ValidationTimeoutSeconds);
                 throw new TimeoutException($"FHIR profile validation timed out after {_config.ValidationTimeoutSeconds} seconds.");
             }
         }
@@ -146,7 +146,7 @@ namespace NWRI.eReferralsService.API.Validators
 
             if (!File.Exists(exampleFilePath))
             {
-                _logger.LogWarning("Warmup skipped: Example file not found at '{ExampleFilePath}'", exampleFilePath);
+                _logger.FhirBundleProfileValidationWarmupSkippedExampleFileNotFound(exampleFilePath);
                 return;
             }
 
@@ -158,7 +158,7 @@ namespace NWRI.eReferralsService.API.Validators
 
                 if (warmupBundle == null)
                 {
-                    _logger.LogWarning("Warmup skipped: Failed to deserialize Bundle from '{ExampleFilePath}'", exampleFilePath);
+                    _logger.FhirBundleProfileValidationWarmupSkippedDeserializationFailed(exampleFilePath);
                     return;
                 }
 
@@ -170,7 +170,7 @@ namespace NWRI.eReferralsService.API.Validators
             catch (Exception ex)
             {
                 // Ignore validation errors during warmup
-                _logger.LogWarning(ex, "An error occurred while warmup validator.");
+                _logger.FhirBundleProfileValidationWarmupSkippedErrorOccurred(ex);
             }
         }
 
