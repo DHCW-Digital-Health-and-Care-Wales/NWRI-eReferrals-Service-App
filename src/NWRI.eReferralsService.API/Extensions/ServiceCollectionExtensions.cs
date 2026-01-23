@@ -59,8 +59,8 @@ public static class ServiceCollectionExtensions
     public static void AddCustomHealthChecks(this IServiceCollection services)
     {
         services.AddHealthChecks()
-            .AddCheck<ApplicationLivenessHealthCheck>("Application Liveness", tags: ["ready"])
-            .AddCheck<FhirBundleProfileValidatorHealthCheck>("FHIR Bundle Profile Validator", tags: ["live"]);
+            .AddCheck<ApplicationLivenessHealthCheck>("Application Liveness", tags: ["live"])
+            .AddCheck<FhirBundleProfileValidatorHealthCheck>("FHIR Bundle Profile Validator", tags: ["ready"]);
     }
 
     private static void CreateResiliencePipeline(

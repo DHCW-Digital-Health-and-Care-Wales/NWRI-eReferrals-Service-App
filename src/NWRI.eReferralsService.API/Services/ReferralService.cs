@@ -50,7 +50,7 @@ public class ReferralService : IReferralService
         _pasReferralsApiConfig = pasReferralsApiOptions.Value;
     }
 
-    public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
+    public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
     {
         await ValidateHeadersAsync(headers);
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
@@ -58,7 +58,7 @@ public class ReferralService : IReferralService
         var workflowAction = DetermineReferralWorkflowAction(bundle);
         return workflowAction switch
         {
-            ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle),
+            ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle, cancellationToken),
             ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle),
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
@@ -141,9 +141,9 @@ public class ReferralService : IReferralService
         // TODO: Add audit log HeadersValidationSucceeded
     }
 
-    private async Task ValidateFhirProfile(Bundle bundle)
+    private async Task ValidateFhirProfile(Bundle bundle, CancellationToken cancellationToken)
     {
-        var validationOutput = await _fhirBundleProfileValidator.ValidateAsync(bundle);
+        var validationOutput = await _fhirBundleProfileValidator.ValidateAsync(bundle, cancellationToken);
         if (!validationOutput.IsSuccessful)
         {
             // TODO: Add audit log FhirProfileValidationFailed
@@ -153,11 +153,11 @@ public class ReferralService : IReferralService
         // TODO: Add audit log FhirProfileValidationSucceeded
     }
 
-    private async Task ValidateMandatoryDataAsync(Bundle bundle)
+    private async Task ValidateMandatoryDataAsync(Bundle bundle, CancellationToken cancellationToken)
     {
         var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
 
-        var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
+        var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel, cancellationToken);
         if (!bundleValidationResult.IsValid)
         {
             // TODO: Add audit log MandatoryDataValidationFailed
@@ -195,17 +195,17 @@ public class ReferralService : IReferralService
         return serviceRequest?.Status;
     }
 
-    private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
+    private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle, CancellationToken cancellationToken)
     {
-        await ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle);
+        await ValidateFhirProfile(bundle, cancellationToken);
+        await ValidateMandatoryDataAsync(bundle, cancellationToken);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

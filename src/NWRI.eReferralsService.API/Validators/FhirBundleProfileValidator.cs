@@ -64,27 +64,42 @@ namespace NWRI.eReferralsService.API.Validators
                 throw new InvalidOperationException("FHIR Validator is not ready. The service is still warming up.");
             }
 
-            var acquired = await _semaphore!.WaitAsync(TimeSpan.FromSeconds(_config.ValidationTimeoutSeconds), cancellationToken);
-            if (!acquired)
-            {
-                throw new TimeoutException($"Profile Bundle Validation timed out after {_config.ValidationTimeoutSeconds}s waiting for available slot.");
-            }
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(_config.ValidationTimeoutSeconds));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
             try
             {
-                _logger.StartingFhirProfileValidation();
-                var result = _validator!.Validate(bundle);
-                _logger.CompletedFhirProfileValidation(result.Issue.Count);
+                await _semaphore!.WaitAsync(linkedCts.Token);
 
-                return new ProfileValidationOutput
+                try
                 {
-                    IsSuccessful = result.Success,
-                    Errors = result.Issue.Select(x => x.ToString()).ToList()
-                };
+                    _logger.StartingFhirProfileValidation();
+
+                    // Avoid blocking the calling thread by running synchronous validation in a separate task
+                    var result = await Task.Run(() => _validator!.Validate(bundle), linkedCts.Token);
+
+                    _logger.CompletedFhirProfileValidation(result.Issue.Count);
+
+                    return new ProfileValidationOutput
+                    {
+                        IsSuccessful = result.Success,
+                        Errors = result.Issue.Select(x => x.ToString()).ToList()
+                    };
+                }
+                finally
+                {
+                    _semaphore!.Release();
+                }
             }
-            finally
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                _semaphore!.Release();
+                _logger.LogWarning("FHIR profile validation was canceled.");
+                throw;
+            }
+            catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+            {
+                _logger.LogWarning("FHIR profile validation timed out after {TimeoutSeconds} seconds.", _config.ValidationTimeoutSeconds);
+                throw new TimeoutException($"FHIR profile validation timed out after {_config.ValidationTimeoutSeconds} seconds.");
             }
         }
 
