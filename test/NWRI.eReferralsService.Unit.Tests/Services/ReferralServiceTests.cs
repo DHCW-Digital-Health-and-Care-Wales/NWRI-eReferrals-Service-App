@@ -84,10 +84,26 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson);
+        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         result.Should().Be(expectedResponse);
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsUpdateAndStatusIsRevokedUntilCancelImplemented()
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, RequestStatus.Revoked), _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+
+        //Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        //Assert
+        await action.Should().ThrowAsync<NotImplementedException>();
     }
 
     [Fact]
@@ -100,7 +116,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         await action.Should().ThrowAsync<BundleValidationException>();
@@ -116,7 +132,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         await action.Should().ThrowAsync<BundleValidationException>();
@@ -145,7 +161,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        await sut.ProcessMessageAsync(headers, bundleJson);
+        await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
@@ -178,7 +194,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         (await action.Should().ThrowAsync<HeaderValidationException>())
@@ -208,7 +224,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        await sut.ProcessMessageAsync(headers, bundleJson);
+        await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
@@ -234,7 +250,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         (await action.Should().ThrowAsync<BundleValidationException>())
@@ -270,7 +286,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         await action.Should().ThrowAsync<FhirProfileValidationException>();
@@ -296,7 +312,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson);
+        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         result.Should().Be(expectedResponse);
@@ -324,7 +340,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
@@ -354,7 +370,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
