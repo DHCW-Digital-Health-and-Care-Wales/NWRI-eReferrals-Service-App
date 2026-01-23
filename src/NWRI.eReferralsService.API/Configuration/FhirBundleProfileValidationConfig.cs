@@ -10,6 +10,7 @@ public class FhirBundleProfileValidationConfig
     public bool Enabled { get; set; } = true;
 
     [Required]
+    [Range(1, 100)]
     public int MaxConcurrentValidations { get; set; } = Environment.ProcessorCount;
 
     [Required]

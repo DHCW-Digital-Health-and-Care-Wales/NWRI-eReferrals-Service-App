@@ -170,7 +170,7 @@ namespace NWRI.eReferralsService.API.Validators
             catch (Exception ex)
             {
                 // Ignore validation errors during warmup
-                _logger.LogError(ex, "An error occurred while warmup validator.");
+                _logger.LogWarning(ex, "An error occurred while warmup validator.");
             }
         }
 
