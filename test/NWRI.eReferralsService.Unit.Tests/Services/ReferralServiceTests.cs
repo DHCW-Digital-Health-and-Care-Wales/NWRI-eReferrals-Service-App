@@ -15,6 +15,8 @@ using Moq;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.EventLogging;
+using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
@@ -527,7 +529,8 @@ public class ReferralServiceTests
             _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object,
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
-            _jsonSerializerOptions
+            _jsonSerializerOptions,
+            _fixture.Mock<IEventLogger>().Object
         );
     }
 

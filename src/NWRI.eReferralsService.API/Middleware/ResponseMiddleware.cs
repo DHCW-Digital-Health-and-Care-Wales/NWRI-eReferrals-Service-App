@@ -6,9 +6,12 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.EventLogging;
+using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Helpers;
+using Polly.Timeout;
 using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.API.Middleware;
@@ -18,12 +21,18 @@ public class ResponseMiddleware
     private readonly RequestDelegate _next;
     private readonly JsonSerializerOptions _serializerOptions;
     private readonly ILogger<ResponseMiddleware> _logger;
+    private readonly IEventLogger _eventLogger;
 
-    public ResponseMiddleware(RequestDelegate next, JsonSerializerOptions serializerOptions, ILogger<ResponseMiddleware> logger)
+    public ResponseMiddleware(
+        RequestDelegate next,
+        JsonSerializerOptions serializerOptions,
+        ILogger<ResponseMiddleware> logger,
+        IEventLogger eventLogger)
     {
         _next = next;
         _serializerOptions = serializerOptions;
         _logger = logger;
+        _eventLogger = eventLogger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -46,10 +55,14 @@ public class ResponseMiddleware
         var statusCode = HttpStatusCode.BadRequest;
         OperationOutcome body;
 
+        var path = context.Request.Path.Value ?? string.Empty;
+
         switch (exception)
         {
             case HeaderValidationException headerValidationException:
                 _logger.HeadersValidationError(headerValidationException);
+
+                _eventLogger.Error(new EventCatalogue.ErrValFhirViolation(path), headerValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(headerValidationException);
                 break;
@@ -57,11 +70,15 @@ public class ResponseMiddleware
             case BundleValidationException bundleValidationException:
                 _logger.BundleValidationError(bundleValidationException);
 
+                _eventLogger.Error(new EventCatalogue.ErrValFhirViolation(path), bundleValidationException);
+
                 body = OperationOutcomeCreator.CreateOperationOutcome(bundleValidationException);
                 break;
 
             case FhirProfileValidationException fhirProfileValidationException:
                 _logger.FhirProfileValidationError(fhirProfileValidationException);
+
+                _eventLogger.Error(new EventCatalogue.ErrValFhirViolation(path), fhirProfileValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(fhirProfileValidationException);
                 break;
@@ -69,12 +86,16 @@ public class ResponseMiddleware
             case DeserializationFailedException deserializationFailedException:
                 _logger.BundleDeserializationFailure(deserializationFailedException);
 
+                _eventLogger.Error(new EventCatalogue.ErrValMalformedJson(path), deserializationFailedException);
+
                 body = OperationOutcomeCreator.CreateOperationOutcome(
                     new BundleDeserializationError(deserializationFailedException.Message));
                 break;
 
             case JsonException jsonException:
                 _logger.InvalidJson(jsonException);
+
+                _eventLogger.Error(new EventCatalogue.ErrValMalformedJson(path), jsonException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(new BundleDeserializationError(jsonException.Message));
                 break;
@@ -85,11 +106,19 @@ public class ResponseMiddleware
                 statusCode = notSuccessfulApiCallException.StatusCode == HttpStatusCode.InternalServerError
                     ? HttpStatusCode.ServiceUnavailable
                     : notSuccessfulApiCallException.StatusCode;
+
+                _eventLogger.Error(
+                    statusCode == HttpStatusCode.GatewayTimeout
+                        ? new EventCatalogue.ErrIntWpasTimeout(path)
+                        : new EventCatalogue.ErrIntWpasConnectionFail(path),
+                    notSuccessfulApiCallException);
                 body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
                 break;
 
             case RequestParameterValidationException requestParameterValidationException:
                 _logger.RequestParameterValidationError(requestParameterValidationException);
+
+                _eventLogger.Error(new EventCatalogue.ErrValFhirViolation(path), requestParameterValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(requestParameterValidationException);
                 break;
@@ -97,12 +126,24 @@ public class ResponseMiddleware
             case HttpRequestException requestException:
                 _logger.ApiCallError(requestException);
 
+                _eventLogger.Error(new EventCatalogue.ErrIntWpasConnectionFail(path), requestException);
+
                 statusCode = HttpStatusCode.ServiceUnavailable;
                 body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(requestException.Message));
                 break;
 
+            case TimeoutRejectedException timeoutRejectedException:
+                _logger.ApiCallError(new HttpRequestException(timeoutRejectedException.Message, timeoutRejectedException));
+
+                statusCode = HttpStatusCode.GatewayTimeout;
+                _eventLogger.Error(new EventCatalogue.ErrIntWpasTimeout(path), timeoutRejectedException);
+                body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(timeoutRejectedException.Message));
+                break;
+
             default:
                 _logger.UnexpectedError(exception);
+
+                _eventLogger.Error(new EventCatalogue.ErrInternalHandler(path), exception);
 
                 statusCode = HttpStatusCode.InternalServerError;
                 body = OperationOutcomeCreator.CreateOperationOutcome(new UnexpectedError(exception.Message));
