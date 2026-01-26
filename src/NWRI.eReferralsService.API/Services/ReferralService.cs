@@ -13,8 +13,8 @@ using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
-
 // ReSharper disable NullableWarningSuppressionIsUsed
+
 namespace NWRI.eReferralsService.API.Services;
 
 public class ReferralService : IReferralService
@@ -24,8 +24,9 @@ public class ReferralService : IReferralService
         Create,
         Cancel
     }
+
     private readonly HttpClient _httpClient;
-    private readonly IValidator<BundleCreateReferralModel> _createbundleValidator;
+    private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
     private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
@@ -34,14 +35,14 @@ public class ReferralService : IReferralService
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
-        IValidator<BundleCreateReferralModel> createbundleValidator,
+        IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions)
     {
         _httpClient = httpClient;
-        _createbundleValidator = createbundleValidator;
+        _createBundleValidator = createBundleValidator;
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
@@ -151,7 +152,7 @@ public class ReferralService : IReferralService
         // TODO: Add audit log FhirProfileValidationSucceeded
     }
 
-    private static async  Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
+    private static async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
        where TModel : IBundleModel<TModel>
     {
         var bundleModel = TModel.FromBundle(bundle);
@@ -183,7 +184,7 @@ public class ReferralService : IReferralService
     private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
     {
         ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle, _createbundleValidator);
+        await ValidateMandatoryDataAsync(bundle, _createBundleValidator);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));

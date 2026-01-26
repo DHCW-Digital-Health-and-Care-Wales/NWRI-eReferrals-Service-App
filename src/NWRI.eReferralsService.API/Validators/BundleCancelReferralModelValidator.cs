@@ -29,34 +29,40 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotEmpty()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Focus)));
 
-                messageHeader.RuleForEach(x => x.Focus)
-                    .ChildRules(f =>
-                    {
-                        f.RuleFor(x => x.Reference)
-                            .NotEmpty()
-                            .WithMessage(MissingEntityField<MessageHeader>("focus.reference"));
-                    });
+                messageHeader.When(x => x.Focus != null && x.Focus.Any(), () =>
+                {
+                    messageHeader.RuleForEach(x => x.Focus)
+                        .Must(f => !string.IsNullOrWhiteSpace(f?.Reference))
+                        .WithMessage(MissingEntityField<MessageHeader>("focus.reference"));
+                });
 
                 messageHeader.RuleFor(x => x.Reason)
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Reason)));
 
-                messageHeader.RuleFor(x => x.Reason!.Coding)
-                    .NotEmpty()
-                    .WithMessage(MissingEntityField<MessageHeader>("reason.coding"));
+                messageHeader.When(x => x.Reason != null, () =>
+                {
+                    messageHeader.RuleFor(x => x.Reason!.Coding)
+                        .NotEmpty()
+                        .WithMessage(MissingEntityField<MessageHeader>("reason.coding"));
+                });
 
                 messageHeader.RuleFor(x => x.Sender)
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Sender)));
 
-                messageHeader.RuleFor(x => x.Sender!.Reference)
-                    .NotEmpty()
-                    .WithMessage(MissingEntityField<MessageHeader>("sender.reference"));
+                messageHeader.When(x => x.Sender != null, () =>
+                {
+                    messageHeader.RuleFor(x => x.Sender!.Reference)
+                        .NotEmpty()
+                        .WithMessage(MissingEntityField<MessageHeader>("sender.reference"));
+                });
 
                 messageHeader.RuleFor(x => x.Source)
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Source)));
-            });
+                 });
+
         RuleFor(x => x.ServiceRequest!)
             .NotNull()
             .WithMessage(MissingBundleEntity(nameof(ServiceRequest)))
@@ -66,9 +72,12 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotNull()
                     .WithMessage(MissingEntityField<ServiceRequest>(nameof(ServiceRequest.Meta)));
 
-                serviceRequest.RuleFor(x => x.Meta!.Profile)
-                    .NotEmpty()
-                    .WithMessage(MissingEntityField<ServiceRequest>("meta.profile"));
+                serviceRequest.When(x => x.Meta != null, () =>
+                {
+                    serviceRequest.RuleFor(x => x.Meta!.Profile)
+                        .NotEmpty()
+                        .WithMessage(MissingEntityField<ServiceRequest>("meta.profile"));
+                });
 
                 serviceRequest.RuleFor(x => x.Identifier)
                     .NotEmpty()
@@ -99,6 +108,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .WithMessage(MissingEntityField<ServiceRequest>("occurrencePeriod"));
 
             });
+
         RuleFor(x => x.Patient!)
             .NotNull()
             .WithMessage(MissingBundleEntity(nameof(Patient)))
@@ -124,16 +134,9 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Address)));
             });
+
         RuleFor(x => x.Organizations!)
             .NotEmpty()
-            .WithMessage(MissingBundleEntity(nameof(Organization)))
-            .Must(orgs => orgs is { Count: > 0 })
-            .WithMessage(MissingBundleEntity(nameof(Organization)))
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.Organizations!)
-                    .Must(orgs => orgs.Any(o => o.Identifier?.Any(id => !string.IsNullOrWhiteSpace(id.Value)) == true))
-                    .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
-            });
+            .WithMessage(MissingBundleEntity(nameof(Organization)));
     }
 }

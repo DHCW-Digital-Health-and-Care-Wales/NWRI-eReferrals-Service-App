@@ -638,11 +638,11 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-       using var mockHttp = new MockHttpMessageHandler();
+        using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .Respond(statusCode, JsonContent.Create(problemDetails));
 
-       using var httpClient = mockHttp.ToHttpClient();
+        using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri("https://some.com");
 
         var sut = CreateReferralService(httpClient);

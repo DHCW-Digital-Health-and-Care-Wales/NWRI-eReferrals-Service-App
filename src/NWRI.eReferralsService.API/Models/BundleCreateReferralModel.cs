@@ -30,6 +30,7 @@ public class BundleCreateReferralModel : IBundleModel<BundleCreateReferralModel>
     public List<Task>? Tasks { get; set; }
     public List<Communication>? Communications { get; set; }
     public List<Procedure>? Procedures { get; set; }
+
     public static BundleCreateReferralModel FromBundle(Bundle bundle)
     {
         return new BundleCreateReferralModel

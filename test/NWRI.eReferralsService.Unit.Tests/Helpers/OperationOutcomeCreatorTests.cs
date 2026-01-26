@@ -65,5 +65,3 @@ public class OperationOutcomeCreatorTests
         result.Issue.Should().BeEquivalentTo(expectedIssues);
     }
 }
-
-
