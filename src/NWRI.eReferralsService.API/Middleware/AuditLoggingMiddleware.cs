@@ -35,7 +35,7 @@ namespace NWRI.eReferralsService.API.Middleware
             {
                 if (context.Response.StatusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
                 {
-                    _eventLogger.Error(
+                    _eventLogger.LogError(
                         new EventCatalogue.ErrAuthFailed(context.Request.Path.Value ?? string.Empty),
                         new UnauthorizedAccessException($"HTTP {context.Response.StatusCode}"));
                 }

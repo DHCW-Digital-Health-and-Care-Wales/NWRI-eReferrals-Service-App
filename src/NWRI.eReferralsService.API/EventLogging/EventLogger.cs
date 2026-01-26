@@ -31,7 +31,7 @@ public sealed class EventLogger : IEventLogger
         _telemetryClient.TrackEvent(eventName, GenerateEventContext(auditEvent, AuditType));
     }
 
-    public void Error(IErrorEvent errorEvent, Exception exception)
+    public void LogError(IErrorEvent errorEvent, Exception exception)
     {
         var eventName = GetName(errorEvent.GetType());
         var properties = GenerateEventContext(errorEvent, ErrorType);

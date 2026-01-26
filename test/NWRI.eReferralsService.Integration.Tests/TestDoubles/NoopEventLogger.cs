@@ -7,5 +7,5 @@ public sealed class NoopEventLogger : IEventLogger
 {
     public void Audit(IAuditEvent auditEvent) { }
 
-    public void Error(IErrorEvent errorEvent, Exception exception) { }
+    public void LogError(IErrorEvent errorEvent, Exception exception) { }
 }

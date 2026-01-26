@@ -32,10 +32,10 @@ public class AuditLoggingMiddlewareAuthTests
         await middleware.InvokeAsync(context, auditContextAccessor);
 
         // Assert
-        _ = spyLogger.ErrorEvents.Should().ContainSingle();
-        _ = spyLogger.ErrorEvents[0].ErrorEvent.Should().BeOfType<EventCatalogue.ErrAuthFailed>();
+        _ = spyLogger.LogErrorEvents.Should().ContainSingle();
+        _ = spyLogger.LogErrorEvents[0].LogErrorEvent.Should().BeOfType<EventCatalogue.ErrAuthFailed>();
 
-        var err = (EventCatalogue.ErrAuthFailed)spyLogger.ErrorEvents[0].ErrorEvent;
+        var err = (EventCatalogue.ErrAuthFailed)spyLogger.LogErrorEvents[0].LogErrorEvent;
         _ = err.Path.Should().Be("/$process-message");
     }
 }
