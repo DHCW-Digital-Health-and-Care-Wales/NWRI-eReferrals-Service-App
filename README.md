@@ -144,4 +144,3 @@ Route parameter **id** should be a valid GUID.
   - 429 - Too many requests [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
   - 503 - PAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
-
