@@ -211,13 +211,13 @@ public class ReferralService : IReferralService
             // TODO: Extract WPAS referral ID from the response
             _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
                 ExecutionTimeMs: callToPasStopwatch.ElapsedMilliseconds,
-                WpasReferralId: "TODO"));
+                WpasReferralId: null));
 
             // TODO: Extract WPAS referral ID from the response
             _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(
                 SourceSystem: headersModel.GetDecodedSourceSystem(),
                 UserRole: headersModel.GetDecodedUserRole(),
-                WpasReferralId: "TODO",
+                WpasReferralId: null,
                 ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
 
             return await response.Content.ReadAsStringAsync();
