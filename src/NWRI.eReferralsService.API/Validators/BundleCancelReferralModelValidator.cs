@@ -45,7 +45,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Sender)));
 
-                    messageHeader.RuleFor(x => x.Sender!.Reference)
+                messageHeader.RuleFor(x => x.Sender!.Reference)
                         .NotEmpty()
                         .WithMessage(MissingEntityField<MessageHeader>("sender.reference"));
 
