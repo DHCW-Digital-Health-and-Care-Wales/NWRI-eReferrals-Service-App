@@ -35,7 +35,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         }
 
         [Fact]
-        public void ExampleBundleShouldBeValid()
+        public void CancelStatusBundleShouldBeValid()
         {
             var model = CreateValidModelFromExampleBundle(CancelBundleFile);
 
@@ -45,7 +45,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         }
 
         [Fact]
-        public void ExampleBundle_StatusEnteredInError_ShouldBeValid()
+        public void EnteredInErrorStatusBundleShouldBeValid()
         {
             var model = CreateValidModelFromExampleBundle(DeleteBundleFile);
 

@@ -35,9 +35,10 @@ public class ReferralServiceTests
     public ReferralServiceTests()
     {
         _pasReferralsApiConfig = _fixture.Build<PasReferralsApiConfig>()
-                                        .With(x => x.GetReferralEndpoint, _fixture.Create<string>() + "/{0}")
-                                        .With(x => x.CancelReferralEndpoint, _fixture.Create<string>())
-                                        .Create();
+            .With(x => x.GetReferralEndpoint, $"{_fixture.Create<string>()}/{{0}}")
+            .With(x => x.CancelReferralEndpoint, _fixture.Create<string>())
+            .Create();
+
         _fixture.Mock<IOptions<PasReferralsApiConfig>>().SetupGet(x => x.Value).Returns(_pasReferralsApiConfig);
 
         _fixture.Register(() => new Bundle

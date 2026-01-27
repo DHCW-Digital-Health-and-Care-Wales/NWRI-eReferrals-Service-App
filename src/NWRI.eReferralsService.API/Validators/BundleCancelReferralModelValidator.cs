@@ -52,7 +52,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                 messageHeader.RuleFor(x => x.Source)
                     .NotNull()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Source)));
-                 });
+            });
 
         RuleFor(x => x.ServiceRequest!)
             .NotNull()
