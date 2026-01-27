@@ -23,7 +23,6 @@ builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResili
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 
-builder.Services.AddSingleton<IAuditContextAccessor, AuditContextAccessor>();
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
 
 builder.Services.AddControllers();

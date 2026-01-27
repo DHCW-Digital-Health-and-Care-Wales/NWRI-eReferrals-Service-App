@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.Middleware;
@@ -19,6 +20,11 @@ public class AuditLoggingMiddlewareAuthTests
         context.Request.Path = "/$process-message";
         context.Request.Headers[RequestHeaderKeys.CorrelationId] = "corr-1";
 
+        context.SetEndpoint(new Endpoint(
+            requestDelegate: _ => Task.CompletedTask,
+            metadata: new EndpointMetadataCollection(new ControllerActionDescriptor()),
+            displayName: "Test controller endpoint"));
+
         RequestDelegate next = ctx =>
         {
             ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -26,16 +32,12 @@ public class AuditLoggingMiddlewareAuthTests
         };
 
         var middleware = new AuditLoggingMiddleware(next, spyLogger);
-        var auditContextAccessor = new AuditContextAccessor();
 
         // Act
-        await middleware.InvokeAsync(context, auditContextAccessor);
+        await middleware.InvokeAsync(context);
 
         // Assert
-        _ = spyLogger.LogErrorEvents.Should().ContainSingle();
-        _ = spyLogger.LogErrorEvents[0].LogErrorEvent.Should().BeOfType<EventCatalogue.ErrAuthFailed>();
-
-        var err = (EventCatalogue.ErrAuthFailed)spyLogger.LogErrorEvents[0].LogErrorEvent;
-        _ = err.Path.Should().Be("/$process-message");
+        spyLogger.LogErrorEvents.Should().ContainSingle();
+        spyLogger.LogErrorEvents[0].LogErrorEvent.Should().BeOfType<EventCatalogue.AuthFailedError>();
     }
 }

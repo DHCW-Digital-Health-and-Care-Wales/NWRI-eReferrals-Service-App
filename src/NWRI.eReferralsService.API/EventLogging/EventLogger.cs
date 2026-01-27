@@ -8,7 +8,6 @@ namespace NWRI.eReferralsService.API.EventLogging;
 public sealed class EventLogger : IEventLogger
 {
     private readonly TelemetryClient _telemetryClient;
-    private readonly IAuditContextAccessor _auditContextAccessor;
 
     private const string AuditType = "Audit";
     private const string ErrorType = "Error";
@@ -19,10 +18,9 @@ public sealed class EventLogger : IEventLogger
     private const string ExceptionTypeKey = "ExceptionType";
     private const string ExceptionMessageKey = "ExceptionMessage";
 
-    public EventLogger(TelemetryClient telemetryClient, IAuditContextAccessor auditContextAccessor)
+    public EventLogger(TelemetryClient telemetryClient)
     {
         _telemetryClient = telemetryClient;
-        _auditContextAccessor = auditContextAccessor;
     }
 
     public void Audit(IAuditEvent auditEvent)
@@ -48,18 +46,12 @@ public sealed class EventLogger : IEventLogger
         return namedAttribute != null ? namedAttribute.Description : type.Name;
     }
 
-    private Dictionary<string, string> GenerateEventContext(IEvent sourceEvent, string eventType)
+    private static Dictionary<string, string> GenerateEventContext(IEvent sourceEvent, string eventType)
     {
         var properties = GetFieldsAsMap(sourceEvent);
         properties[LoggerTypeKey] = LoggerType;
         properties[EventTypeKey] = eventType;
         properties[TimestampKey] = DateTimeOffset.UtcNow.ToString("O");
-
-        var auditContext = _auditContextAccessor.Current;
-        if (auditContext is not null)
-        {
-            properties["CorrelationId"] = auditContext.CorrelationId;
-        }
 
         return properties;
     }

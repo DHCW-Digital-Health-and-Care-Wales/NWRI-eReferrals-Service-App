@@ -47,26 +47,20 @@ public static class EventCatalogue
         long ProcessingTimeTotalMs) : IAuditEvent;
 
     [Description("ERR_AUTH_FAILED")]
-    public record ErrAuthFailed(
-        string Path) : IErrorEvent;
+    public record AuthFailedError : IErrorEvent;
 
     [Description("ERR_VAL_MALFORMED_JSON")]
-    public record ErrValMalformedJson(
-        string Path) : IErrorEvent;
+    public record ValMalformedJsonError : IErrorEvent;
 
     [Description("ERR_VAL_FHIR_VIOLATION")]
-    public record ErrValFhirViolation(
-        string Path) : IErrorEvent;
+    public record ValFhirViolationError : IErrorEvent;
 
     [Description("ERR_INT_WPAS_TIMEOUT")]
-    public record ErrIntWpasTimeout(
-        string Path) : IErrorEvent;
+    public record IntWpasTimeoutError : IErrorEvent;
 
     [Description("ERR_INT_WPAS_CONNECTION_FAIL")]
-    public record ErrIntWpasConnectionFail(
-        string Path) : IErrorEvent;
+    public record IntWpasConnectionFailError : IErrorEvent;
 
     [Description("ERR_INTERNAL_HANDLER")]
-    public record ErrInternalHandler(
-        string Path) : IErrorEvent;
+    public record InternalHandlerError : IErrorEvent;
 }

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 
@@ -16,10 +15,8 @@ namespace NWRI.eReferralsService.API.Middleware
             _eventLogger = eventLogger;
         }
 
-        public async Task InvokeAsync(HttpContext context, IAuditContextAccessor auditContextAccessor)
+        public async Task InvokeAsync(HttpContext context)
         {
-            auditContextAccessor.Current = CreateAuditContext(context);
-
             var stopwatch = Stopwatch.StartNew();
 
             _eventLogger.Audit(new EventCatalogue.RequestReceived(
@@ -36,26 +33,14 @@ namespace NWRI.eReferralsService.API.Middleware
                 if (context.Response.StatusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
                 {
                     _eventLogger.LogError(
-                        new EventCatalogue.ErrAuthFailed(context.Request.Path.Value ?? string.Empty),
+                        new EventCatalogue.AuthFailedError(),
                         new UnauthorizedAccessException($"HTTP {context.Response.StatusCode}"));
                 }
 
                 _eventLogger.Audit(new EventCatalogue.ResponseSent(
                     StatusCode: context.Response.StatusCode,
                     LatencyMs: stopwatch.ElapsedMilliseconds));
-
-                auditContextAccessor.Current = null;
             }
-        }
-
-        private static AuditContext CreateAuditContext(HttpContext context)
-        {
-            var correlationId = context.Request.Headers.TryGetValue(RequestHeaderKeys.CorrelationId, out var correlation)
-                && !string.IsNullOrWhiteSpace(correlation)
-                ? correlation.ToString()
-                : context.TraceIdentifier;
-
-            return new AuditContext(correlationId);
         }
     }
 }

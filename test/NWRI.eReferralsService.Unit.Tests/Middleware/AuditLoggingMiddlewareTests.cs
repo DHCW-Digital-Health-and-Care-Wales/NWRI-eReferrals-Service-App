@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Routing;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.Middleware;
@@ -22,6 +24,11 @@ public class AuditLoggingMiddlewareTests
         context.Request.Headers[RequestHeaderKeys.CorrelationId] = "corr-1";
         context.Request.Headers[RequestHeaderKeys.RequestId] = "req-1";
 
+        context.SetEndpoint(new Endpoint(
+            requestDelegate: _ => Task.CompletedTask,
+            metadata: new EndpointMetadataCollection(new ControllerActionDescriptor()),
+            displayName: "Test controller endpoint"));
+
         RequestDelegate next = ctx =>
         {
             ctx.Response.StatusCode = StatusCodes.Status200OK;
@@ -29,10 +36,9 @@ public class AuditLoggingMiddlewareTests
         };
 
         var middleware = new AuditLoggingMiddleware(next, spyLogger);
-        var auditContextAccessor = new AuditContextAccessor();
 
         // Act
-        await middleware.InvokeAsync(context, auditContextAccessor);
+        await middleware.InvokeAsync(context);
 
         // Assert
         _ = spyLogger.AuditEvents.Should().HaveCount(2);

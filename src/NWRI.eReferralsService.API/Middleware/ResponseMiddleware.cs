@@ -62,7 +62,7 @@ public class ResponseMiddleware
             case HeaderValidationException headerValidationException:
                 _logger.HeadersValidationError(headerValidationException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValFhirViolation(path), headerValidationException);
+                _eventLogger.LogError(new EventCatalogue.ValFhirViolationError(), headerValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(headerValidationException);
                 break;
@@ -70,7 +70,7 @@ public class ResponseMiddleware
             case BundleValidationException bundleValidationException:
                 _logger.BundleValidationError(bundleValidationException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValFhirViolation(path), bundleValidationException);
+                _eventLogger.LogError(new EventCatalogue.ValFhirViolationError(), bundleValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(bundleValidationException);
                 break;
@@ -78,7 +78,7 @@ public class ResponseMiddleware
             case FhirProfileValidationException fhirProfileValidationException:
                 _logger.FhirProfileValidationError(fhirProfileValidationException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValFhirViolation(path), fhirProfileValidationException);
+                _eventLogger.LogError(new EventCatalogue.ValFhirViolationError(), fhirProfileValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(fhirProfileValidationException);
                 break;
@@ -86,7 +86,7 @@ public class ResponseMiddleware
             case DeserializationFailedException deserializationFailedException:
                 _logger.BundleDeserializationFailure(deserializationFailedException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValMalformedJson(path), deserializationFailedException);
+                _eventLogger.LogError(new EventCatalogue.ValMalformedJsonError(), deserializationFailedException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(
                     new BundleDeserializationError(deserializationFailedException.Message));
@@ -95,7 +95,7 @@ public class ResponseMiddleware
             case JsonException jsonException:
                 _logger.InvalidJson(jsonException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValMalformedJson(path), jsonException);
+                _eventLogger.LogError(new EventCatalogue.ValMalformedJsonError(), jsonException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(new BundleDeserializationError(jsonException.Message));
                 break;
@@ -109,8 +109,8 @@ public class ResponseMiddleware
 
                 _eventLogger.LogError(
                     statusCode == HttpStatusCode.GatewayTimeout
-                        ? new EventCatalogue.ErrIntWpasTimeout(path)
-                        : new EventCatalogue.ErrIntWpasConnectionFail(path),
+                        ? new EventCatalogue.IntWpasTimeoutError()
+                        : new EventCatalogue.IntWpasConnectionFailError(),
                     notSuccessfulApiCallException);
                 body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
                 break;
@@ -118,7 +118,7 @@ public class ResponseMiddleware
             case RequestParameterValidationException requestParameterValidationException:
                 _logger.RequestParameterValidationError(requestParameterValidationException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrValFhirViolation(path), requestParameterValidationException);
+                _eventLogger.LogError(new EventCatalogue.ValFhirViolationError(), requestParameterValidationException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(requestParameterValidationException);
                 break;
@@ -126,7 +126,7 @@ public class ResponseMiddleware
             case HttpRequestException requestException:
                 _logger.ApiCallError(requestException);
 
-                _eventLogger.LogError(new EventCatalogue.ErrIntWpasConnectionFail(path), requestException);
+                _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), requestException);
 
                 statusCode = HttpStatusCode.ServiceUnavailable;
                 body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(requestException.Message));
@@ -136,14 +136,14 @@ public class ResponseMiddleware
                 _logger.ApiCallError(new HttpRequestException(timeoutRejectedException.Message, timeoutRejectedException));
 
                 statusCode = HttpStatusCode.GatewayTimeout;
-                _eventLogger.LogError(new EventCatalogue.ErrIntWpasTimeout(path), timeoutRejectedException);
+                _eventLogger.LogError(new EventCatalogue.IntWpasTimeoutError(), timeoutRejectedException);
                 body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(timeoutRejectedException.Message));
                 break;
 
             default:
                 _logger.UnexpectedError(exception);
 
-                _eventLogger.LogError(new EventCatalogue.ErrInternalHandler(path), exception);
+                _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), exception);
 
                 statusCode = HttpStatusCode.InternalServerError;
                 body = OperationOutcomeCreator.CreateOperationOutcome(new UnexpectedError(exception.Message));
