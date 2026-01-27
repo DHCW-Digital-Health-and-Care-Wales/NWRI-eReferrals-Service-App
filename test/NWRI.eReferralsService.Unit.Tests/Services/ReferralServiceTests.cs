@@ -518,7 +518,6 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-
         _fixture.Mock<IValidator<BundleCancelReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
@@ -555,7 +554,6 @@ public class ReferralServiceTests
         _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
-
 
         _fixture.Mock<IValidator<BundleCancelReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
