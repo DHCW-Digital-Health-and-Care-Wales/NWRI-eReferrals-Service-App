@@ -556,13 +556,13 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-
         _fixture.Mock<IValidator<BundleCancelReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -640,6 +640,7 @@ public class ReferralServiceTests
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
             .Respond(statusCode, JsonContent.Create(problemDetails));
 
         using var httpClient = mockHttp.ToHttpClient();

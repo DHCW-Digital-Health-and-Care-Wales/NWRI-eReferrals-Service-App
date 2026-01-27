@@ -88,6 +88,7 @@ public class ReferralService : IReferralService
         {
             return ReferralWorkflowAction.Cancel;
         }
+
         throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
     }
 
@@ -167,6 +168,20 @@ public class ReferralService : IReferralService
         // TODO: Add audit log MandatoryDataValidationSucceeded
     }
 
+    private async Task ValidateMandatoryCancelDataAsync(Bundle bundle)
+    {
+        var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
+
+        var bundleValidationResult = await _cancelBundleValidator.ValidateAsync(bundleModel);
+        if (!bundleValidationResult.IsValid)
+        {
+            // TODO: Add audit log MandatoryCancelDataFailed
+            throw new BundleValidationException(bundleValidationResult.Errors);
+        }
+
+        // TODO: Add audit log MandatoryCancelDataSucceeded
+    }
+
     private static string? GetMessageReasonCode(Bundle bundle)
     {
         var messageHeader = bundle.ResourceByType<MessageHeader>();
@@ -203,7 +218,7 @@ public class ReferralService : IReferralService
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+        await ValidateMandatoryCancelDataAsync(bundle);
 
         if (response.IsSuccessStatusCode)
         {
