@@ -130,19 +130,18 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         }
 
         [Fact]
-        public void ShouldContainErrorWhenOrganizationIdentifierMissing()
+        public void ShouldContainErrorWhenOrganizationsMissing()
         {
             var model = CreateValidModelFromExampleBundle(CancelBundleFile);
 
-            foreach (var org in model.Organizations!)
-            {
-                org.Identifier = [];
-            }
+            model.Organizations = [];
 
             var result = _sut.TestValidate(model);
 
-            result.Errors.Should().Contain(e =>
-                e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>(nameof(Organization.Identifier)));
+            result.ShouldHaveValidationErrorFor(x => x.Organizations)
+                .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Organization)));
         }
+
+
     }
 }
