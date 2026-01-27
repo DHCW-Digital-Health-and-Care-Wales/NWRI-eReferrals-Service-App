@@ -4,10 +4,4 @@ using NWRI.eReferralsService.API.Models;
 
 namespace NWRI.eReferralsService.API.Validators;
 
-public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
-{
-    public BundleCancelReferralModelValidator()
-    {
-
-    }
-}
+public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel> { }

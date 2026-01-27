@@ -64,7 +64,7 @@ public class ReferralService : IReferralService
         };
     }
 
-    private static ReferralWorkflowAction DetermineReferralWorkflowAction( Bundle bundle)
+    private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
     {
         var reasonCode = GetMessageReasonCode(bundle);
         if (reasonCode is null)
@@ -89,7 +89,7 @@ public class ReferralService : IReferralService
             return ReferralWorkflowAction.Cancel;
         }
 
-        throw new BundleValidationException([new ValidationFailure("","Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
+        throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
