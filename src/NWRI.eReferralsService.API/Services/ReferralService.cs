@@ -218,7 +218,7 @@ public class ReferralService : IReferralService
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
-        await ValidateMandatoryCancelDataAsync(bundle);
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 
         if (response.IsSuccessStatusCode)
         {

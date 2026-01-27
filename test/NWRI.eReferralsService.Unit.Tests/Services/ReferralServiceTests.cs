@@ -562,7 +562,6 @@ public class ReferralServiceTests
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -640,7 +639,6 @@ public class ReferralServiceTests
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
             .Respond(statusCode, JsonContent.Create(problemDetails));
 
         using var httpClient = mockHttp.ToHttpClient();
