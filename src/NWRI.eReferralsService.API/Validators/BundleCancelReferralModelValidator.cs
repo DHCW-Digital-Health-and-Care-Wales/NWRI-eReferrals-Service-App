@@ -1,0 +1,11 @@
+using FluentValidation;
+using NWRI.eReferralsService.API.Models;
+// ReSharper disable NullableWarningSuppressionIsUsed
+
+namespace NWRI.eReferralsService.API.Validators;
+
+public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
+{
+    // Placeholder validator.
+    // Rules will be implemented in a separate task.
+}

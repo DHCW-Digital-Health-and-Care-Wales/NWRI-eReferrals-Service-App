@@ -27,6 +27,7 @@ public class ReferralService : IReferralService
 
     private readonly HttpClient _httpClient;
     private readonly IValidator<BundleCreateReferralModel> _bundleValidator;
+    private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -35,12 +36,14 @@ public class ReferralService : IReferralService
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
         IValidator<BundleCreateReferralModel> bundleValidator,
+        IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions)
     {
         _httpClient = httpClient;
         _bundleValidator = bundleValidator;
+        _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
         _jsonSerializerOptions = jsonSerializerOptions;
@@ -61,7 +64,7 @@ public class ReferralService : IReferralService
         };
     }
 
-    private static ReferralWorkflowAction DetermineReferralWorkflowAction( Bundle bundle)
+    private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
     {
         var reasonCode = GetMessageReasonCode(bundle);
         if (reasonCode is null)
@@ -86,7 +89,7 @@ public class ReferralService : IReferralService
             return ReferralWorkflowAction.Cancel;
         }
 
-        throw new BundleValidationException([new ValidationFailure("","Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
+        throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
@@ -164,6 +167,20 @@ public class ReferralService : IReferralService
         // TODO: Add audit log MandatoryDataValidationSucceeded
     }
 
+    private async Task ValidateMandatoryCancelDataAsync(Bundle bundle)
+    {
+        var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
+
+        var bundleValidationResult = await _cancelBundleValidator.ValidateAsync(bundleModel);
+        if (!bundleValidationResult.IsValid)
+        {
+            // TODO: Add audit log MandatoryCancelDataFailed
+            throw new BundleValidationException(bundleValidationResult.Errors);
+        }
+
+        // TODO: Add audit log MandatoryCancelDataSucceeded
+    }
+
     private static string? GetMessageReasonCode(Bundle bundle)
     {
         var messageHeader = bundle.ResourceByType<MessageHeader>();
@@ -194,9 +211,19 @@ public class ReferralService : IReferralService
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
-    private Task<string> CancelReferralAsync(string requestBody, Bundle bundle)
+    private async Task<string> CancelReferralAsync(string requestBody, Bundle bundle)
     {
-        // TODO: Implement cancel referral flow
-        throw new NotImplementedException("CancelReferralAsync is not implemented yet");
+        ValidateFhirProfile(bundle);
+        await ValidateMandatoryCancelDataAsync(bundle);
+
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 }
