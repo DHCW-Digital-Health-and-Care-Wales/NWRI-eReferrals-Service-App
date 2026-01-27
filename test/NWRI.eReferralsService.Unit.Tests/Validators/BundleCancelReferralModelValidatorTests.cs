@@ -141,7 +141,5 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
             result.ShouldHaveValidationErrorFor(x => x.Organizations)
                 .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Organization)));
         }
-
-
     }
 }
