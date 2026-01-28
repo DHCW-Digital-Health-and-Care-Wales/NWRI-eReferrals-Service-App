@@ -8,7 +8,7 @@ using NWRI.eReferralsService.API.Validators;
 namespace NWRI.eReferralsService.API.Services;
 
 /// <summary>
-/// Background service that initializes and warmup the FHIR Bundle Profile Validator during startup.
+/// Background service that initializes and warms up the FHIR Bundle Profile Validator during startup.
 /// This runs BEFORE the application starts accepting requests.
 /// </summary>
 [ExcludeFromCodeCoverage]

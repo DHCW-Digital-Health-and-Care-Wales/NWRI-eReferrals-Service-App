@@ -29,6 +29,6 @@ public static partial class FhirBundleProfileValidatorLoggerExtensions
     [LoggerMessage(Level = LogLevel.Warning, Message = "Warmup skipped: Failed to deserialize Bundle from '{exampleFilePath}'.")]
     public static partial void FhirBundleProfileValidationWarmupSkippedDeserializationFailed(this ILogger logger, string exampleFilePath);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Warmup skipped: An error occurred while warmup validator..")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Warmup skipped: An error occurred while warming up the validator..")]
     public static partial void FhirBundleProfileValidationWarmupSkippedErrorOccurred(this ILogger logger, Exception exception);
 }

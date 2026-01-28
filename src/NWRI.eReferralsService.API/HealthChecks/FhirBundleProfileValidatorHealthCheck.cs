@@ -21,6 +21,6 @@ public class FhirBundleProfileValidatorHealthCheck : IHealthCheck
             return Task.FromResult(HealthCheckResult.Healthy("FHIR Bundle Profile Validator is ready."));
         }
 
-        return Task.FromResult(HealthCheckResult.Unhealthy("FHIR Bundle Profile Validator is warming up."));
+        return Task.FromResult(HealthCheckResult.Degraded("FHIR Bundle Profile Validator is warming up."));
     }
 }

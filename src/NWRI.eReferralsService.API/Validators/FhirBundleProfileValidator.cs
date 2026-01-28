@@ -142,7 +142,7 @@ namespace NWRI.eReferralsService.API.Validators
 
         private async Task PerformWarmupAsync(CancellationToken cancellationToken)
         {
-            var exampleFilePath = Path.Combine(_hostEnvironment.ContentRootPath, "Swagger", "Examples", "process-message-payload&response.json");
+            var exampleFilePath = Path.Combine(_hostEnvironment.ContentRootPath, "Swagger", "Examples", "process-message-payload-and-response.json");
 
             if (!File.Exists(exampleFilePath))
             {
