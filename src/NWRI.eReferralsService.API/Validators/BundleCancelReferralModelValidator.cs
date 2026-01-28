@@ -13,6 +13,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
     private const string SenderReference = "sender.reference";
     private const string MetaProfile = "meta.profile";
     private const string OccurrencePeriod = "occurrencePeriod";
+
     public BundleCancelReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
