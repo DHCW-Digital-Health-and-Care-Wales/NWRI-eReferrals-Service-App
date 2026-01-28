@@ -16,6 +16,11 @@ public class FhirBundleProfileValidatorHealthCheck : IHealthCheck
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
+        if (!_fhirBundleProfileValidator.IsInitialized)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy("FHIR Validator failed to initialize."));
+        }
+
         if (_fhirBundleProfileValidator.IsReady)
         {
             return Task.FromResult(HealthCheckResult.Healthy("FHIR Bundle Profile Validator is ready."));

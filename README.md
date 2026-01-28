@@ -10,7 +10,7 @@ Make sure you have the following installed and set up:
 
 ## Required configuration for local development
 To configure the project, follow these steps:
-1. Open [appsettings.Development.json](./src/WCCG.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
+1. Open [appsettings.Development.json](./src/NWRI.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
 ```
 "PasReferralsApi": {
     "BaseUrl": "<YOUR_URL>"
@@ -104,14 +104,12 @@ The service uses `ResponseMiddleware` to handle all exceptions and return proper
 The service provides three health check endpoints for Kubernetes liveness and readiness probes:
 
 ### Endpoints
-- **`/health/live`** - Liveness probe - checks if the FHIR Bundle Profile Validator is initialized and ready
-  - Returns `200 OK` when the validator is ready
+- **`/health/live`** - Liveness probe - checks if the application is running
+  - Returns `200 OK` once the application starts
   - Returns `503 Service Unavailable` when the validator is still warming up
-  - **Purpose**: Kubernetes will restart the pod if this check fails repeatedly
 
-- **`/health/ready`** - Readiness probe - checks if the application is running
-  - Always returns `200 OK` once the application starts
-  - **Purpose**: Kubernetes will not route traffic to the pod until this check passes
+- **`/health/ready`** - Readiness probe - checks if the FHIR Bundle Profile Validator is initialized and ready
+  - Always returns `200 OK` when the validator is ready
 
 - **`/health`** - General health check - combines all health checks
   - Returns `200 OK` when all checks pass
@@ -122,7 +120,7 @@ The service provides three health check endpoints for Kubernetes liveness and re
    - The service initializes the FHIR Bundle Profile Validator during startup via `FhirBundleProfileValidatorWarmupService`
    - This process loads FHIR packages and profiles, which may take several seconds
    - During warmup, `/health/live` will NOT return any status and the application will not respond to requests
-   - Once complete, the service logs: `"FHIR-Bundle-Profile-Validator warmup complete. Application is ready to accept requests"`
+   - Once complete, the service logs: `"[Startup] FHIR-Bundle-Profile-Validator warmup complete. Application is ready to accept requests"`
    - **Note**: If `FhirBundleProfileValidation.Enabled` is set to `false` in configuration, the warmup is skipped and a warning is logged
 
 ## FHIR Bundle Profile Validation
@@ -171,7 +169,7 @@ Depending on the message content, the API will either:
 
 #### Request details
 Request body must be a valid FHIR `Bundle` JSON object.
-See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload&response.json).
+See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload-response.json).
 
 #### Workflow determination
 The API determines the workflow action by inspecting:
@@ -187,8 +185,8 @@ Supported combinations:
 If either field is missing, or the combination does not match the supported set, the endpoint returns `400`.
 
 #### Responses
-  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
-  - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
+  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+  - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
   - 429 - Too many requests. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
   - 503 - PAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)

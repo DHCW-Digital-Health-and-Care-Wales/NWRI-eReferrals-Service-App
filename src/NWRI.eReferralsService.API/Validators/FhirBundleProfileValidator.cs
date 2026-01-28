@@ -28,6 +28,7 @@ namespace NWRI.eReferralsService.API.Validators
 
         private volatile bool _isInitialized;
         private volatile bool _isReady;
+        private bool _disposed;
 
         public FhirBundleProfileValidator(
             IOptions<FhirBundleProfileValidationConfig> config,
@@ -105,6 +106,11 @@ namespace NWRI.eReferralsService.API.Validators
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
+            if (_isInitialized)
+            {
+                throw new InvalidOperationException("FHIR Validator has already been initialized.");
+            }
+
             _semaphore = new SemaphoreSlim(_config.MaxConcurrentValidations, _config.MaxConcurrentValidations);
 
             var packagesPath = Path.Combine(_hostEnvironment.ContentRootPath, FhirPackagesDirectory);
@@ -169,13 +175,16 @@ namespace NWRI.eReferralsService.API.Validators
             }
             catch (Exception ex)
             {
-                // Ignore validation errors during warmup
+                // Ignore errors during warmup to ensure service starts
                 _logger.FhirBundleProfileValidationWarmupSkippedErrorOccurred(ex);
             }
         }
 
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
+
             _semaphore?.Dispose();
             _cachedResolver?.Clear();
 

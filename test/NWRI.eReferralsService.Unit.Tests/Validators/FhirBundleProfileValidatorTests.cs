@@ -225,7 +225,7 @@ public class FhirBundleProfileValidatorTests
 
             await sut.InitializeAsync();
 
-            var cts = new CancellationTokenSource();
+            using var cts = new CancellationTokenSource();
             await cts.CancelAsync();
 
             // Act

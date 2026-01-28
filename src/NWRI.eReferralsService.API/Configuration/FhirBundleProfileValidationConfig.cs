@@ -14,5 +14,6 @@ public class FhirBundleProfileValidationConfig
     public int MaxConcurrentValidations { get; set; } = Environment.ProcessorCount;
 
     [Required]
+    [Range(1, 300)]
     public int ValidationTimeoutSeconds { get; set; } = 10;
 }

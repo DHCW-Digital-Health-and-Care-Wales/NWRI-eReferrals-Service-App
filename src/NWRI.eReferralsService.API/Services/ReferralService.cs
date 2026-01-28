@@ -167,11 +167,11 @@ public class ReferralService : IReferralService
         // TODO: Add audit log MandatoryDataValidationSucceeded
     }
 
-    private async Task ValidateMandatoryCancelDataAsync(Bundle bundle)
+    private async Task ValidateMandatoryCancelDataAsync(Bundle bundle, CancellationToken cancellationToken)
     {
         var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
 
-        var bundleValidationResult = await _cancelBundleValidator.ValidateAsync(bundleModel);
+        var bundleValidationResult = await _cancelBundleValidator.ValidateAsync(bundleModel, cancellationToken);
         if (!bundleValidationResult.IsValid)
         {
             // TODO: Add audit log MandatoryCancelDataFailed
@@ -214,7 +214,7 @@ public class ReferralService : IReferralService
     private async Task<string> CancelReferralAsync(string requestBody, Bundle bundle, CancellationToken cancellationToken)
     {
         await ValidateFhirProfileAsync(bundle, cancellationToken);
-        await ValidateMandatoryCancelDataAsync(bundle);
+        await ValidateMandatoryCancelDataAsync(bundle, cancellationToken);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);

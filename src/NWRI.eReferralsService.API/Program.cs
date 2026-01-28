@@ -36,7 +36,6 @@ builder.Services.AddSingleton(new JsonSerializerOptions().ForFhirExtended());
 builder.Services.AddHttpClients();
 builder.Services.AddValidators();
 
-builder.Services.AddHealthChecks();
 builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
