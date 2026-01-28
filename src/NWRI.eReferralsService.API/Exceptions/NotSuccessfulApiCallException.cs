@@ -42,10 +42,17 @@ public class NotSuccessfulApiCallException : BaseFhirException
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
     {
-        if (problemDetails.Extensions.TryGetValue(ValidationErrorsKey, out var errorMessages))
+        if (problemDetails.Extensions.TryGetValue(ValidationErrorsKey, out var validationErrors) && validationErrors is not null)
         {
-            var errorList = JsonSerializer.Deserialize<List<string>>(errorMessages!.ToString()!);
-            return errorList!.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
+            var validationErrorsJson = validationErrors.ToString();
+            if (validationErrorsJson != null)
+            {
+                var errorList = JsonSerializer.Deserialize<List<string>>(validationErrorsJson);
+                if (errorList != null)
+                {
+                    return errorList.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
+                }
+            }
         }
 
         if (problemDetails.Extensions.Count > 0)

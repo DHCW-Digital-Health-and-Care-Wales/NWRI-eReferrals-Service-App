@@ -29,85 +29,85 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
             .Must(x => BeValidFhirType<Identifier>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.EndUserOrganisation)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
             .Must(x => BeValidFhirType<Organization>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.RequestingSoftware)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
             .Must(x => BeValidFhirType<Device>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         When(x => !string.IsNullOrWhiteSpace(x.RequestingPractitioner), () =>
         {
-            RuleFor(x => x.RequestingPractitioner!)
+            RuleFor(x => x.RequestingPractitioner)
                 //Format
                 .Must(x => BeValidFhirType<PractitionerRole>(x.AsSpan()))
                 .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
-                .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+                .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
         });
 
         RuleFor(x => x.RequestId)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
-            //Format
-            .Must(BeValidGuid!)
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
+            // Format
+            .Must(BeValidGuid)
             .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.CorrelationId)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
-            .Must(BeValidGuid!)
+            .Must(BeValidGuid)
             .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.UseContext)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.UseContext))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
-            .Must(ContainValidUseCaseValues!)
+            .Must(ContainValidUseCaseValues)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.UseContext,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.UseContext)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.Accept)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
             //Format
-            .Must(BeValidAcceptValue!)
+            .Must(BeValidAcceptValue)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
-    private static bool BeValidGuid(string value)
+    private static bool BeValidGuid(string? value)
     {
         return Guid.TryParse(value, out _);
     }
@@ -139,12 +139,12 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
         return false;
     }
 
-    private static bool ContainValidUseCaseValues(string value)
+    private static bool ContainValidUseCaseValues(string? value)
     {
-        return ValidUseCaseRegex().IsMatch(value);
+        return value != null && ValidUseCaseRegex().IsMatch(value);
     }
 
-    private static bool BeValidAcceptValue(string value)
+    private static bool BeValidAcceptValue(string? value)
     {
         var valueSpan = value.AsSpan();
 

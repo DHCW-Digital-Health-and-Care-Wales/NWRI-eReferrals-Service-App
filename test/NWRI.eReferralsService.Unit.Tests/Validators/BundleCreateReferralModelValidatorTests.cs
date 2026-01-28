@@ -31,7 +31,12 @@ public class BundleCreateReferralModelValidatorTests
         var options = new JsonSerializerOptions()
             .ForFhir(ModelInfo.ModelInspector);
 
-        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
+        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options);
+        if (bundle is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(bundle)}");
+        }
+
         return BundleCreateReferralModel.FromBundle(bundle);
     }
 
@@ -121,9 +126,13 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        if (model.Patient is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(model.Patient)}");
+        }
 
         // Remove NHS number identifier
-        model.Patient!.Identifier = model.Patient.Identifier
+        model.Patient.Identifier = model.Patient.Identifier
             .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -136,8 +145,12 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenServiceRequestBasedOnMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        if (model.ServiceRequest is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(model.ServiceRequest)}");
+        }
 
-        model.ServiceRequest!.BasedOn = [];
+        model.ServiceRequest.BasedOn = [];
 
         var result = _sut.TestValidate(model);
 
@@ -148,8 +161,12 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenServiceRequestOccurrencePeriodMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        if (model.ServiceRequest is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(model.ServiceRequest)}");
+        }
 
-        model.ServiceRequest!.Occurrence = null;
+        model.ServiceRequest.Occurrence = null;
 
         var result = _sut.TestValidate(model);
 
@@ -160,8 +177,12 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenEncounterPeriodMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        if (model.Encounter is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(model.Encounter)}");
+        }
 
-        model.Encounter!.Period = null;
+        model.Encounter.Period = null;
 
         var result = _sut.TestValidate(model);
 
@@ -172,8 +193,12 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientAddressMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        if (model.Patient is null)
+        {
+            throw new InvalidOperationException($"Test data produced null {nameof(model.Patient)}");
+        }
 
-        model.Patient!.Address = [];
+        model.Patient.Address = [];
 
         var result = _sut.TestValidate(model);
 

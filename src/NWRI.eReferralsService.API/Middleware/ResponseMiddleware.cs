@@ -55,8 +55,6 @@ public class ResponseMiddleware
         var statusCode = HttpStatusCode.BadRequest;
         OperationOutcome body;
 
-        var path = context.Request.Path.Value ?? string.Empty;
-
         switch (exception)
         {
             case HeaderValidationException headerValidationException:

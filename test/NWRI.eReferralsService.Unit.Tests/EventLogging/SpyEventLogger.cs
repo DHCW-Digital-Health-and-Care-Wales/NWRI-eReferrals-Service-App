@@ -1,4 +1,3 @@
-using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 
 namespace NWRI.eReferralsService.Unit.Tests.EventLogging;

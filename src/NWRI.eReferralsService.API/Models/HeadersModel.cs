@@ -53,7 +53,7 @@ public class HeadersModel
         if (Base64Decoder.TryDecode<PractitionerRole>(RequestingPractitioner, out var practitionerRole)
             && practitionerRole is not null)
         {
-            var coding = practitionerRole.Code.FirstOrDefault()?.Coding?.FirstOrDefault();
+            var coding = practitionerRole.Code.FirstOrDefault()?.Coding.FirstOrDefault();
             return coding?.Display ?? coding?.Code;
         }
 

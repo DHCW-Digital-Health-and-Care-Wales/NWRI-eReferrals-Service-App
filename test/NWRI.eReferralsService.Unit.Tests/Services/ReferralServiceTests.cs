@@ -15,7 +15,6 @@ using Moq;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
-using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
