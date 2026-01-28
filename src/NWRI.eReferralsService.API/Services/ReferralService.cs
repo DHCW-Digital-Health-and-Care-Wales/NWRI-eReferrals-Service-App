@@ -59,7 +59,7 @@ public class ReferralService : IReferralService
         return workflowAction switch
         {
             ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle, cancellationToken),
-            ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle),
+            ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
     }
@@ -211,17 +211,17 @@ public class ReferralService : IReferralService
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
-    private async Task<string> CancelReferralAsync(string requestBody, Bundle bundle)
+    private async Task<string> CancelReferralAsync(string requestBody, Bundle bundle, CancellationToken cancellationToken)
     {
-        ValidateFhirProfile(bundle);
+        await ValidateFhirProfileAsync(bundle, cancellationToken);
         await ValidateMandatoryCancelDataAsync(bundle);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

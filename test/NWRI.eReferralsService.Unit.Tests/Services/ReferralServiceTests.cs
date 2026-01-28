@@ -91,22 +91,6 @@ public class ReferralServiceTests
     }
 
     [Fact]
-    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsUpdateAndStatusIsRevokedUntilCancelImplemented()
-    {
-        //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, RequestStatus.Revoked), _jsonSerializerOptions);
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
-
-        //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
-
-        //Assert
-        await action.Should().ThrowAsync<NotImplementedException>();
-    }
-
-    [Fact]
     public async Task ProcessMessageAsyncShouldThrowWhenReasonUnsupported()
     {
         //Arrange
@@ -550,7 +534,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson);
+        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedResponse);
@@ -587,7 +571,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson);
+        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedResponse);
@@ -618,13 +602,13 @@ public class ReferralServiceTests
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
-            .Setup(x => x.Validate(It.IsAny<Bundle>()))
-            .Returns(failureOutput);
+            .Setup(x => x.ValidateAsync(It.IsAny<Bundle>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failureOutput);
 
         var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
 
         // Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
         await action.Should().ThrowAsync<FhirProfileValidationException>();
@@ -662,7 +646,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         // Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
