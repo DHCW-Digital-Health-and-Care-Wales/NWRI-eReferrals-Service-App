@@ -8,6 +8,12 @@ namespace NWRI.eReferralsService.API.Validators;
 
 public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
 {
+    //Nested FHIR Field Names
+    public const string ReasonCoding = "reason.coding";
+    public const string FocusReference = "focus.reference";
+    public const string SenderReference = "sender.reference";
+    public const string MetaProfile = "meta.profile";
+
     public BundleCancelReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
@@ -31,7 +37,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 messageHeader.RuleForEach(x => x.Focus)
                         .Must(f => !string.IsNullOrWhiteSpace(f?.Reference))
-                        .WithMessage(MissingEntityField<MessageHeader>("focus.reference"));
+                        .WithMessage(MissingEntityField<MessageHeader>(FocusReference));
 
                 messageHeader.RuleFor(x => x.Reason)
                     .NotNull()
@@ -39,7 +45,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 messageHeader.RuleFor(x => x.Reason!.Coding)
                         .NotEmpty()
-                        .WithMessage(MissingEntityField<MessageHeader>("reason.coding"));
+                        .WithMessage(MissingEntityField<MessageHeader>(ReasonCoding));
 
                 messageHeader.RuleFor(x => x.Sender)
                     .NotNull()
@@ -47,7 +53,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 messageHeader.RuleFor(x => x.Sender!.Reference)
                         .NotEmpty()
-                        .WithMessage(MissingEntityField<MessageHeader>("sender.reference"));
+                        .WithMessage(MissingEntityField<MessageHeader>(SenderReference));
 
                 messageHeader.RuleFor(x => x.Source)
                     .NotNull()
@@ -65,7 +71,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 serviceRequest.RuleFor(x => x.Meta!.Profile)
                         .NotEmpty()
-                        .WithMessage(MissingEntityField<ServiceRequest>("meta.profile"));
+                        .WithMessage(MissingEntityField<ServiceRequest>(MetaProfile));
 
                 serviceRequest.RuleFor(x => x.Identifier)
                     .NotEmpty()
