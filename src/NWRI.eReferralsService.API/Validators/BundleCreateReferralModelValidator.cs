@@ -8,6 +8,8 @@ namespace NWRI.eReferralsService.API.Validators;
 
 public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreateReferralModel>
 {
+    private const string OccurrencePeriod = "occurrencePeriod";
+    private const string EventCoding = "eventCoding";
     public BundleCreateReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
@@ -39,7 +41,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
 
                 messageHeader.RuleFor(x => x.Event)
                     .NotNull()
-                    .WithMessage(MissingEntityField<MessageHeader>("eventCoding"));
+                    .WithMessage(MissingEntityField<MessageHeader>(EventCoding));
 
                 messageHeader.RuleFor(x => x.Reason)
                     .NotNull()
@@ -81,7 +83,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
 
                 serviceRequest.RuleFor(x => x.Occurrence)
                     .NotNull()
-                    .WithMessage(MissingEntityField<ServiceRequest>("occurrencePeriod"));
+                    .WithMessage(MissingEntityField<ServiceRequest>(OccurrencePeriod));
 
                 serviceRequest.RuleFor(x => x.Requester)
                     .NotNull()

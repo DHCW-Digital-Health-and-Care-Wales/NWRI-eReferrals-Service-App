@@ -8,12 +8,11 @@ namespace NWRI.eReferralsService.API.Validators;
 
 public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancelReferralModel>
 {
-    //Nested FHIR Field Names
-    public const string ReasonCoding = "reason.coding";
-    public const string FocusReference = "focus.reference";
-    public const string SenderReference = "sender.reference";
-    public const string MetaProfile = "meta.profile";
-
+    private const string ReasonCoding = "reason.coding";
+    private const string FocusReference = "focus.reference";
+    private const string SenderReference = "sender.reference";
+    private const string MetaProfile = "meta.profile";
+    private const string OccurrencePeriod = "occurrencePeriod";
     public BundleCancelReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
@@ -99,7 +98,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
 
                 serviceRequest.RuleFor(x => x.Occurrence)
                     .NotNull()
-                    .WithMessage(MissingEntityField<ServiceRequest>("occurrencePeriod"));
+                    .WithMessage(MissingEntityField<ServiceRequest>(OccurrencePeriod));
             });
 
         RuleFor(x => x.Patient!)
