@@ -18,6 +18,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         private readonly BundleCancelReferralModelValidator _sut;
         private const string CancelBundleFile = "example-cancel-revoked.json";
         private const string DeleteBundleFile = "example-cancel-entered-in-error.json";
+
         public BundleCancelReferralModelValidatorTests()
         {
             _sut = _fixture.CreateWithFrozen<BundleCancelReferralModelValidator>();
