@@ -101,6 +101,24 @@ public class ReferralsControllerTests
         ex.Message.Should().Contain("not been implemented");
     }
 
+    [Fact]
+    public void GetServiceRequest_ShouldThrowProxyNotImplementedException()
+    {
+        // Arrange
+        var patientIdentifier = "https://fhir.nhs.uk/Id/nhs-number|3478526985";
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        SetRequestDetails(headers);
+
+        // Act
+        var act = () => _sut.GetServiceRequest(patientIdentifier);
+
+        // Assert
+        var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
+        ex.StatusCode.Should().Be(System.Net.HttpStatusCode.NotImplemented);
+        ex.Message.Should().Contain("not been implemented");
+    }
+
     private void SetRequestDetails(IHeaderDictionary headerDictionary, string? body = null)
     {
         _sut.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };

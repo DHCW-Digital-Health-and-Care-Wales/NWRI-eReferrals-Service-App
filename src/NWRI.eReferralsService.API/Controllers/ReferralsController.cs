@@ -55,4 +55,17 @@ public class ReferralsController : ControllerBase
 
         throw new ProxyNotImplementedException();
     }
+
+    [HttpGet("ServiceRequest")]
+    [SwaggerGetServiceRequest]
+    public IActionResult GetServiceRequest(
+       [FromQuery(Name = "patient.identifier")] string? patientIdentifier)
+    {
+        _logger.CalledMethod(nameof(GetServiceRequest));
+
+        // I intentionally do not parse or validate the identifier,
+        // because the endpoint is not implemented.
+        throw new ProxyNotImplementedException(
+            "BaRS did not recognize the request. This request has not been implemented within the Api.");
+    }
 }
