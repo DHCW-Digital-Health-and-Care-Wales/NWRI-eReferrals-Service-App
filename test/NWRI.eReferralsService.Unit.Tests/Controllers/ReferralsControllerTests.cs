@@ -120,7 +120,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public void GetServiceRequest_ShouldThrowProxyNotImplementedException()
+    public void GetServiceRequestShouldThrowProxyNotImplementedException()
     {
         // Arrange
         var patientIdentifier = "https://fhir.nhs.uk/Id/nhs-number|3478526985";
