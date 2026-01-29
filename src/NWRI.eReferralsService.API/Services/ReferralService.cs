@@ -26,7 +26,7 @@ public class ReferralService : IReferralService
     }
 
     private readonly HttpClient _httpClient;
-    private readonly IValidator<BundleCreateReferralModel> _bundleValidator;
+    private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
     private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
@@ -35,14 +35,14 @@ public class ReferralService : IReferralService
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
-        IValidator<BundleCreateReferralModel> bundleValidator,
+        IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions)
     {
         _httpClient = httpClient;
-        _bundleValidator = bundleValidator;
+        _createBundleValidator = createBundleValidator;
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
@@ -153,11 +153,12 @@ public class ReferralService : IReferralService
         // TODO: Add audit log FhirProfileValidationSucceeded
     }
 
-    private async Task ValidateMandatoryDataAsync(Bundle bundle)
+    private static async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
+       where TModel : IBundleModel<TModel>
     {
-        var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
+        var bundleModel = TModel.FromBundle(bundle);
 
-        var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
+        var bundleValidationResult = await validator.ValidateAsync(bundleModel);
         if (!bundleValidationResult.IsValid)
         {
             // TODO: Add audit log MandatoryDataValidationFailed
@@ -198,7 +199,7 @@ public class ReferralService : IReferralService
     private async Task<string> CreateReferralAsync(string requestBody, Bundle bundle)
     {
         ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle);
+        await ValidateMandatoryDataAsync(bundle, _createBundleValidator);
 
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
@@ -214,9 +215,9 @@ public class ReferralService : IReferralService
     private async Task<string> CancelReferralAsync(string requestBody, Bundle bundle)
     {
         ValidateFhirProfile(bundle);
-        await ValidateMandatoryCancelDataAsync(bundle);
+        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
 
-        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 
         if (response.IsSuccessStatusCode)
