@@ -10,6 +10,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
 {
     private const string OccurrencePeriod = "occurrencePeriod";
     private const string EventCoding = "eventCoding";
+
     public BundleCreateReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
