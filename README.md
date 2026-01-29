@@ -10,7 +10,7 @@ Make sure you have the following installed and set up:
 
 ## Required configuration for local development
 To configure the project, follow these steps:
-1. Open [appsettings.Development.json](./src/WCCG.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
+1. Open [appsettings.Development.json](./src/NWRI.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
 ```
 "PasReferralsApi": {
     "BaseUrl": "<YOUR_URL>"
@@ -123,8 +123,8 @@ Supported combinations:
 If either field is missing, or the combination does not match the supported set, the endpoint returns `400`.
 
 #### Responses
-  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
-  - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
+  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+  - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
   - 429 - Too many requests. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
   - 503 - PAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
