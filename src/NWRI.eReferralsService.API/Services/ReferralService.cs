@@ -29,7 +29,7 @@ public class ReferralService : IReferralService
     }
 
     private readonly HttpClient _httpClient;
-    private readonly IValidator<BundleCreateReferralModel> _bundleValidator;
+    private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
     private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
@@ -39,7 +39,7 @@ public class ReferralService : IReferralService
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
-        IValidator<BundleCreateReferralModel> bundleValidator,
+        IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
@@ -47,7 +47,7 @@ public class ReferralService : IReferralService
         IEventLogger eventLogger)
     {
         _httpClient = httpClient;
-        _bundleValidator = bundleValidator;
+        _createBundleValidator = createBundleValidator;
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
@@ -167,26 +167,17 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.FhirSchemaValidated());
     }
 
-    private async Task ValidateMandatoryDataAsync(Bundle bundle)
+    private async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
+       where TModel : IBundleModel<TModel>
     {
-        var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
+        var bundleModel = TModel.FromBundle(bundle);
 
-        var bundleValidationResult = await _bundleValidator.ValidateAsync(bundleModel);
+        var bundleValidationResult = await validator.ValidateAsync(bundleModel);
         if (!bundleValidationResult.IsValid)
         {
             throw new BundleValidationException(bundleValidationResult.Errors);
         }
-    }
-
-    private async Task ValidateMandatoryCancelDataAsync(Bundle bundle)
-    {
-        var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
-
-        var bundleValidationResult = await _cancelBundleValidator.ValidateAsync(bundleModel);
-        if (!bundleValidationResult.IsValid)
-        {
-            throw new BundleValidationException(bundleValidationResult.Errors);
-        }
+        _eventLogger.Audit(new EventCatalogue.FhirMappedToWpasPayload());
     }
 
     private static string? GetMessageReasonCode(Bundle bundle)
@@ -210,8 +201,7 @@ public class ReferralService : IReferralService
         HeadersModel headersModel)
     {
         ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle);
-        _eventLogger.Audit(new EventCatalogue.FhirMappedToWpasPayload());
+        await ValidateMandatoryDataAsync(bundle, _createBundleValidator);
 
         var callToPasStopwatch = Stopwatch.StartNew();
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
@@ -247,11 +237,10 @@ public class ReferralService : IReferralService
         HeadersModel headersModel)
     {
         ValidateFhirProfile(bundle);
-        await ValidateMandatoryCancelDataAsync(bundle);
-        _eventLogger.Audit(new EventCatalogue.FhirMappedToWpasPayload());
+        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
 
         var callToPasStopwatch = Stopwatch.StartNew();
-        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 
         callToPasStopwatch.Stop();

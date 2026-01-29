@@ -36,8 +36,10 @@ public class ReferralServiceTests
     public ReferralServiceTests()
     {
         _pasReferralsApiConfig = _fixture.Build<PasReferralsApiConfig>()
-            .With(x => x.GetReferralEndpoint, _fixture.Create<string>() + "/{0}")
+            .With(x => x.GetReferralEndpoint, $"{_fixture.Create<string>()}/{{0}}")
+            .With(x => x.CancelReferralEndpoint, _fixture.Create<string>())
             .Create();
+
         _fixture.Mock<IOptions<PasReferralsApiConfig>>().SetupGet(x => x.Value).Returns(_pasReferralsApiConfig);
 
         _fixture.Register(() => new Bundle
@@ -524,7 +526,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -561,7 +563,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .WithContent(bundleJson)
             .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
             .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -638,7 +640,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
             .Respond(statusCode, JsonContent.Create(problemDetails));
 
         using var httpClient = mockHttp.ToHttpClient();

@@ -6,7 +6,7 @@ namespace NWRI.eReferralsService.API.Helpers
 {
     public static class Base64Decoder
     {
-        private static readonly JsonSerializerOptions DefaultFhirJsonSerializerOptions =
+        private static readonly JsonSerializerOptions SerializerOptions =
             new JsonSerializerOptions().ForFhirExtended();
 
         public static bool TryDecode<T>(string? base64Value, out T? result)
@@ -22,14 +22,10 @@ namespace NWRI.eReferralsService.API.Helpers
             try
             {
                 var bytes = Convert.FromBase64String(base64Value.Trim());
-                result = JsonSerializer.Deserialize<T>(bytes, DefaultFhirJsonSerializerOptions);
-                return result is not null;
+                result = JsonSerializer.Deserialize<T>(bytes, SerializerOptions);
+                return result != null;
             }
-            catch (FormatException)
-            {
-                return false;
-            }
-            catch (JsonException)
+            catch
             {
                 return false;
             }

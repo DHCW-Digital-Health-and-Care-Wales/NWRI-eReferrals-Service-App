@@ -5,7 +5,7 @@ using Task = Hl7.Fhir.Model.Task;
 
 namespace NWRI.eReferralsService.API.Models;
 
-public class BundleCreateReferralModel
+public class BundleCreateReferralModel : IBundleModel<BundleCreateReferralModel>
 {
     public required MessageHeader? MessageHeader { get; set; }
     public required ServiceRequest? ServiceRequest { get; set; }

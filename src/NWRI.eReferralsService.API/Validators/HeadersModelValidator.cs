@@ -69,7 +69,7 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            // Format
+            //Format
             .Must(BeValidGuid)
             .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));

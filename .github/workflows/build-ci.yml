@@ -88,8 +88,8 @@ jobs:
 #        id: docker_build
 #        with:
 #          push: true
-#          context: "./src/WCCG.eReferralsService.API"
-#          file: "./src/WCCG.eReferralsService.API/Dockerfile"
+#          context: "./src/NWRI.eReferralsService.API"
+#          file: "./src/NWRI.eReferralsService.API/Dockerfile"
 #          tags: |
 #            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:latest"
 #            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}"

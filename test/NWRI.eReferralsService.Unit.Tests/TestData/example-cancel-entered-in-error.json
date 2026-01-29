@@ -1,0 +1,228 @@
+{
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:1cbdfb97-5859-48a4-8301-d54eab818d68",
+      "resource": {
+        "destination": [
+          {
+            "endpoint": "https://bars.wales.nhs.uk",
+            "receiver": {
+              "reference": "urn:uuid:10397afd-479c-42ea-9d5d-e4024481e0f8"
+            }
+          }
+        ],
+        "eventCoding": {
+          "code": "servicerequest-request",
+          "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars"
+        },
+        "focus": [
+          {
+            "reference": "urn:uuid:236bb75d-90ef-461f-b71e-fde7f899802c"
+          }
+        ],
+        "meta": {
+          "lastUpdated": "2021-11-26T15:03:00.8185338+00:00",
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/BARSMessageHeader-servicerequest-request"
+          ]
+        },
+        "reason": {
+          "coding": [
+            {
+              "code": "update",
+              "system": "https://fhir.nhs.uk/CodeSystem/message-reason-bars"
+            }
+          ]
+        },
+        "resourceType": "MessageHeader",
+        "sender": {
+          "reference": "urn:uuid:07939a0c-2854-46ff-9282-ad906bc93679"
+        },
+        "source": {
+          "endpoint": "https://optom-wales-bars.aws.com",
+          "name": "Optometry",
+          "software": "Optom RMSL",
+          "version": "2.1.45"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:236bb75d-90ef-461f-b71e-fde7f899802c",
+      "resource": {
+        "authoredOn": "2024-08-20T17:00:00+01:00",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest",
+                "code": "referral",
+                "display": "Transfer of Care"
+              },
+              {
+                "code": "validation",
+                "display": "For Validation",
+                "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest"
+              },
+              {
+                "code": "referraltosecondarycare",
+                "display": "Primary Care to Secondary Care",
+                "system": "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars"
+              }
+            ]
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://wrds.wales.nhs.uk/AllWalesData/AssigningAuthorities/AssigningAuthority/Optom-Referrals",
+            "value": "1e792757-8998-480e-bd9a-17e77d89e53d"
+          }
+        ],
+        "intent": "plan",
+        "meta": {
+          "lastUpdated": "2021-11-26T15:03:00.8185338+00:00",
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/BARSServiceRequest-request-validation"
+          ]
+        },
+        "occurrencePeriod": {
+          "end": "2021-11-26T15:20:00+00:00",
+          "start": "2021-11-26T15:00:00+00:00"
+        },
+        "resourceType": "ServiceRequest",
+        "status": "entered-in-error",
+        "subject": {
+          "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8",
+      "resource": {
+        "address": [
+          {
+            "city": "Overtown",
+            "district": "West Yorkshire",
+            "line": [
+              "22 Brightside Crescent"
+            ],
+            "postalCode": "LS10 4YU",
+            "text": "22 Brightside Crescent, Overtown, West Yorkshire, LS10 4YU",
+            "type": "both",
+            "use": "home"
+          }
+        ],
+        "birthDate": "1959-05-04",
+        "gender": "female",
+        "identifier": [
+          {
+            "extension": [
+              {
+                "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-NHSNumberVerificationStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "code": "01",
+                      "display": "Number present and verified",
+                      "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland"
+                    }
+                  ]
+                }
+              }
+            ],
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "3478526985"
+          }
+        ],
+        "meta": {
+          "lastUpdated": "2024-08-20T11:30:00.8185338+00:00",
+          "profile": [
+            "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Patient"
+          ]
+        },
+        "name": [
+          {
+            "family": "Jones",
+            "given": [
+              "Julie"
+            ],
+            "prefix": [
+              "Mrs"
+            ],
+            "text": "Mrs Julie Jones",
+            "use": "official"
+          }
+        ],
+        "resourceType": "Patient",
+        "telecom": [
+          {
+            "rank": 2,
+            "system": "phone",
+            "use": "home",
+            "value": "01138698975"
+          },
+          {
+            "rank": 1,
+            "system": "phone",
+            "use": "mobile",
+            "value": "07736312544"
+          },
+          {
+            "rank": 3,
+            "system": "email",
+            "use": "home",
+            "value": "jjones@hotmail.co.uk"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:10397afd-479c-42ea-9d5d-e4024481e0f8",
+      "resource": {
+        "identifier": [
+          {
+            "system": "https://wrds.wales.nhs.uk/Secondary-Care/Organisations/NHS-Wales-Organisations",
+            "value": "7A4BV"
+          }
+        ],
+        "meta": {
+          "lastUpdated": "2021-11-26T15:03:00.8185338+00:00",
+          "profile": [
+            "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Organization"
+          ]
+        },
+        "name": "Receiver Organization",
+        "resourceType": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:07939a0c-2854-46ff-9282-ad906bc93679",
+      "resource": {
+        "identifier": [
+          {
+            "system": "https://wrds.wales.nhs.uk/Secondary-Care/Organisations/UK-NHS-Organisations",
+            "value": "TP2VC"
+          }
+        ],
+        "meta": {
+          "lastUpdated": "2021-11-26T15:03:00.8185338+00:00",
+          "profile": [
+            "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Organization"
+          ]
+        },
+        "name": "Sender Organization",
+        "resourceType": "Organization"
+      }
+    }
+  ],
+  "id": "a961e68a-50e9-4988-9b14-4bfa4629d761",
+  "meta": {
+    "lastUpdated": "2021-11-26T15:03:00.8185338+00:00",
+    "profile": [
+      "https://fhir.nhs.uk/StructureDefinition/BARSBundleMessage"
+    ],
+    "versionId": "1.1.0"
+  },
+  "resourceType": "Bundle",
+  "timestamp": "2021-11-26T15:03:00+00:00",
+  "type": "message"
+}

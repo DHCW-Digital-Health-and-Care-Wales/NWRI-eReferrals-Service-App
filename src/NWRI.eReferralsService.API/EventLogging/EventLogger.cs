@@ -11,10 +11,12 @@ public sealed class EventLogger : IEventLogger
 
     private const string AuditType = "Audit";
     private const string ErrorType = "Error";
+
     private const string EventTypeKey = "EventType";
     private const string LoggerTypeKey = "LoggerType";
     private const string LoggerType = "UserActivityAuditLog";
     private const string TimestampKey = "EventTimestampUtc";
+
     private const string ExceptionTypeKey = "ExceptionType";
     private const string ExceptionMessageKey = "ExceptionMessage";
 
@@ -25,30 +27,37 @@ public sealed class EventLogger : IEventLogger
 
     public void Audit(IAuditEvent auditEvent)
     {
-        var eventName = GetName(auditEvent.GetType());
-        _telemetryClient.TrackEvent(eventName, GenerateEventContext(auditEvent, AuditType));
-    }
-
-    public void LogError(IErrorEvent errorEvent, Exception exception)
-    {
-        var eventName = GetName(errorEvent.GetType());
-        var properties = GenerateEventContext(errorEvent, ErrorType);
-
-        properties[ExceptionTypeKey] = exception.GetType().Name;
-        properties[ExceptionMessageKey] = exception.Message;
+        var eventName = GetEventName(auditEvent);
+        var properties = GenerateEventContext(auditEvent, AuditType);
 
         _telemetryClient.TrackEvent(eventName, properties);
     }
 
-    private static string GetName(Type type)
+    public void LogError(IErrorEvent errorEvent, Exception? exception)
     {
-        var namedAttribute = type.GetCustomAttribute<DescriptionAttribute>();
-        return namedAttribute != null ? namedAttribute.Description : type.Name;
+        var eventName = GetEventName(errorEvent);
+        var properties = GenerateEventContext(errorEvent, ErrorType);
+
+        if (exception != null)
+        {
+            properties[ExceptionTypeKey] = exception.GetType().Name;
+            properties[ExceptionMessageKey] = exception.Message;
+        }
+
+        _telemetryClient.TrackEvent(eventName, properties);
+    }
+
+    private static string GetEventName(IEvent sourceEvent)
+    {
+        var type = sourceEvent.GetType();
+        var attribute = type.GetCustomAttribute<DescriptionAttribute>();
+        return attribute?.Description ?? type.Name;
     }
 
     private static Dictionary<string, string> GenerateEventContext(IEvent sourceEvent, string eventType)
     {
         var properties = GetFieldsAsMap(sourceEvent);
+
         properties[LoggerTypeKey] = LoggerType;
         properties[EventTypeKey] = eventType;
         properties[TimestampKey] = DateTimeOffset.UtcNow.ToString("O");
@@ -66,6 +75,6 @@ public sealed class EventLogger : IEventLogger
     private static string GetValue(IEvent sourceEvent, PropertyInfo property)
     {
         var value = property.GetValue(sourceEvent);
-        return value is null ? "N/A" : value.ToString() ?? "N/A";
+        return value?.ToString() ?? "N/A";
     }
 }

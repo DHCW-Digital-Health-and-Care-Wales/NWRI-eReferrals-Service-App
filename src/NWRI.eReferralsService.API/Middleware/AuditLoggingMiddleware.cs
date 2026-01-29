@@ -32,9 +32,7 @@ namespace NWRI.eReferralsService.API.Middleware
             {
                 if (context.Response.StatusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
                 {
-                    _eventLogger.LogError(
-                        new EventCatalogue.AuthFailedError(),
-                        new UnauthorizedAccessException($"HTTP {context.Response.StatusCode}"));
+                    _eventLogger.LogError(new EventCatalogue.AuthFailedError());
                 }
 
                 _eventLogger.Audit(new EventCatalogue.ResponseSent(
