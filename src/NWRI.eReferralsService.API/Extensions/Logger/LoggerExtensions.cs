@@ -37,4 +37,7 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error.")]
     public static partial void UnexpectedError(this ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Proxy endpoint not implemented (BaRS Core Spec).")]
+    public static partial void ProxyNotImplemented(this ILogger logger, ProxyNotImplementedException exception);
 }

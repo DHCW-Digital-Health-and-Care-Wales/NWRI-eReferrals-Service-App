@@ -14,6 +14,7 @@ public class SwaggerOperationFilter : IOperationFilter
     {
         HandleProcessMessage(operation, context);
         HandleGetReferral(operation, context);
+        HandleGetServiceRequestByPatientIdentifier(operation, context);
     }
 
     private static void HandleProcessMessage(OpenApiOperation operation, OperationFilterContext context)
@@ -58,6 +59,33 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
         AddGetReferralResponses(operation);
+    }
+
+    private static void HandleGetServiceRequestByPatientIdentifier(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetServiceRequestAttribute>();
+        if (attr is null)
+        {
+            return;
+        }
+
+        operation.Parameters = [];
+
+        // Query param: patient.identifier
+        operation.Parameters.Add(new OpenApiParameter
+        {
+            In = ParameterLocation.Query,
+            Name = "patient.identifier",
+            Required = false,
+            Description = "FHIR token search parameter in the form system|value. Example: https://fhir.nhs.uk/Id/nhs-number|3478526985",
+            Schema = new OpenApiSchema { Type = "string" },
+            Example = new OpenApiString("https://fhir.nhs.uk/Id/nhs-number|3478526985")
+        });
+
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+
+        AddGetServiceRequestByPatientIdentifierResponses(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
@@ -263,6 +291,93 @@ public class SwaggerOperationFilter : IOperationFilter
                             {
                                 Example = new OpenApiString(
                                     File.ReadAllText("Swagger/Examples/common-external-server-error.json")),
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private static void AddGetServiceRequestByPatientIdentifierResponses(OpenApiOperation operation)
+    {
+        operation.Responses = new OpenApiResponses
+        {
+            {
+                "501", new OpenApiResponse
+                {
+                    Description = "Not Implemented",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "400", new OpenApiResponse
+                {
+                    Description = "Bad Request",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/get-referral-bad-request.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "429", new OpenApiResponse
+                {
+                    Description = "Too many requests",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-too-many-requests.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "500", new OpenApiResponse
+                {
+                    Description = "Internal Server Error",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-internal-server-error.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "503", new OpenApiResponse
+                {
+                    Description = "Service Unavailable",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
                             }
                         }
                     }
