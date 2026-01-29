@@ -344,6 +344,64 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task ShouldHandleProxyNotImplementedException()
+    {
+        // Arrange
+        var message = "BaRS did not recognize the request. This request has not been implemented within the Api.";
+        var exception = new ProxyNotImplementedException(message);
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        // Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotImplemented);
+
+        response.Headers.GetValues("X-Operation-Id").Should().NotBeNullOrEmpty();
+        response.Headers.GetValues(RequestHeaderKeys.RequestId).Should().Contain(requestId);
+        response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should().Contain(correlationId);
+
+        response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
+            .NotBeNull()
+            .And.Contain(FhirConstants.FhirMediaType);
+
+        var raw = await response.Content.ReadAsStringAsync();
+
+        Action parse = () => JsonDocument.Parse(raw);
+        parse.Should().NotThrow(raw);
+
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(
+            raw,
+            new JsonSerializerOptions().ForFhirExtended())!;
+
+        operationOutcome.Issue.Should().NotBeNullOrEmpty();
+
+        operationOutcome.Issue.Should().AllSatisfy(issue =>
+        {
+            issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+
+            issue.Code.Should().BeOneOf(OperationOutcome.IssueType.Invalid, OperationOutcome.IssueType.NotSupported);
+
+            // BaRS error code should be in details.coding
+            issue.Details.Should().NotBeNull();
+            issue.Details.Coding.Should().NotBeNullOrEmpty();
+
+            issue.Details.Coding.Should().Contain(c =>
+                c.System == "https://fhir.nhs.uk/CodeSystem/http-error-codes" &&
+                c.Code == "PROXY_NOT_IMPLEMENTED");
+        });
+    }
+
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,

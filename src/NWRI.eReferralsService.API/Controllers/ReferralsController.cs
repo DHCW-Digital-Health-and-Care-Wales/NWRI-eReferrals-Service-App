@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
@@ -51,5 +52,18 @@ public class ReferralsController : ControllerBase
             StatusCode = 200,
             ContentType = FhirConstants.FhirMediaType
         };
+    }
+
+    [HttpGet("ServiceRequest")]
+    [SwaggerGetServiceRequest]
+    public IActionResult GetServiceRequest(
+       [FromQuery(Name = "patient.identifier")] string? patientIdentifier)
+    {
+        _logger.CalledMethod(nameof(GetServiceRequest));
+
+        // I intentionally do not parse or validate the identifier,
+        // because the endpoint is not implemented.
+        throw new ProxyNotImplementedException(
+            "BaRS did not recognize the request. This request has not been implemented within the Api.");
     }
 }
