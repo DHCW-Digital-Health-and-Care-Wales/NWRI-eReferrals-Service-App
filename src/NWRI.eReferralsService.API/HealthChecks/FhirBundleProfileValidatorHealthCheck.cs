@@ -1,10 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.API.HealthChecks;
 
-[ExcludeFromCodeCoverage]
 public class FhirBundleProfileValidatorHealthCheck : IHealthCheck
 {
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
