@@ -15,6 +15,9 @@ public class PasReferralsApiConfig
     public required string CreateReferralEndpoint { get; set; }
 
     [Required]
+    public required string CancelReferralEndpoint { get; set; }
+
+    [Required]
     public required string GetReferralEndpoint { get; set; }
 
     [Required]
