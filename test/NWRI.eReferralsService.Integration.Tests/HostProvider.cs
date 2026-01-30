@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NWRI.eReferralsService.API.EventLogging;
+using NWRI.eReferralsService.API.EventLogging.Interfaces;
 
 namespace NWRI.eReferralsService.Integration.Tests;
 
@@ -25,6 +27,7 @@ public static class HostProvider
                     {
                         services.AddRouting();
                         services.AddApplicationInsightsTelemetry(options => options.ConnectionString = "test");
+                        services.AddSingleton<IEventLogger, EventLogger>();
                         addServices?.Invoke(services);
                     })
                     .Configure(app =>

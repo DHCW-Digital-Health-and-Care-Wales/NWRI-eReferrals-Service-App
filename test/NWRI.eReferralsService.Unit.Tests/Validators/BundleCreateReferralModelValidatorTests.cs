@@ -31,7 +31,9 @@ public class BundleCreateReferralModelValidatorTests
         var options = new JsonSerializerOptions()
             .ForFhir(ModelInfo.ModelInspector);
 
-        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
+        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options);
+        bundle.Should().NotBeNull("Test data should deserialize into a valid FHIR Bundle");
+
         return BundleCreateReferralModel.FromBundle(bundle);
     }
 
@@ -121,9 +123,10 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle();
+        model.Patient.Should().NotBeNull($"Test data should include {model.Patient} entry");
 
         // Remove NHS number identifier
-        model.Patient!.Identifier = model.Patient.Identifier
+        model.Patient.Identifier = model.Patient.Identifier
             .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -136,8 +139,8 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenServiceRequestBasedOnMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
-        model.ServiceRequest!.BasedOn = [];
+        model.ServiceRequest.Should().NotBeNull($"Test data should include {model.ServiceRequest} entry");
+        model.ServiceRequest.BasedOn = [];
 
         var result = _sut.TestValidate(model);
 
@@ -148,8 +151,8 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenServiceRequestOccurrencePeriodMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
-        model.ServiceRequest!.Occurrence = null;
+        model.ServiceRequest.Should().NotBeNull($"Test data should include {model.ServiceRequest} entry");
+        model.ServiceRequest.Occurrence = null;
 
         var result = _sut.TestValidate(model);
 
@@ -160,8 +163,8 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenEncounterPeriodMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
-        model.Encounter!.Period = null;
+        model.Encounter.Should().NotBeNull($"Test data should include {model.Encounter} entry");
+        model.Encounter.Period = null;
 
         var result = _sut.TestValidate(model);
 
@@ -172,8 +175,8 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientAddressMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
-        model.Patient!.Address = [];
+        model.Patient.Should().NotBeNull($"Test data should include {model.Patient} entry");
+        model.Patient.Address = [];
 
         var result = _sut.TestValidate(model);
 

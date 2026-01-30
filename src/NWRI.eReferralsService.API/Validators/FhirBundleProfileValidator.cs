@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using Task = System.Threading.Tasks.Task;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Validators
 {

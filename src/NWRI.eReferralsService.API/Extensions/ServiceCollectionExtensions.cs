@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
             .GetValue<string>(nameof(ApplicationInsightsConfig.ConnectionString));
 
         services.AddApplicationInsightsTelemetry(options => options.ConnectionString = appInsightsConnectionString);
+        services.AddSingleton<ITelemetryInitializer, TelemetryInitializer>();
         services.Configure<TelemetryConfiguration>(config =>
         {
             if (isDevelopmentEnvironment)

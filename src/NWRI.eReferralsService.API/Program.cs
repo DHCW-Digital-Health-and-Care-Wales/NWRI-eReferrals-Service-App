@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.OptionValidators;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.EventLogging;
+using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
@@ -22,6 +24,7 @@ builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResili
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
+builder.Services.AddSingleton<IEventLogger, EventLogger>();
 
 builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 
@@ -40,6 +43,7 @@ builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
+app.UseMiddleware<AuditLoggingMiddleware>();
 app.UseMiddleware<ResponseMiddleware>();
 
 // Configure the HTTP request pipeline.
