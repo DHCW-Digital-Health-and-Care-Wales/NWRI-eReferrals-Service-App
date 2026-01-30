@@ -227,9 +227,10 @@ public class FhirBundleProfileValidatorTests
 
             using var cts = new CancellationTokenSource();
             await cts.CancelAsync();
+            var cancelledToken = cts.Token;
 
             // Act
-            var action = async () => await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message }, cts.Token);
+            var action = async () => await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message }, cancelledToken);
 
             // Assert
             await action.Should().ThrowAsync<OperationCanceledException>();

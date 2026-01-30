@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Extensions.Logger;
@@ -11,7 +10,6 @@ namespace NWRI.eReferralsService.API.Services;
 /// Background service that initializes and warms up the FHIR Bundle Profile Validator during startup.
 /// This runs BEFORE the application starts accepting requests.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public class FhirBundleProfileValidatorWarmupService : IHostedService
 {
     private readonly ILogger<FhirBundleProfileValidatorWarmupService> _logger;
