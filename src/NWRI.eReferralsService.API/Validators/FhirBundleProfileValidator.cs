@@ -14,6 +14,7 @@ namespace NWRI.eReferralsService.API.Validators
 {
     public class FhirBundleProfileValidator : IFhirBundleProfileValidator, IDisposable
     {
+        private const string WarmupExampleFilePath = "Swagger/Examples/process-message-payload-and-response.json";
         private const string FhirPackagesDirectory = "FhirPackages";
 
         private readonly FhirBundleProfileValidationConfig _config;
@@ -148,7 +149,7 @@ namespace NWRI.eReferralsService.API.Validators
 
         private async Task PerformWarmupAsync(CancellationToken cancellationToken)
         {
-            var exampleFilePath = Path.Combine(_hostEnvironment.ContentRootPath, "Swagger", "Examples", "process-message-payload-and-response.json");
+            var exampleFilePath = Path.Combine(_hostEnvironment.ContentRootPath, WarmupExampleFilePath);
 
             if (!File.Exists(exampleFilePath))
             {
