@@ -56,7 +56,7 @@ public class ReferralService : IReferralService
         _eventLogger = eventLogger;
     }
 
-    public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody)
+    public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
     {
         var processingStopwatch = Stopwatch.StartNew();
 
@@ -73,12 +73,14 @@ public class ReferralService : IReferralService
                 requestBody,
                 bundle,
                 processingStopwatch,
-                headersModel),
+                headersModel,
+                cancellationToken),
             ReferralWorkflowAction.Cancel => await CancelReferralAsync(
                 requestBody,
                 bundle,
                 processingStopwatch,
-                headersModel),
+                headersModel,
+                cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
     }
@@ -157,9 +159,9 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.HeadersValidated());
     }
 
-    private void ValidateFhirProfile(Bundle bundle)
+    private async Task ValidateFhirProfileAsync(Bundle bundle, CancellationToken cancellationToken)
     {
-        var validationOutput = _fhirBundleProfileValidator.Validate(bundle);
+        var validationOutput = await _fhirBundleProfileValidator.ValidateAsync(bundle, cancellationToken);
         if (!validationOutput.IsSuccessful)
         {
             throw new FhirProfileValidationException(validationOutput.Errors!);
@@ -167,12 +169,12 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.FhirSchemaValidated());
     }
 
-    private async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator)
+    private async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator, CancellationToken cancellationToken)
        where TModel : IBundleModel<TModel>
     {
         var bundleModel = TModel.FromBundle(bundle);
 
-        var bundleValidationResult = await validator.ValidateAsync(bundleModel);
+        var bundleValidationResult = await validator.ValidateAsync(bundleModel, cancellationToken);
         if (!bundleValidationResult.IsValid)
         {
             throw new BundleValidationException(bundleValidationResult.Errors);
@@ -198,14 +200,15 @@ public class ReferralService : IReferralService
         string requestBody,
         Bundle bundle,
         Stopwatch processingStopwatch,
-        HeadersModel headersModel)
+        HeadersModel headersModel,
+        CancellationToken cancellationToken)
     {
-        ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle, _createBundleValidator);
+        await ValidateFhirProfileAsync(bundle, cancellationToken);
+        await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
 
         var callToPasStopwatch = Stopwatch.StartNew();
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         callToPasStopwatch.Stop();
         processingStopwatch.Stop();
@@ -224,7 +227,7 @@ public class ReferralService : IReferralService
                 WpasReferralId: null,
                 ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
@@ -234,14 +237,15 @@ public class ReferralService : IReferralService
         string requestBody,
         Bundle bundle,
         Stopwatch processingStopwatch,
-        HeadersModel headersModel)
+        HeadersModel headersModel,
+        CancellationToken cancellationToken)
     {
-        ValidateFhirProfile(bundle);
-        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator);
+        await ValidateFhirProfileAsync(bundle, cancellationToken);
+        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator, cancellationToken);
 
         var callToPasStopwatch = Stopwatch.StartNew();
         using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         callToPasStopwatch.Stop();
         processingStopwatch.Stop();
@@ -260,7 +264,7 @@ public class ReferralService : IReferralService
                 WpasReferralId: null,
                 ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

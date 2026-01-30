@@ -20,14 +20,14 @@ public class ReferralsController : ControllerBase
 
     [HttpPost("/$process-message")]
     [SwaggerProcessMessageRequest]
-    public async Task<IActionResult> ProcessMessage()
+    public async Task<IActionResult> ProcessMessage(CancellationToken cancellationToken)
     {
         _logger.CalledMethod(nameof(ProcessMessage));
 
         using var reader = new StreamReader(HttpContext.Request.Body);
-        var body = await reader.ReadToEndAsync();
+        var body = await reader.ReadToEndAsync(cancellationToken);
 
-        var outputBundleJson = await _referralService.ProcessMessageAsync(HttpContext.Request.Headers, body);
+        var outputBundleJson = await _referralService.ProcessMessageAsync(HttpContext.Request.Headers, body, cancellationToken);
 
         return new ContentResult
         {
