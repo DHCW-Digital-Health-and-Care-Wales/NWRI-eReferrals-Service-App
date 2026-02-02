@@ -104,7 +104,7 @@ public class ResponseMiddleware
             case ProxyNotImplementedException proxyNotImplementedException:
                 _logger.ProxyNotImplemented(proxyNotImplementedException);
 
-                statusCode = proxyNotImplementedException.StatusCode;
+                statusCode = HttpStatusCode.NotImplemented;
                 body = OperationOutcomeCreator.CreateOperationOutcome(proxyNotImplementedException);
                 break;
 

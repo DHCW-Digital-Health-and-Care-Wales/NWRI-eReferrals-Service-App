@@ -348,8 +348,7 @@ public class ResponseMiddlewareTests
     public async Task ShouldHandleProxyNotImplementedException()
     {
         // Arrange
-        var message = "BaRS did not recognize the request. This request has not been implemented within the Api.";
-        var exception = new ProxyNotImplementedException(message);
+        var exception = new ProxyNotImplementedException();
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();
@@ -379,7 +378,6 @@ public class ResponseMiddlewareTests
         Action parse = () => JsonDocument.Parse(raw);
         parse.Should().NotThrow(raw);
 
-
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(
             raw,
             new JsonSerializerOptions().ForFhirExtended())!;
@@ -389,13 +387,9 @@ public class ResponseMiddlewareTests
         operationOutcome.Issue.Should().AllSatisfy(issue =>
         {
             issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
-
             issue.Code.Should().BeOneOf(OperationOutcome.IssueType.Invalid, OperationOutcome.IssueType.NotSupported);
-
-            // BaRS error code should be in details.coding
             issue.Details.Should().NotBeNull();
             issue.Details.Coding.Should().NotBeNullOrEmpty();
-
             issue.Details.Coding.Should().Contain(c =>
                 c.System == "https://fhir.nhs.uk/CodeSystem/http-error-codes" &&
                 c.Code == "PROXY_NOT_IMPLEMENTED");

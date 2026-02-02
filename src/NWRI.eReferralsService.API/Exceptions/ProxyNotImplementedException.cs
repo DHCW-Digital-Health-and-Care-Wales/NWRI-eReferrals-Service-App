@@ -1,18 +1,15 @@
-using System.Net;
 using NWRI.eReferralsService.API.Errors;
 
 namespace NWRI.eReferralsService.API.Exceptions;
 
-public class ProxyNotImplementedException : BaseFhirException
+public sealed class ProxyNotImplementedException : BaseFhirException
 {
-    public override IEnumerable<BaseFhirHttpError> Errors { get; }
-    public HttpStatusCode StatusCode { get; }
-    public override string Message { get; }
+    public override IEnumerable<BaseFhirHttpError> Errors { get; } =
+        [new ProxyNotImplementedError()];
 
-    public ProxyNotImplementedException(string message)
+    public override string Message => ProxyNotImplementedError.Message;
+
+    public ProxyNotImplementedException()
     {
-        StatusCode = HttpStatusCode.NotImplemented;
-        Message = message;
-        Errors = [new ProxyNotImplementedError(message)];
     }
 }

@@ -5,14 +5,13 @@ namespace NWRI.eReferralsService.API.Errors;
 
 public sealed class ProxyNotImplementedError : BaseFhirHttpError
 {
-    private readonly string _errorMessage;
-
-    public ProxyNotImplementedError(string errorMessage)
-    {
-        _errorMessage = errorMessage;
-    }
+    internal const string Message =
+        "BaRS did not recognize the request. This request has not been implemented within the API.";
 
     public override string Code => FhirHttpErrorCodes.ProxyNotImplemented;
-    public override string DiagnosticsMessage => $"Not Implemented error: {_errorMessage}";
-    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.NotSupported;
+
+    public override string DiagnosticsMessage => $"";
+
+    public override OperationOutcome.IssueType IssueType =>
+        OperationOutcome.IssueType.NotSupported;
 }
