@@ -14,7 +14,7 @@ public class SwaggerOperationFilter : IOperationFilter
     {
         HandleProcessMessage(operation, context);
         HandleGetReferral(operation, context);
-        HandleGetServiceRequestByPatientIdentifier(operation, context);
+        HandleGetReferrals(operation, context);
     }
 
     private static void HandleProcessMessage(OpenApiOperation operation, OperationFilterContext context)
@@ -61,31 +61,18 @@ public class SwaggerOperationFilter : IOperationFilter
         AddGetReferralResponses(operation);
     }
 
-    private static void HandleGetServiceRequestByPatientIdentifier(OpenApiOperation operation, OperationFilterContext context)
+    private static void HandleGetReferrals(OpenApiOperation operation, OperationFilterContext context)
     {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetServiceRequestAttribute>();
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>();
         if (attr is null)
         {
             return;
         }
 
-        operation.Parameters = [];
-
-        // Query param: patient.identifier
-        operation.Parameters.Add(new OpenApiParameter
-        {
-            In = ParameterLocation.Query,
-            Name = "patient.identifier",
-            Required = false,
-            Description = "FHIR token search parameter in the form system|value. Example: https://fhir.nhs.uk/Id/nhs-number|3478526985",
-            Schema = new OpenApiSchema { Type = "string" },
-            Example = new OpenApiString("https://fhir.nhs.uk/Id/nhs-number|3478526985")
-        });
-
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
-        AddGetServiceRequestByPatientIdentifierResponses(operation);
+        AddGetReferralsResponses(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
@@ -299,42 +286,10 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 
-    private static void AddGetServiceRequestByPatientIdentifierResponses(OpenApiOperation operation)
+    private static void AddGetReferralsResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {
-            {
-                "501", new OpenApiResponse
-                {
-                    Description = "Not Implemented",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "400", new OpenApiResponse
-                {
-                    Description = "Bad Request",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/get-referral-bad-request.json"))
-                            }
-                        }
-                    }
-                }
-            },
             {
                 "429", new OpenApiResponse
                 {
@@ -368,16 +323,16 @@ public class SwaggerOperationFilter : IOperationFilter
                 }
             },
             {
-                "503", new OpenApiResponse
+                "501", new OpenApiResponse
                 {
-                    Description = "Service Unavailable",
+                    Description = "Not Implemented",
                     Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
                             RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
+                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
                             }
                         }
                     }

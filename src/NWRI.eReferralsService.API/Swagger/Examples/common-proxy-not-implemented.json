@@ -16,9 +16,9 @@
             "code": "PROXY_NOT_IMPLEMENTED"
           }
         ],
-        "text": "BaRS did not recognize the request. This request has not been implemented within the Api."
+        "text": "501: BaRS did not recognize the request. This request has not been implemented within the Api."
       },
-      "diagnostics": "Not Implemented error: BaRS did not recognize the request. This request has not been implemented within the Api."
+      "diagnostics": ""
     }
   ]
 }
