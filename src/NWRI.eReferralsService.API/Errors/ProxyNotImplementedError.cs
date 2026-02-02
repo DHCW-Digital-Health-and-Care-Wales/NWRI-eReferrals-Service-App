@@ -10,7 +10,7 @@ public sealed class ProxyNotImplementedError : BaseFhirHttpError
 
     public override string Code => FhirHttpErrorCodes.ProxyNotImplemented;
 
-    public override string DiagnosticsMessage => $"";
+    public override string DiagnosticsMessage => string.Empty;
 
     public override OperationOutcome.IssueType IssueType =>
         OperationOutcome.IssueType.NotSupported;

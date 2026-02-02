@@ -1,5 +1,6 @@
 {
   "resourceType": "OperationOutcome",
+  "id": "6f3c2a4b-8e61-4c9a-b7f2-5a9d0d8c4e17",
   "meta": {
     "profile": [
       "https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome"
