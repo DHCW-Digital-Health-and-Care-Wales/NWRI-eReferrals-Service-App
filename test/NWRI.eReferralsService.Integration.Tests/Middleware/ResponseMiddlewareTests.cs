@@ -387,7 +387,8 @@ public class ResponseMiddlewareTests
         operationOutcome.Issue.Should().AllSatisfy(issue =>
         {
             issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
-            issue.Code.Should().BeOneOf(OperationOutcome.IssueType.Invalid, OperationOutcome.IssueType.NotSupported);
+            issue.Code.Should().Be(OperationOutcome.IssueType.NotSupported);
+
             issue.Details.Should().NotBeNull();
             issue.Details.Coding.Should().NotBeNullOrEmpty();
             issue.Details.Coding.Should().Contain(c =>
