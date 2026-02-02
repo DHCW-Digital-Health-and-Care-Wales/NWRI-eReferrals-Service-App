@@ -5,6 +5,7 @@ using NWRI.eReferralsService.API.Configuration.OptionValidators;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
+using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
 using NWRI.eReferralsService.API.Validators;
 
@@ -19,7 +20,10 @@ builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSe
 builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResilienceConfigOptions>();
 
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
+builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
+
+builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -32,7 +36,7 @@ builder.Services.AddSingleton(new JsonSerializerOptions().ForFhirExtended());
 builder.Services.AddHttpClients();
 builder.Services.AddValidators();
 
-builder.Services.AddHealthChecks();
+builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
@@ -48,4 +52,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapCustomHealthChecks();
+
 app.Run();

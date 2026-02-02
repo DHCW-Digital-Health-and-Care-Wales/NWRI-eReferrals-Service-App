@@ -110,7 +110,7 @@ public class SwaggerOperationFilter : IOperationFilter
             new OpenApiMediaType
             {
                 Example = new OpenApiString(
-                    File.ReadAllText("Swagger/Examples/process-message-payload&response.json"))
+                    File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
             });
     }
 
@@ -228,7 +228,7 @@ public class SwaggerOperationFilter : IOperationFilter
                             RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/process-message-payload&response.json")),
+                                    File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json")),
                             }
                         }
                     }

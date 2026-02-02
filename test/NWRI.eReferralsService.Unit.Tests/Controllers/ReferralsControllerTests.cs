@@ -36,13 +36,13 @@ public class ReferralsControllerTests
         SetRequestDetails(headers, body);
 
         var headerArgs = new List<IHeaderDictionary>();
-        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(Capture.In(headerArgs), It.IsAny<string>()));
+        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(Capture.In(headerArgs), It.IsAny<string>(), It.IsAny<CancellationToken>()));
         //Act
-        await _sut.ProcessMessage();
+        await _sut.ProcessMessage(CancellationToken.None);
 
         //Assert
         headerArgs[0].Should().ContainKeys(headers.Keys);
-        _fixture.Mock<IReferralService>().Verify(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), body));
+        _fixture.Mock<IReferralService>().Verify(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), body, It.IsAny<CancellationToken>()));
     }
 
     [Fact]
@@ -55,11 +55,11 @@ public class ReferralsControllerTests
 
         var outputBundleJson = _fixture.Create<string>();
 
-        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>()))
+        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(outputBundleJson);
 
         //Act
-        var result = await _sut.ProcessMessage();
+        var result = await _sut.ProcessMessage(CancellationToken.None);
 
         //Assert
         var contentResult = result.Should().BeOfType<ContentResult>().Subject;

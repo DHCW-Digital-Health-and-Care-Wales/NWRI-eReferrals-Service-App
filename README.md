@@ -77,21 +77,83 @@ To run the project locally, follow these steps:
 2. Don't forget `az login --tenant <YOUR_TENNANT>`.
 3. Setup local configuration according to `Required configuration for local development` section.
 4. Rebuild and run the project.
-5. Open your web browser and navigate to `https://localhost:xxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
+5. The service will warm up the FHIR validator during startup (check logs for confirmation).
+6. Open your web browser and navigate to `https://localhost:5069/swagger/index.html` to access the SwaggerUI with API endpoints.
+
+## Error Handling and Middleware
+The service uses `ResponseMiddleware` to handle all exceptions and return properly formatted FHIR `OperationOutcome` responses.
+
+**Error response format**: All errors return a FHIR `OperationOutcome` JSON object with detailed diagnostic information.
+
+**Exception handling**:
+- **Header validation errors** → `400 Bad Request` with validation details
+- **Bundle deserialization errors** (invalid JSON) → `400 Bad Request` 
+- **Bundle validation errors** (invalid structure/workflow) → `400 Bad Request`
+- **FHIR profile validation errors** → `400 Bad Request` with specific profile violations
+- **Request parameter validation errors** (e.g., invalid GUID) → `400 Bad Request`
+- **External API errors** (PAS API returns 500) → `503 Service Unavailable`
+- **Network errors** (PAS API unreachable) → `503 Service Unavailable`
+- **Timeout errors** (after all retries) → `503 Service Unavailable`
+- **Unknown errors** → `500 Internal Server Error`
+
+**Response headers**: Every response includes:
+- `X-Correlation-Id` - for request tracing across systems
+- Standard content type headers
+
+## Health Checks
+The service provides three health check endpoints for Kubernetes liveness and readiness probes:
+
+### Endpoints
+- **`/health/live`** - Liveness probe - checks if the application is running
+  - Returns `200 OK` once the application starts
+  - Returns `503 Service Unavailable` when the validator is still warming up
+
+- **`/health/ready`** - Readiness probe - checks if the FHIR Bundle Profile Validator is initialized and ready
+  - Always returns `200 OK` when the validator is ready
+
+- **`/health`** - General health check - combines all health checks
+  - Returns `200 OK` when all checks pass
+  - Returns `503 Service Unavailable` if any check fails
+
+### Startup Behavior
+1. **FHIR Bundle Profile Validator Warmup**: 
+   - The service initializes the FHIR Bundle Profile Validator during startup via `FhirBundleProfileValidatorWarmupService`
+   - This process loads FHIR packages and profiles, which may take several seconds
+   - During warmup, `/health/live` will NOT return any status and the application will not respond to requests
+   - Once complete, the service logs: `"[Startup] FHIR-Bundle-Profile-Validator warmup complete. Application is ready to accept requests"`
+   - **Note**: If `FhirBundleProfileValidation.Enabled` is set to `false` in configuration, the warmup is skipped and a warning is logged
+
+## FHIR Bundle Profile Validation
+The service validates incoming FHIR Bundles against UK Core and BARS profiles. Configuration in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
+```json
+"FhirBundleProfileValidation": {
+  "Enabled": true,                    // Enable/disable FHIR profile validation
+  "MaxConcurrentValidations": 4,      // Maximum number of concurrent validations
+  "ValidationTimeoutSeconds": 10      // Timeout for a single validation operation
+}
+```
+
+**Note**: When validation is enabled, the service will reject requests with `400 Bad Request` if the FHIR Bundle does not conform to the required profiles.
 
 ## Resilience
-All HTTP requests using resilience policy, which can be configured in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
-```
- "Resilience": {
-    "TotalTimeoutSeconds": 30, // Totat execution timeout
-    "AttemptTimeoutSeconds": 10, // Timeout of a single request attempt
-    "Retry": {
-      "IsExponentialDelay": true, // Is delay between retries increases exponentialy?
-      "DelaySeconds": 2, // Delay between retries (first delay, when IsExponentialDelay is true, as next delay will be longer)
-      "MaxRetries": 3 // Maximum number of retries
-    }
+All HTTP requests to external services (PAS Referrals API) use a resilience policy with automatic retry and timeout. Configuration in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
+```json
+"Resilience": {
+  "TotalTimeoutSeconds": 30,         // Total execution timeout (includes all retries)
+  "AttemptTimeoutSeconds": 10,       // Timeout of a single request attempt
+  "Retry": {
+    "IsExponentialDelay": true,      // Is delay between retries exponential?
+    "DelaySeconds": 2,               // Initial delay between retries (increases exponentially)
+    "MaxRetries": 3                  // Maximum number of retry attempts
   }
+}
 ```
+
+**Retry behavior**:
+- Retries are triggered on: `408 Request Timeout`, `429 Too Many Requests`, `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, `504 Gateway Timeout`, or network exceptions
+- With exponential delay and `DelaySeconds: 2`, the delays will be approximately: 2s, 4s, 8s
+- Total time for all attempts: up to `TotalTimeoutSeconds` (30s by default)
+- After all retries exhausted, the service returns `503 Service Unavailable` to the client
 
 ## API Endpoints
 Example payloads, responses and errors can be found in the `Swagger/Examples` folder. 
@@ -107,7 +169,7 @@ Depending on the message content, the API will either:
 
 #### Request details
 Request body must be a valid FHIR `Bundle` JSON object.
-See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload&response.json).
+See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload-response.json).
 
 #### Workflow determination
 The API determines the workflow action by inspecting:
