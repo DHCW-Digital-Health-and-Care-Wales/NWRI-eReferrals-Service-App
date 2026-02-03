@@ -69,46 +69,20 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public async Task GetReferralShouldCallGetReferralAsync()
+    public async Task  GetReferralShouldThrowProxyNotImplementedException()
     {
-        //Arrange
+        // Arrange
         var id = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
         SetRequestDetails(headers);
 
-        var headerArgs = new List<IHeaderDictionary>();
-        _fixture.Mock<IReferralService>().Setup(x => x.GetReferralAsync(Capture.In(headerArgs), It.IsAny<string>()));
-        //Act
-        await _sut.GetReferral(id);
+        // Act
+        Func<Task> act = () => _sut.GetReferral(id);
 
-        //Assert
-        headerArgs[0].Should().ContainKeys(headers.Keys);
-        _fixture.Mock<IReferralService>().Verify(x => x.GetReferralAsync(It.IsAny<IHeaderDictionary>(), id));
-    }
-
-    [Fact]
-    public async Task GetReferralShouldReturn200()
-    {
-        //Arrange
-        var id = _fixture.Create<string>();
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        SetRequestDetails(headers);
-
-        var outputBundleJson = _fixture.Create<string>();
-
-        _fixture.Mock<IReferralService>().Setup(x => x.GetReferralAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>()))
-            .ReturnsAsync(outputBundleJson);
-
-        //Act
-        var result = await _sut.GetReferral(id);
-
-        //Assert
-        var contentResult = result.Should().BeOfType<ContentResult>().Subject;
-        contentResult.StatusCode.Should().Be(200);
-        contentResult.Content.Should().Be(outputBundleJson);
-        contentResult.ContentType.Should().Be(FhirConstants.FhirMediaType);
+        // Assert
+        var ex = await act.Should().ThrowAsync<ProxyNotImplementedException>();
+        ex.Which.Message.Should().Contain("not been implemented");
     }
 
     [Fact]
