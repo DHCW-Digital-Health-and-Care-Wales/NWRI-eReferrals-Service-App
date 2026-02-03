@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
             .GetValue<string>(nameof(ApplicationInsightsConfig.ConnectionString));
 
         services.AddApplicationInsightsTelemetry(options => options.ConnectionString = appInsightsConnectionString);
-        services.AddSingleton<ITelemetryInitializer, TelemetryInitializer>();
+        services.AddSingleton<ITelemetryInitializer, EnrichLoggerContext>();
         services.Configure<TelemetryConfiguration>(config =>
         {
             if (isDevelopmentEnvironment)

@@ -16,12 +16,6 @@ public static class EventCatalogue
         int StatusCode,
         long LatencyMs) : IAuditEvent;
 
-    [Description("AUTH_CLIENT_VERIFIED")]
-    public record AuthClientVerified(
-        string? ClientId,
-        string? Issuer,
-        string? CertificateThumbprint) : IAuditEvent;
-
     [Description("VAL_PAYLOAD_STARTED")]
     public record PayloadValidationStarted : IAuditEvent;
 

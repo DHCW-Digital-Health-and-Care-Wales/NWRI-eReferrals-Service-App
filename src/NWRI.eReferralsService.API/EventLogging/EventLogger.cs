@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Reflection;
 using Microsoft.ApplicationInsights;
@@ -14,11 +15,13 @@ public sealed class EventLogger : IEventLogger
 
     private const string EventTypeKey = "EventType";
     private const string LoggerTypeKey = "LoggerType";
-    private const string LoggerType = "UserActivityAuditLog";
-    private const string TimestampKey = "EventTimestampUtc";
+    private const string LoggerType = "AuditLog";
 
     private const string ExceptionTypeKey = "ExceptionType";
     private const string ExceptionMessageKey = "ExceptionMessage";
+
+    private readonly record struct EventTypeMetadata(string EventName, PropertyInfo[] Properties);
+    private static readonly ConcurrentDictionary<Type, EventTypeMetadata> EventTypeMetadataCache = new();
 
     public EventLogger(TelemetryClient telemetryClient)
     {
@@ -27,16 +30,16 @@ public sealed class EventLogger : IEventLogger
 
     public void Audit(IAuditEvent auditEvent)
     {
-        var eventName = GetEventName(auditEvent);
-        var properties = GenerateEventContext(auditEvent, AuditType);
+        var metadata = GetOrCreateMetadata(auditEvent.GetType());
+        var properties = BuildEventProperties(auditEvent, metadata, AuditType);
 
-        _telemetryClient.TrackEvent(eventName, properties);
+        _telemetryClient.TrackEvent(metadata.EventName, properties);
     }
 
     public void LogError(IErrorEvent errorEvent, Exception? exception)
     {
-        var eventName = GetEventName(errorEvent);
-        var properties = GenerateEventContext(errorEvent, ErrorType);
+        var metadata = GetOrCreateMetadata(errorEvent.GetType());
+        var properties = BuildEventProperties(errorEvent, metadata, ErrorType);
 
         if (exception != null)
         {
@@ -44,37 +47,54 @@ public sealed class EventLogger : IEventLogger
             properties[ExceptionMessageKey] = exception.Message;
         }
 
-        _telemetryClient.TrackEvent(eventName, properties);
+        _telemetryClient.TrackEvent(metadata.EventName, properties);
     }
 
-    private static string GetEventName(IEvent sourceEvent)
+    private static Dictionary<string, string> BuildEventProperties(
+        IEvent sourceEvent,
+        EventTypeMetadata metadata,
+        string eventType)
     {
-        var type = sourceEvent.GetType();
-        var attribute = type.GetCustomAttribute<DescriptionAttribute>();
-        return attribute?.Description ?? type.Name;
-    }
-
-    private static Dictionary<string, string> GenerateEventContext(IEvent sourceEvent, string eventType)
-    {
-        var properties = GetFieldsAsMap(sourceEvent);
+        var properties = ExtractEventProperties(sourceEvent, metadata);
 
         properties[LoggerTypeKey] = LoggerType;
         properties[EventTypeKey] = eventType;
-        properties[TimestampKey] = DateTimeOffset.UtcNow.ToString("O");
 
         return properties;
     }
 
-    private static Dictionary<string, string> GetFieldsAsMap(IEvent sourceEvent)
+    private static Dictionary<string, string> ExtractEventProperties(
+        IEvent sourceEvent,
+        EventTypeMetadata metadata)
     {
-        return sourceEvent.GetType()
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .ToDictionary(prop => prop.Name, prop => GetValue(sourceEvent, prop));
+        var properties = new Dictionary<string, string>(metadata.Properties.Length);
+        foreach (var property in metadata.Properties)
+        {
+            properties[property.Name] = GetPropertyValue(sourceEvent, property);
+        }
+
+        return properties;
     }
 
-    private static string GetValue(IEvent sourceEvent, PropertyInfo property)
+    private static EventTypeMetadata GetOrCreateMetadata(Type type)
+    {
+        return EventTypeMetadataCache.GetOrAdd(type, static eventType =>
+        {
+            var descriptionAttribute = eventType.GetCustomAttribute<DescriptionAttribute>();
+            var eventName = descriptionAttribute?.Description ?? eventType.Name;
+
+            var properties = eventType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetIndexParameters().Length == 0)
+                .ToArray();
+
+            return new EventTypeMetadata(eventName, properties);
+        });
+    }
+
+    private static string GetPropertyValue(IEvent sourceEvent, PropertyInfo property)
     {
         var value = property.GetValue(sourceEvent);
-        return value?.ToString() ?? "N/A";
+        return value?.ToString() ?? string.Empty;
     }
 }
