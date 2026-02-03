@@ -9,12 +9,12 @@ using NWRI.eReferralsService.API.EventLogging;
 
 namespace NWRI.eReferralsService.Unit.Tests.EventLogging;
 
-public class TelemetryInitializerTests
+public class EnrichLoggerContextTests
 {
     private readonly ITelemetry _telemetry;
     private readonly TelemetryContext _telemetryContext;
 
-    public TelemetryInitializerTests()
+    public EnrichLoggerContextTests()
     {
         _telemetryContext = new TelemetryContext();
 
@@ -31,7 +31,7 @@ public class TelemetryInitializerTests
         context.Request.Headers[RequestHeaderKeys.CorrelationId] = expectedCorrelationId;
 
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
-        var sut = new TelemetryInitializer(httpContextAccessor);
+        var sut = new EnrichLoggerContext(httpContextAccessor);
 
         sut.Initialize(_telemetry);
 
@@ -43,24 +43,22 @@ public class TelemetryInitializerTests
     {
         var context = new DefaultHttpContext();
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
-        var sut = new TelemetryInitializer(httpContextAccessor);
+        var sut = new EnrichLoggerContext(httpContextAccessor);
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
-        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
     }
 
     [Fact]
     public void InitializeShouldSetCorrelationIdGlobalPropertyToEmptyWhenHttpContextIsNull()
     {
         var httpContextAccessor = new HttpContextAccessor { HttpContext = null };
-        var sut = new TelemetryInitializer(httpContextAccessor);
+        var sut = new EnrichLoggerContext(httpContextAccessor);
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
-        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
     }
 
     [Fact]
@@ -70,7 +68,7 @@ public class TelemetryInitializerTests
         context.Request.Headers[RequestHeaderKeys.CorrelationId] = new StringValues(["corr-1", "corr-2"]);
 
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
-        var sut = new TelemetryInitializer(httpContextAccessor);
+        var sut = new EnrichLoggerContext(httpContextAccessor);
 
         sut.Initialize(_telemetry);
 

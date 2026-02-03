@@ -40,17 +40,17 @@ public class AuditLoggingMiddlewareTests
         await middleware.InvokeAsync(context);
 
         // Assert
-        _ = spyLogger.AuditEvents.Should().HaveCount(2);
-        _ = spyLogger.AuditEvents[0].Should().BeOfType<EventCatalogue.RequestReceived>();
-        _ = spyLogger.AuditEvents[1].Should().BeOfType<EventCatalogue.ResponseSent>();
+        spyLogger.AuditEvents.Should().HaveCount(2);
+        spyLogger.AuditEvents[0].Should().BeOfType<EventCatalogue.RequestReceived>();
+        spyLogger.AuditEvents[1].Should().BeOfType<EventCatalogue.ResponseSent>();
 
         var req = (EventCatalogue.RequestReceived)spyLogger.AuditEvents[0];
-        _ = req.Method.Should().Be(HttpMethods.Post);
-        _ = req.Path.Should().Be("/$process-message");
-        _ = req.RequestSize.Should().Be(123);
+        req.Method.Should().Be(HttpMethods.Post);
+        req.Path.Should().Be("/$process-message");
+        req.RequestSize.Should().Be(123);
 
         var resp = (EventCatalogue.ResponseSent)spyLogger.AuditEvents[1];
-        _ = resp.StatusCode.Should().Be(StatusCodes.Status200OK);
-        _ = resp.LatencyMs.Should().BeGreaterOrEqualTo(0);
+        resp.StatusCode.Should().Be(StatusCodes.Status200OK);
+        resp.LatencyMs.Should().BeGreaterOrEqualTo(0);
     }
 }

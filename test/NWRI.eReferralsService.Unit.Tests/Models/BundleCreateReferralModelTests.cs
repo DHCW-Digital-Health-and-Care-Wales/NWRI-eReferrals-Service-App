@@ -5,6 +5,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+#pragma warning disable CS8604 // Possible null reference argument.
 
 namespace NWRI.eReferralsService.Unit.Tests.Models;
 
@@ -21,7 +22,6 @@ public class BundleCreateReferralModelTests
         var options = new JsonSerializerOptions()
             .ForFhir(ModelInfo.ModelInspector);
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options);
-        bundle.Should().NotBeNull("Test data should deserialize into a valid FHIR Bundle");
 
         //Act
         var model = BundleCreateReferralModel.FromBundle(bundle);

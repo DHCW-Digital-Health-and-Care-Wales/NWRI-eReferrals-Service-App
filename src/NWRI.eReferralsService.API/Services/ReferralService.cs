@@ -28,6 +28,8 @@ public class ReferralService : IReferralService
         Cancel
     }
 
+    private sealed record PasCallSuccessResult(string Content, long ExecutionTimeMs);
+
     private readonly HttpClient _httpClient;
     private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
     private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
@@ -36,6 +38,7 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly PasReferralsApiConfig _pasReferralsApiConfig;
     private readonly IEventLogger _eventLogger;
+    private readonly IHeadersDecoder _headersDecoder;
 
     public ReferralService(HttpClient httpClient,
         IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
@@ -44,7 +47,8 @@ public class ReferralService : IReferralService
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions,
-        IEventLogger eventLogger)
+        IEventLogger eventLogger,
+        IHeadersDecoder headersDecoder)
     {
         _httpClient = httpClient;
         _createBundleValidator = createBundleValidator;
@@ -54,6 +58,7 @@ public class ReferralService : IReferralService
         _jsonSerializerOptions = jsonSerializerOptions;
         _pasReferralsApiConfig = pasReferralsApiOptions.Value;
         _eventLogger = eventLogger;
+        _headersDecoder = headersDecoder;
     }
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
@@ -67,22 +72,31 @@ public class ReferralService : IReferralService
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
 
         var workflowAction = DetermineReferralWorkflowAction(bundle);
-        return workflowAction switch
+        var result = workflowAction switch
         {
-            ReferralWorkflowAction.Create => await CreateReferralAsync(
-                requestBody,
-                bundle,
-                processingStopwatch,
-                headersModel,
-                cancellationToken),
-            ReferralWorkflowAction.Cancel => await CancelReferralAsync(
-                requestBody,
-                bundle,
-                processingStopwatch,
-                headersModel,
-                cancellationToken),
+            ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle, cancellationToken),
+            ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
+
+        processingStopwatch.Stop();
+
+        // TODO: Extract WPAS referral ID from the response
+        _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
+            ExecutionTimeMs: result.ExecutionTimeMs,
+            WpasReferralId: null));
+
+        var sourceSystem = _headersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
+        var userRole = _headersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
+
+        // TODO: Extract WPAS referral ID from the response
+        _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(
+            SourceSystem: sourceSystem,
+            UserRole: userRole,
+            WpasReferralId: null,
+            ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
+
+        return result.Content;
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
@@ -196,11 +210,9 @@ public class ReferralService : IReferralService
         return serviceRequest?.Status;
     }
 
-    private async Task<string> CreateReferralAsync(
+    private async Task<PasCallSuccessResult> CreateReferralAsync(
         string requestBody,
         Bundle bundle,
-        Stopwatch processingStopwatch,
-        HeadersModel headersModel,
         CancellationToken cancellationToken)
     {
         await ValidateFhirProfileAsync(bundle, cancellationToken);
@@ -211,33 +223,19 @@ public class ReferralService : IReferralService
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         callToPasStopwatch.Stop();
-        processingStopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
-            // TODO: Extract WPAS referral ID from the response
-            _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
-                ExecutionTimeMs: callToPasStopwatch.ElapsedMilliseconds,
-                WpasReferralId: null));
-
-            // TODO: Extract WPAS referral ID from the response
-            _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(
-                SourceSystem: headersModel.GetDecodedSourceSystem(),
-                UserRole: headersModel.GetDecodedUserRole(),
-                WpasReferralId: null,
-                ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
-
-            return await response.Content.ReadAsStringAsync(cancellationToken);
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            return new PasCallSuccessResult(content, callToPasStopwatch.ElapsedMilliseconds);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
-    private async Task<string> CancelReferralAsync(
+    private async Task<PasCallSuccessResult> CancelReferralAsync(
         string requestBody,
         Bundle bundle,
-        Stopwatch processingStopwatch,
-        HeadersModel headersModel,
         CancellationToken cancellationToken)
     {
         await ValidateFhirProfileAsync(bundle, cancellationToken);
@@ -248,23 +246,11 @@ public class ReferralService : IReferralService
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
         callToPasStopwatch.Stop();
-        processingStopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
-            // TODO: Extract WPAS referral ID from the response
-            _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
-                ExecutionTimeMs: callToPasStopwatch.ElapsedMilliseconds,
-                WpasReferralId: null));
-
-            // TODO: Extract WPAS referral ID from the response
-            _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(
-                SourceSystem: headersModel.GetDecodedSourceSystem(),
-                UserRole: headersModel.GetDecodedUserRole(),
-                WpasReferralId: null,
-                ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
-
-            return await response.Content.ReadAsStringAsync(cancellationToken);
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            return new PasCallSuccessResult(content, callToPasStopwatch.ElapsedMilliseconds);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

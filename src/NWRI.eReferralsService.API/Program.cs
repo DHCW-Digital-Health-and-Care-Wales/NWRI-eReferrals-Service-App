@@ -6,6 +6,7 @@ using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
@@ -25,6 +26,8 @@ builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Co
 builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
+builder.Services.AddSingleton<Base64Decoder>();
+builder.Services.AddSingleton<IHeadersDecoder, HeadersDecoder>();
 
 builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 

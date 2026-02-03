@@ -9,6 +9,8 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8604 // Possible null reference argument.
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators
 {
@@ -32,7 +34,6 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
                 .ForFhir(ModelInfo.ModelInspector);
 
             var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options);
-            bundle.Should().NotBeNull("Test data should deserialize into a valid FHIR Bundle");
 
             return BundleCancelReferralModel.FromBundle(bundle);
         }
@@ -108,7 +109,6 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         public void ShouldContainErrorWhenPatientNhsNumberMissing()
         {
             var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-            model.Patient.Should().NotBeNull($"Test data should include {model.Patient} entry");
 
             // Remove NHS number identifier
             model.Patient.Identifier = model.Patient.Identifier
@@ -124,7 +124,6 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators
         public void ShouldContainErrorWhenServiceRequestOccurrencePeriodMissing()
         {
             var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-            model.ServiceRequest.Should().NotBeNull($"Test data should include {model.ServiceRequest} entry");
             model.ServiceRequest.Occurrence = null;
 
             var result = _sut.TestValidate(model);

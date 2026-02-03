@@ -57,6 +57,14 @@ public class ReferralServiceTests
                 IsSuccessful = true,
                 Errors = new List<string>()
             });
+
+        _fixture.Mock<IHeadersDecoder>()
+            .Setup(x => x.GetDecodedSourceSystem(It.IsAny<string?>()))
+            .Returns(_fixture.Create<string>());
+
+        _fixture.Mock<IHeadersDecoder>()
+            .Setup(x => x.GetDecodedUserRole(It.IsAny<string?>()))
+            .Returns(_fixture.Create<string>());
     }
 
     [Fact]
@@ -667,7 +675,8 @@ public class ReferralServiceTests
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
             _jsonSerializerOptions,
-            _fixture.Mock<IEventLogger>().Object
+            _fixture.Mock<IEventLogger>().Object,
+            _fixture.Mock<IHeadersDecoder>().Object
         );
     }
 

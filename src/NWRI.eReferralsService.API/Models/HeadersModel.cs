@@ -1,7 +1,5 @@
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Utility;
 using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.Helpers;
 
 namespace NWRI.eReferralsService.API.Models;
 
@@ -35,28 +33,5 @@ public class HeadersModel
             //Optional
             RequestingPractitioner = headerDictionary.GetOrDefault(RequestHeaderKeys.RequestingPractitioner),
         };
-    }
-
-    public string? GetDecodedSourceSystem()
-    {
-        if (Base64Decoder.TryDecode<Device>(RequestingSoftware, out var device) && device is not null)
-        {
-            return device.Identifier.FirstOrDefault()?.Value
-                   ?? device.DeviceName.FirstOrDefault()?.Name;
-        }
-
-        return null;
-    }
-
-    public string? GetDecodedUserRole()
-    {
-        if (Base64Decoder.TryDecode<PractitionerRole>(RequestingPractitioner, out var practitionerRole)
-            && practitionerRole is not null)
-        {
-            var coding = practitionerRole.Code.FirstOrDefault()?.Coding.FirstOrDefault();
-            return coding?.Display ?? coding?.Code;
-        }
-
-        return null;
     }
 }
