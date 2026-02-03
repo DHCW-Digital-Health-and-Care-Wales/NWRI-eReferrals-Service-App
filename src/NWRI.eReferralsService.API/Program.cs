@@ -46,7 +46,7 @@ builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
-app.UseMiddleware<AuditLoggingMiddleware>();
+app.UseMiddleware<RequestResponseAuditMiddleware>();
 app.UseMiddleware<ResponseMiddleware>();
 
 // Configure the HTTP request pipeline.

@@ -4,12 +4,12 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 
 namespace NWRI.eReferralsService.API.Middleware
 {
-    public sealed class AuditLoggingMiddleware
+    public sealed class RequestResponseAuditMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IEventLogger _eventLogger;
 
-        public AuditLoggingMiddleware(RequestDelegate next, IEventLogger eventLogger)
+        public RequestResponseAuditMiddleware(RequestDelegate next, IEventLogger eventLogger)
         {
             _next = next;
             _eventLogger = eventLogger;
@@ -17,6 +17,13 @@ namespace NWRI.eReferralsService.API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata.GetMetadata<RequestResponseAuditAttribute>() is null)
+            {
+                await _next(context);
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             _eventLogger.Audit(new EventCatalogue.RequestReceived(
@@ -30,14 +37,14 @@ namespace NWRI.eReferralsService.API.Middleware
             }
             finally
             {
+                _eventLogger.Audit(new EventCatalogue.ResponseSent(
+                    StatusCode: context.Response.StatusCode,
+                    LatencyMs: stopwatch.ElapsedMilliseconds));
+
                 if (context.Response.StatusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
                 {
                     _eventLogger.LogError(new EventCatalogue.AuthFailedError());
                 }
-
-                _eventLogger.Audit(new EventCatalogue.ResponseSent(
-                    StatusCode: context.Response.StatusCode,
-                    LatencyMs: stopwatch.ElapsedMilliseconds));
             }
         }
     }
