@@ -69,20 +69,20 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public void GetServiceRequestShouldThrowProxyNotImplementedException()
+    public async Task  GetReferralShouldThrowProxyNotImplementedException()
     {
         // Arrange
+        var id = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
         SetRequestDetails(headers);
 
         // Act
-        var act = _sut.GetReferrals;
+        Func<Task> act = () => _sut.GetReferral(id);
 
         // Assert
-        var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
-        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
-        ex.Message.Should().Contain("not been implemented");
+        var ex = await act.Should().ThrowAsync<ProxyNotImplementedException>();
+        ex.Which.Message.Should().Contain("not been implemented");
     }
 
     [Fact]
@@ -119,4 +119,5 @@ public class ReferralsControllerTests
         _sut.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         _sut.ControllerContext.HttpContext.Request.ContentLength = body.Length;
     }
+
 }
