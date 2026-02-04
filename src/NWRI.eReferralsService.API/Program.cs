@@ -14,9 +14,9 @@ using NWRI.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//PasReferralsApiConfig
-builder.Services.AddOptions<PasReferralsApiConfig>().Bind(builder.Configuration.GetSection(PasReferralsApiConfig.SectionName));
-builder.Services.AddSingleton<IValidateOptions<PasReferralsApiConfig>, ValidatePasReferralsApiConfigOptions>();
+//WpasApiConfig
+builder.Services.AddOptions<WpasApiConfig>().Bind(builder.Configuration.GetSection(WpasApiConfig.SectionName));
+builder.Services.AddSingleton<IValidateOptions<WpasApiConfig>, ValidateWpasApiConfigOptions>();
 
 //Resilience
 builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSection(ResilienceConfig.SectionName));

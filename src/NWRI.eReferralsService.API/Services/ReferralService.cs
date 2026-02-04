@@ -28,7 +28,7 @@ public class ReferralService : IReferralService
         Cancel
     }
 
-    private sealed record PasCallSuccessResult(string Content, long ExecutionTimeMs);
+    private sealed record WpasCallSuccessResult(string Content, long ExecutionTimeMs);
 
     private readonly HttpClient _httpClient;
     private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
@@ -36,12 +36,12 @@ public class ReferralService : IReferralService
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
-    private readonly PasReferralsApiConfig _pasReferralsApiConfig;
+    private readonly WpasApiConfig _wpasApiConfig;
     private readonly IEventLogger _eventLogger;
     private readonly IHeadersDecoder _headersDecoder;
 
     public ReferralService(HttpClient httpClient,
-        IOptions<PasReferralsApiConfig> pasReferralsApiOptions,
+        IOptions<WpasApiConfig> wpasApiOptions,
         IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
@@ -56,7 +56,7 @@ public class ReferralService : IReferralService
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
         _jsonSerializerOptions = jsonSerializerOptions;
-        _pasReferralsApiConfig = pasReferralsApiOptions.Value;
+        _wpasApiConfig = wpasApiOptions.Value;
         _eventLogger = eventLogger;
         _headersDecoder = headersDecoder;
     }
@@ -132,7 +132,7 @@ public class ReferralService : IReferralService
         var headersModel = HeadersModel.FromHeaderDictionary(headers);
         await ValidateHeadersAsync(headersModel);
 
-        var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
+        var endpoint = string.Format(CultureInfo.InvariantCulture, _wpasApiConfig.GetReferralEndpoint, id);
         using var response = await _httpClient.GetAsync(endpoint);
 
         if (response.IsSuccessStatusCode)
@@ -205,7 +205,7 @@ public class ReferralService : IReferralService
         return serviceRequest?.Status;
     }
 
-    private async Task<PasCallSuccessResult> CreateReferralAsync(
+    private async Task<WpasCallSuccessResult> CreateReferralAsync(
         string requestBody,
         Bundle bundle,
         CancellationToken cancellationToken)
@@ -213,22 +213,22 @@ public class ReferralService : IReferralService
         await ValidateFhirProfileAsync(bundle, cancellationToken);
         await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
 
-        var callToPasStopwatch = Stopwatch.StartNew();
-        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+        var callToWpasStopwatch = Stopwatch.StartNew();
+        using var response = await _httpClient.PostAsync(_wpasApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
-        callToPasStopwatch.Stop();
+        callToWpasStopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            return new PasCallSuccessResult(content, callToPasStopwatch.ElapsedMilliseconds);
+            return new WpasCallSuccessResult(content, callToWpasStopwatch.ElapsedMilliseconds);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);
     }
 
-    private async Task<PasCallSuccessResult> CancelReferralAsync(
+    private async Task<WpasCallSuccessResult> CancelReferralAsync(
         string requestBody,
         Bundle bundle,
         CancellationToken cancellationToken)
@@ -236,16 +236,16 @@ public class ReferralService : IReferralService
         await ValidateFhirProfileAsync(bundle, cancellationToken);
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator, cancellationToken);
 
-        var callToPasStopwatch = Stopwatch.StartNew();
-        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CancelReferralEndpoint,
+        var callToWpasStopwatch = Stopwatch.StartNew();
+        using var response = await _httpClient.PostAsync(_wpasApiConfig.CancelReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
 
-        callToPasStopwatch.Stop();
+        callToWpasStopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            return new PasCallSuccessResult(content, callToPasStopwatch.ElapsedMilliseconds);
+            return new WpasCallSuccessResult(content, callToWpasStopwatch.ElapsedMilliseconds);
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

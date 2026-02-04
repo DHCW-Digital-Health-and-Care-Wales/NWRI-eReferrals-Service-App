@@ -36,7 +36,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
     {
         StatusCode = statusCode;
-        Errors = [new UnexpectedError("PAS API call failed.")];
+        Errors = [new UnexpectedError("WPAS API call failed.")];
         ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
     }
 

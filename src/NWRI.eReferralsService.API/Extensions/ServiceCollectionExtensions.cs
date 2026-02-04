@@ -53,8 +53,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpClient<IReferralService, ReferralService>((provider, client) =>
         {
-            var pasApiConfig = provider.GetRequiredService<IOptions<PasReferralsApiConfig>>().Value;
-            client.BaseAddress = new Uri(pasApiConfig.BaseUrl);
+            var wpasApiConfig = provider.GetRequiredService<IOptions<WpasApiConfig>>().Value;
+            client.BaseAddress = new Uri(wpasApiConfig.BaseUrl);
         }).AddResilienceHandler("default", CreateResiliencePipeline);
     }
 
