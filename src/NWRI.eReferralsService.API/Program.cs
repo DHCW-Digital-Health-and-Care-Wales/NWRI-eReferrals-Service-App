@@ -26,8 +26,8 @@ builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Co
 builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
 builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
-builder.Services.AddSingleton<Base64Decoder>();
-builder.Services.AddSingleton<IHeadersDecoder, HeadersDecoder>();
+builder.Services.AddSingleton<FhirBase64Decoder>();
+builder.Services.AddSingleton<IRequestHeadersDecoder, RequestRequestHeadersDecoder>();
 
 builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 

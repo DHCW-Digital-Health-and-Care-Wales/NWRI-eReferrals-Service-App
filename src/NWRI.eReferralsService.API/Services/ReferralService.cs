@@ -38,7 +38,7 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly WpasApiConfig _wpasApiConfig;
     private readonly IEventLogger _eventLogger;
-    private readonly IHeadersDecoder _headersDecoder;
+    private readonly IRequestHeadersDecoder _requestHeadersDecoder;
 
     public ReferralService(HttpClient httpClient,
         IOptions<WpasApiConfig> wpasApiOptions,
@@ -48,7 +48,7 @@ public class ReferralService : IReferralService
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
-        IHeadersDecoder headersDecoder)
+        IRequestHeadersDecoder requestHeadersDecoder)
     {
         _httpClient = httpClient;
         _createBundleValidator = createBundleValidator;
@@ -58,7 +58,7 @@ public class ReferralService : IReferralService
         _jsonSerializerOptions = jsonSerializerOptions;
         _wpasApiConfig = wpasApiOptions.Value;
         _eventLogger = eventLogger;
-        _headersDecoder = headersDecoder;
+        _requestHeadersDecoder = requestHeadersDecoder;
     }
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
@@ -84,8 +84,8 @@ public class ReferralService : IReferralService
         // TODO: Extract WPAS referral ID from the response
         _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(result.ExecutionTimeMs, null));
 
-        var sourceSystem = _headersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
-        var userRole = _headersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
+        var sourceSystem = _requestHeadersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
+        var userRole = _requestHeadersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
 
         // TODO: Extract WPAS referral ID from the response
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, null,

@@ -1,6 +1,6 @@
 namespace NWRI.eReferralsService.API.Services;
 
-public interface IHeadersDecoder
+public interface IRequestHeadersDecoder
 {
     string? GetDecodedSourceSystem(string? requestingSoftwareHeader);
     string? GetDecodedUserRole(string? requestingPractitionerHeader);

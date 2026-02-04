@@ -58,11 +58,11 @@ public class ReferralServiceTests
                 Errors = new List<string>()
             });
 
-        _fixture.Mock<IHeadersDecoder>()
+        _fixture.Mock<IRequestHeadersDecoder>()
             .Setup(x => x.GetDecodedSourceSystem(It.IsAny<string?>()))
             .Returns(_fixture.Create<string>());
 
-        _fixture.Mock<IHeadersDecoder>()
+        _fixture.Mock<IRequestHeadersDecoder>()
             .Setup(x => x.GetDecodedUserRole(It.IsAny<string?>()))
             .Returns(_fixture.Create<string>());
     }
@@ -676,7 +676,7 @@ public class ReferralServiceTests
             _fixture.Mock<IValidator<HeadersModel>>().Object,
             _jsonSerializerOptions,
             _fixture.Mock<IEventLogger>().Object,
-            _fixture.Mock<IHeadersDecoder>().Object
+            _fixture.Mock<IRequestHeadersDecoder>().Object
         );
     }
 

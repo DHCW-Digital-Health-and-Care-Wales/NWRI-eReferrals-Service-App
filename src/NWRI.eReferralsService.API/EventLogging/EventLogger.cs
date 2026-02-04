@@ -30,7 +30,7 @@ public sealed class EventLogger : IEventLogger
 
     public void Audit(IAuditEvent auditEvent)
     {
-        var metadata = GetOrCreateMetadata(auditEvent.GetType());
+        var metadata = GetOrCreateEventMetadata(auditEvent.GetType());
         var properties = BuildEventProperties(auditEvent, metadata, AuditType);
 
         _telemetryClient.TrackEvent(metadata.EventName, properties);
@@ -38,7 +38,7 @@ public sealed class EventLogger : IEventLogger
 
     public void LogError(IErrorEvent errorEvent, Exception? exception)
     {
-        var metadata = GetOrCreateMetadata(errorEvent.GetType());
+        var metadata = GetOrCreateEventMetadata(errorEvent.GetType());
         var properties = BuildEventProperties(errorEvent, metadata, ErrorType);
 
         if (exception != null)
@@ -76,7 +76,7 @@ public sealed class EventLogger : IEventLogger
         return properties;
     }
 
-    private static EventTypeMetadata GetOrCreateMetadata(Type type)
+    private static EventTypeMetadata GetOrCreateEventMetadata(Type type)
     {
         return EventTypeMetadataCache.GetOrAdd(type, static eventType =>
         {

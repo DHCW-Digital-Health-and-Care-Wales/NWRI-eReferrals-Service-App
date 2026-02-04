@@ -18,7 +18,7 @@ namespace NWRI.eReferralsService.API.Middleware
         public async Task InvokeAsync(HttpContext context)
         {
             var endpoint = context.GetEndpoint();
-            if (endpoint?.Metadata.GetMetadata<RequestResponseAuditAttribute>() is null)
+            if (endpoint?.Metadata.GetMetadata<AuditLogRequestAttribute>() is null)
             {
                 await _next(context);
                 return;

@@ -8,10 +8,10 @@ using NWRI.eReferralsService.API.Helpers;
 
 namespace NWRI.eReferralsService.Unit.Tests.Helpers;
 
-public class Base64DecoderTests
+public class FhirBase64DecoderTests
 {
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions().ForFhirExtended();
-    private readonly Base64Decoder _decoder = new(NullLogger<Base64Decoder>.Instance);
+    private readonly FhirBase64Decoder _decoder = new(NullLogger<FhirBase64Decoder>.Instance);
 
     [Theory]
     [InlineData(null)]

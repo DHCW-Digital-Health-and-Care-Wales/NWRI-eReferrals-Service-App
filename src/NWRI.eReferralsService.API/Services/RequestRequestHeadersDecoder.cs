@@ -3,18 +3,18 @@ using NWRI.eReferralsService.API.Helpers;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public class HeadersDecoder : IHeadersDecoder
+public class RequestRequestHeadersDecoder : IRequestHeadersDecoder
 {
-    private readonly Base64Decoder _base64Decoder;
+    private readonly FhirBase64Decoder _fhirBase64Decoder;
 
-    public HeadersDecoder(Base64Decoder base64Decoder)
+    public RequestRequestHeadersDecoder(FhirBase64Decoder fhirBase64Decoder)
     {
-        _base64Decoder = base64Decoder;
+        _fhirBase64Decoder = fhirBase64Decoder;
     }
 
     public string? GetDecodedSourceSystem(string? requestingSoftwareHeader)
     {
-        if (_base64Decoder.TryDecode<Device>(requestingSoftwareHeader, out var device) && device is not null)
+        if (_fhirBase64Decoder.TryDecode<Device>(requestingSoftwareHeader, out var device) && device is not null)
         {
             return device.Identifier.FirstOrDefault()?.Value
                    ?? device.DeviceName.FirstOrDefault()?.Name;
@@ -25,7 +25,7 @@ public class HeadersDecoder : IHeadersDecoder
 
     public string? GetDecodedUserRole(string? requestingPractitionerHeader)
     {
-        if (_base64Decoder.TryDecode<PractitionerRole>(requestingPractitionerHeader, out var practitionerRole)
+        if (_fhirBase64Decoder.TryDecode<PractitionerRole>(requestingPractitionerHeader, out var practitionerRole)
             && practitionerRole is not null)
         {
             var coding = practitionerRole.Code.FirstOrDefault()?.Coding.FirstOrDefault();

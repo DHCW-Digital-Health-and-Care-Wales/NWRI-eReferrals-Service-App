@@ -9,10 +9,10 @@ using NWRI.eReferralsService.API.Services;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services
 {
-    public class HeadersDecoderTests
+    public class RequestRequestHeadersDecoderTests
     {
         private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions().ForFhirExtended();
-        private readonly HeadersDecoder _sut = new(new Base64Decoder(NullLogger<Base64Decoder>.Instance));
+        private readonly RequestRequestHeadersDecoder _sut = new(new FhirBase64Decoder(NullLogger<FhirBase64Decoder>.Instance));
 
         [Fact]
         public void GetDecodedSourceSystemShouldReturnIdentifierValueWhenPresent()

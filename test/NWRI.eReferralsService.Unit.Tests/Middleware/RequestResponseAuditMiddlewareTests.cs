@@ -25,7 +25,7 @@ public class RequestResponseAuditMiddlewareTests
 
         context.SetEndpoint(new Endpoint(
             _ => Task.CompletedTask,
-            new EndpointMetadataCollection(new ControllerActionDescriptor(), new RequestResponseAuditAttribute()),
+            new EndpointMetadataCollection(new ControllerActionDescriptor(), new AuditLogRequestAttribute()),
             "Test controller endpoint"));
 
         RequestDelegate next = ctx =>
@@ -94,7 +94,7 @@ public class RequestResponseAuditMiddlewareTests
 
         context.SetEndpoint(new Endpoint(
             _ => Task.CompletedTask,
-            new EndpointMetadataCollection(new ControllerActionDescriptor(), new RequestResponseAuditAttribute()),
+            new EndpointMetadataCollection(new ControllerActionDescriptor(), new AuditLogRequestAttribute()),
             "Test controller endpoint"));
 
         RequestDelegate next = ctx =>

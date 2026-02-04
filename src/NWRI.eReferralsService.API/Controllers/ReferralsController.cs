@@ -8,7 +8,7 @@ using NWRI.eReferralsService.API.Swagger;
 namespace NWRI.eReferralsService.API.Controllers;
 
 [ApiController]
-[RequestResponseAudit]
+[AuditLogRequest]
 public class ReferralsController : ControllerBase
 {
     private readonly IReferralService _referralService;

@@ -5,11 +5,11 @@ using NWRI.eReferralsService.API.Extensions.Logger;
 
 namespace NWRI.eReferralsService.API.Helpers
 {
-    public class Base64Decoder
+    public class FhirBase64Decoder
     {
-        private readonly ILogger<Base64Decoder> _logger;
+        private readonly ILogger<FhirBase64Decoder> _logger;
 
-        public Base64Decoder(ILogger<Base64Decoder> logger)
+        public FhirBase64Decoder(ILogger<FhirBase64Decoder> logger)
         {
             _logger = logger;
         }
