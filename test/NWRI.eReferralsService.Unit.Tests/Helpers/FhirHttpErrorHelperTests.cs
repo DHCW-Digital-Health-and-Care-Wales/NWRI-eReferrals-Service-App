@@ -17,7 +17,7 @@ public class FhirHttpErrorHelperTests
     [InlineData(FhirHttpErrorCodes.ReceiverUnavailable, "503: The Receiver is currently unavailable.")]
     [InlineData(FhirHttpErrorCodes.TooManyRequests, "429: Too many requests have been made by this source in a given amount of time.")]
     [InlineData(FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource.")]
-    [InlineData(FhirHttpErrorCodes.ProxyNotImplemented, "501: BaRS did not recognize the request. This request has not been implemented within the Api.")]
+    [InlineData(FhirHttpErrorCodes.ProxyNotImplemented, "501: BaRS did not recognize the request. This request has not been implemented within the API.")]
     public void GetDisplayMessageByCodeShouldReturnCorrectMessages(string code, string expectedMessage)
     {
         //Act

@@ -19,9 +19,7 @@ public static class OperationOutcomeCreator
             };
 
             if (!string.IsNullOrWhiteSpace(error.DiagnosticsMessage))
-            {
                 issue.Diagnostics = error.DiagnosticsMessage;
-            }
 
             return issue;
         }).ToList();

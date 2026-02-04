@@ -124,7 +124,7 @@ public class ReferralsControllerTests
 
         // Assert
         var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
-        //ex.StatusCode.Should().Be(System.Net.HttpStatusCode.NotImplemented);
+        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
         ex.Message.Should().Contain("not been implemented");
     }
 

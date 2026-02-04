@@ -12,7 +12,7 @@ public class ProxyNotImplementedErrorTests
     {
         // Arrange
         const string expectedDisplayMessage =
-            "501: BaRS did not recognize the request. This request has not been implemented within the Api.";
+            "501: BaRS did not recognize the request. This request has not been implemented within the API.";
 
         // Act
         var error = new ProxyNotImplementedError();
