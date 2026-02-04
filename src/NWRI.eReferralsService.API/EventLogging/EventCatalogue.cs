@@ -25,8 +25,8 @@ public static class EventCatalogue
     [Description("VAL_FHIR_SCHEMA_OK")]
     public record FhirSchemaValidated : IAuditEvent;
 
-    [Description("MAP_FHIR_TO_WPAS")]
-    public record FhirMappedToWpasPayload : IAuditEvent;
+    [Description("VAL_MANDATORY_FIELDS_OK")]
+    public record MandatoryFieldsValidated : IAuditEvent;
 
     [Description("INT_WPAS_SUCCESS")]
     public record DataSuccessfullyCommittedToWpas(

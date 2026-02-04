@@ -188,7 +188,7 @@ public class ReferralService : IReferralService
         {
             throw new BundleValidationException(bundleValidationResult.Errors);
         }
-        _eventLogger.Audit(new EventCatalogue.FhirMappedToWpasPayload());
+        _eventLogger.Audit(new EventCatalogue.MandatoryFieldsValidated());
     }
 
     private static string? GetMessageReasonCode(Bundle bundle)
