@@ -47,7 +47,8 @@ public class EnrichLoggerContextTests
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
+        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
     }
 
     [Fact]
@@ -58,7 +59,8 @@ public class EnrichLoggerContextTests
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
+        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
     }
 
     [Fact]
