@@ -82,19 +82,14 @@ public class ReferralService : IReferralService
         processingStopwatch.Stop();
 
         // TODO: Extract WPAS referral ID from the response
-        _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
-            ExecutionTimeMs: result.ExecutionTimeMs,
-            WpasReferralId: null));
+        _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(result.ExecutionTimeMs, null));
 
         var sourceSystem = _headersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
         var userRole = _headersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
 
         // TODO: Extract WPAS referral ID from the response
-        _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(
-            SourceSystem: sourceSystem,
-            UserRole: userRole,
-            WpasReferralId: null,
-            ProcessingTimeTotalMs: processingStopwatch.ElapsedMilliseconds));
+        _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, null,
+            processingStopwatch.ElapsedMilliseconds));
 
         return result.Content;
     }

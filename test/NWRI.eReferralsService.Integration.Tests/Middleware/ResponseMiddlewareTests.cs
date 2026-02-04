@@ -363,14 +363,14 @@ public class ResponseMiddlewareTests
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,
-            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
-            configureApp: app => app.UseMiddleware<ResponseMiddleware>());
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
+            app => app.UseMiddleware<ResponseMiddleware>());
     }
 
     private static IHost StartHost()
     {
         return HostProvider.StartHostWithEndpoint(_ => Task.CompletedTask,
-            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
-            configureApp: app => app.UseMiddleware<ResponseMiddleware>());
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
+            app => app.UseMiddleware<ResponseMiddleware>());
     }
 }

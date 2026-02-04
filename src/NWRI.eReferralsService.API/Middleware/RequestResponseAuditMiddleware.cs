@@ -27,9 +27,9 @@ namespace NWRI.eReferralsService.API.Middleware
             var stopwatch = Stopwatch.StartNew();
 
             _eventLogger.Audit(new EventCatalogue.RequestReceived(
-                Method: context.Request.Method,
-                Path: context.Request.Path.Value ?? string.Empty,
-                RequestSize: context.Request.ContentLength));
+                context.Request.Method,
+                context.Request.Path.Value ?? string.Empty,
+                context.Request.ContentLength));
 
             try
             {
@@ -37,9 +37,7 @@ namespace NWRI.eReferralsService.API.Middleware
             }
             finally
             {
-                _eventLogger.Audit(new EventCatalogue.ResponseSent(
-                    StatusCode: context.Response.StatusCode,
-                    LatencyMs: stopwatch.ElapsedMilliseconds));
+                _eventLogger.Audit(new EventCatalogue.ResponseSent(context.Response.StatusCode, stopwatch.ElapsedMilliseconds));
 
                 if (context.Response.StatusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
                 {

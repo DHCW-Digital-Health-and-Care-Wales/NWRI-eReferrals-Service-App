@@ -8,10 +8,10 @@ public static class FhirHttpErrorHelper
     {
         { FhirHttpErrorCodes.SenderBadRequest, "400: The API was unable to process the request." },
         { FhirHttpErrorCodes.ReceiverBadRequest, "400: The Receiver was unable to process the request." },
-        { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." },
-        { FhirHttpErrorCodes.ReceiverUnavailable, "503: The Receiver is currently unavailable." },
+        { FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource." },
         { FhirHttpErrorCodes.TooManyRequests, "429: Too many requests have been made by this source in a given amount of time." },
-        { FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource." }
+        { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." },
+        { FhirHttpErrorCodes.ReceiverUnavailable, "503: The Receiver is currently unavailable." }
     };
 
     public static string GetDisplayMessageByCode(string code)
