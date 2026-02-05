@@ -61,11 +61,16 @@ public sealed class WpasApiClient : IWpasApiClient
         try
         {
             var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
-            return new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+            if (problemDetails != null)
+            {
+                return new NotSuccessfulApiCallException(response.StatusCode, problemDetails);
+            }
         }
         catch (JsonException)
         {
-            return new NotSuccessfulApiCallException(response.StatusCode, content);
+            // Ignore deserialization errors and fallback to plain content
         }
+
+        return new NotSuccessfulApiCallException(response.StatusCode, content);
     }
 }

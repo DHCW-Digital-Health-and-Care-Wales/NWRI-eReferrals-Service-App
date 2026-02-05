@@ -17,6 +17,7 @@ using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Integration.Tests.Middleware;
 
