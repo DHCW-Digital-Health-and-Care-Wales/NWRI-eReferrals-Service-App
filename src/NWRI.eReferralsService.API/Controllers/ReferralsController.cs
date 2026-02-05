@@ -40,18 +40,11 @@ public class ReferralsController : ControllerBase
 
     [HttpGet("ServiceRequest/{id}")]
     [SwaggerGetReferralRequest]
-    public async Task<IActionResult> GetReferral(string? id)
+    public Task<IActionResult> GetReferral(string? id)
     {
         _logger.CalledMethod(nameof(GetReferral));
 
-        var outputBundleJson = await _referralService.GetReferralAsync(HttpContext.Request.Headers, id);
-
-        return new ContentResult
-        {
-            Content = outputBundleJson,
-            StatusCode = 200,
-            ContentType = FhirConstants.FhirMediaType
-        };
+        throw new ProxyNotImplementedException();
     }
 
     [HttpGet("ServiceRequest")]

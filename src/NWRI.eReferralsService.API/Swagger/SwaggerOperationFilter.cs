@@ -44,17 +44,6 @@ public class SwaggerOperationFilter : IOperationFilter
             return;
         }
 
-        operation.Parameters =
-        [
-            new OpenApiParameter
-            {
-                In = ParameterLocation.Path,
-                Name = "id",
-                Required = true,
-                Example = new OpenApiString(Guid.NewGuid().ToString())
-            }
-        ];
-
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
@@ -177,6 +166,22 @@ public class SwaggerOperationFilter : IOperationFilter
                             {
                                 Example = new OpenApiString(
                                     File.ReadAllText("Swagger/Examples/common-internal-server-error.json")),
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "501", new OpenApiResponse
+                {
+                    Description = "Not Implemented",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
                             }
                         }
                     }
