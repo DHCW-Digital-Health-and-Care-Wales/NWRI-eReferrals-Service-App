@@ -16,7 +16,9 @@ public class EnrichLoggerContext : ITelemetryInitializer
 
     public void Initialize(ITelemetry telemetry)
     {
-        _httpContextAccessor.HttpContext?.Request.Headers.TryGetValue(RequestHeaderKeys.CorrelationId, out var correlationId);
-        telemetry.Context.GlobalProperties.TryAdd(CorrelationIdPropertyName, correlationId);
+        if (_httpContextAccessor.HttpContext?.Request.Headers.TryGetValue(RequestHeaderKeys.CorrelationId, out var correlationId) == true)
+        {
+            telemetry.Context.GlobalProperties.TryAdd(CorrelationIdPropertyName, correlationId);
+        }
     }
 }
