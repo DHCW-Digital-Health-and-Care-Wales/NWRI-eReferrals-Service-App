@@ -100,11 +100,7 @@ public class ResponseMiddleware
                     ? HttpStatusCode.ServiceUnavailable
                     : notSuccessfulApiCallException.StatusCode;
 
-                _eventLogger.LogError(
-                    statusCode == HttpStatusCode.GatewayTimeout
-                        ? new EventCatalogue.IntWpasTimeoutError()
-                        : new EventCatalogue.IntWpasConnectionFailError(),
-                    notSuccessfulApiCallException);
+                _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), notSuccessfulApiCallException);
 
                 body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
                 break;
