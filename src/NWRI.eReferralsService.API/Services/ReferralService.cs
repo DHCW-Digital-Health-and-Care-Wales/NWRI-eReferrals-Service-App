@@ -1,13 +1,8 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentValidation;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
@@ -28,18 +23,16 @@ public class ReferralService : IReferralService
         Cancel
     }
 
-    private readonly HttpClient _httpClient;
+    private readonly IWpasApiClient _wpasApiClient;
     private readonly IValidator<BundleCreateReferralModel> _createBundleValidator;
     private readonly IValidator<BundleCancelReferralModel> _cancelBundleValidator;
     private readonly IFhirBundleProfileValidator _fhirBundleProfileValidator;
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
-    private readonly WpasApiConfig _wpasApiConfig;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestHeadersDecoder _requestHeadersDecoder;
 
-    public ReferralService(HttpClient httpClient,
-        IOptions<WpasApiConfig> wpasApiOptions,
+    public ReferralService(IWpasApiClient wpasApiClient,
         IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
@@ -48,13 +41,12 @@ public class ReferralService : IReferralService
         IEventLogger eventLogger,
         IRequestHeadersDecoder requestHeadersDecoder)
     {
-        _httpClient = httpClient;
+        _wpasApiClient = wpasApiClient;
         _createBundleValidator = createBundleValidator;
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
         _jsonSerializerOptions = jsonSerializerOptions;
-        _wpasApiConfig = wpasApiOptions.Value;
         _eventLogger = eventLogger;
         _requestHeadersDecoder = requestHeadersDecoder;
     }
@@ -117,42 +109,6 @@ public class ReferralService : IReferralService
         throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
     }
 
-    public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
-    {
-        if (!Guid.TryParse(id, out _))
-        {
-            throw new RequestParameterValidationException(nameof(id), "Id should be a valid GUID");
-        }
-
-        var headersModel = HeadersModel.FromHeaderDictionary(headers);
-        await ValidateHeadersAsync(headersModel);
-
-        var endpoint = string.Format(CultureInfo.InvariantCulture, _wpasApiConfig.GetReferralEndpoint, id);
-        using var response = await _httpClient.GetAsync(endpoint);
-
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        throw await GetNotSuccessfulApiCallExceptionAsync(response);
-    }
-
-    private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadAsStringAsync();
-
-        try
-        {
-            var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
-            return new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
-        }
-        catch (JsonException)
-        {
-            return new NotSuccessfulApiCallException(response.StatusCode, content);
-        }
-    }
-
     private async Task ValidateHeadersAsync(HeadersModel headersModel)
     {
         var headersValidationResult = await _headerValidator.ValidateAsync(headersModel);
@@ -208,7 +164,7 @@ public class ReferralService : IReferralService
         await ValidateFhirProfileAsync(bundle, cancellationToken);
         await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
 
-        return await PostToWpasAsync(_wpasApiConfig.CreateReferralEndpoint, requestBody, cancellationToken);
+        return await _wpasApiClient.CreateReferralAsync(requestBody, cancellationToken);
     }
 
     private async Task<string> CancelReferralAsync(
@@ -219,26 +175,6 @@ public class ReferralService : IReferralService
         await ValidateFhirProfileAsync(bundle, cancellationToken);
         await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator, cancellationToken);
 
-        return await PostToWpasAsync(_wpasApiConfig.CancelReferralEndpoint, requestBody, cancellationToken);
-    }
-
-    private async Task<string> PostToWpasAsync(string endpoint, string requestBody, CancellationToken cancellationToken)
-    {
-        var wpasCallStopwatch = Stopwatch.StartNew();
-        using var response = await _httpClient.PostAsync(endpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)), cancellationToken);
-        wpasCallStopwatch.Stop();
-
-        if (response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            // TODO: Extract WPAS referral ID from the response
-            _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(wpasCallStopwatch.ElapsedMilliseconds, null));
-
-            return content;
-        }
-
-        throw await GetNotSuccessfulApiCallExceptionAsync(response);
+        return await _wpasApiClient.CancelReferralAsync(requestBody, cancellationToken);
     }
 }

@@ -38,20 +38,4 @@ public class ReferralsController : ControllerBase
             ContentType = FhirConstants.FhirMediaType
         };
     }
-
-    [HttpGet("ServiceRequest/{id}")]
-    [SwaggerGetReferralRequest]
-    public async Task<IActionResult> GetReferral(string? id)
-    {
-        _logger.CalledMethod(nameof(GetReferral));
-
-        var outputBundleJson = await _referralService.GetReferralAsync(HttpContext.Request.Headers, id);
-
-        return new ContentResult
-        {
-            Content = outputBundleJson,
-            StatusCode = 200,
-            ContentType = FhirConstants.FhirMediaType
-        };
-    }
 }

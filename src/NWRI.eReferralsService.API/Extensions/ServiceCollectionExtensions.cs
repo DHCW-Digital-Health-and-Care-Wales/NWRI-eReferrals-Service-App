@@ -51,11 +51,13 @@ public static class ServiceCollectionExtensions
 
     public static void AddHttpClients(this IServiceCollection services)
     {
-        services.AddHttpClient<IReferralService, ReferralService>((provider, client) =>
+        services.AddHttpClient<IWpasApiClient, WpasApiClient>((provider, client) =>
         {
             var wpasApiConfig = provider.GetRequiredService<IOptions<WpasApiConfig>>().Value;
             client.BaseAddress = new Uri(wpasApiConfig.BaseUrl);
         }).AddResilienceHandler("default", CreateResiliencePipeline);
+
+        services.AddScoped<IReferralService, ReferralService>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)
