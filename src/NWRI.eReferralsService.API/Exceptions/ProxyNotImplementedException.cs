@@ -8,8 +8,4 @@ public sealed class ProxyNotImplementedException : BaseFhirException
         [new ProxyNotImplementedError()];
 
     public override string Message => ProxyNotImplementedError.Message;
-
-    public ProxyNotImplementedException()
-    {
-    }
 }
