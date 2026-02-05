@@ -75,13 +75,4 @@ public class ReferralsController : ControllerBase
 
         throw new ProxyNotImplementedException();
     }
-
-    [HttpGet("ServiceRequest")]
-    [SwaggerGetReferralsRequest]
-    public IActionResult GetReferrals()
-    {
-        _logger.CalledMethod(nameof(GetReferrals));
-
-        throw new ProxyNotImplementedException();
-    }
 }
