@@ -62,4 +62,13 @@ public class ReferralsController : ControllerBase
 
         throw new ProxyNotImplementedException();
     }
+
+    [HttpGet("Appointment")]
+    [SwaggerGetReferralsRequest]
+    public IActionResult GetAppointments()
+    {
+        _logger.CalledMethod(nameof(GetAppointments));
+
+        throw new ProxyNotImplementedException();
+    }
 }
