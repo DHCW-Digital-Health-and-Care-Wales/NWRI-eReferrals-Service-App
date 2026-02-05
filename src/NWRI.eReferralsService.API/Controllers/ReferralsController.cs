@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
@@ -51,5 +52,14 @@ public class ReferralsController : ControllerBase
             StatusCode = 200,
             ContentType = FhirConstants.FhirMediaType
         };
+    }
+
+    [HttpGet("ServiceRequest")]
+    [SwaggerGetReferralsRequest]
+    public IActionResult GetReferrals()
+    {
+        _logger.CalledMethod(nameof(GetReferrals));
+
+        throw new ProxyNotImplementedException();
     }
 }

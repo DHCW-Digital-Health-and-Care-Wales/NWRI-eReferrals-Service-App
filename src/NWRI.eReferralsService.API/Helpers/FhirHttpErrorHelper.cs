@@ -11,7 +11,8 @@ public static class FhirHttpErrorHelper
         { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." },
         { FhirHttpErrorCodes.ReceiverUnavailable, "503: The Receiver is currently unavailable." },
         { FhirHttpErrorCodes.TooManyRequests, "429: Too many requests have been made by this source in a given amount of time." },
-        { FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource." }
+        { FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource." },
+        { FhirHttpErrorCodes.ProxyNotImplemented, "501: BaRS did not recognize the request. This request has not been implemented within the API." }
     };
 
     public static string GetDisplayMessageByCode(string code)
