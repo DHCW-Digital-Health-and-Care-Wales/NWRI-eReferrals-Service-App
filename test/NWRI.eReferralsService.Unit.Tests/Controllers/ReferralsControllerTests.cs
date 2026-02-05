@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Controllers;
+using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 
@@ -67,6 +68,23 @@ public class ReferralsControllerTests
         contentResult.ContentType.Should().Be(FhirConstants.FhirMediaType);
     }
 
+    [Fact]
+    public void GetServiceRequestShouldThrowProxyNotImplementedException()
+    {
+        // Arrange
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        SetRequestDetails(headers);
+
+        // Act
+        var act = _sut.GetReferrals;
+
+        // Assert
+        var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
+        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
+        ex.Message.Should().Contain("not been implemented");
+    }
+
     private void SetRequestDetails(IHeaderDictionary headerDictionary, string? body = null)
     {
         _sut.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
@@ -84,5 +102,4 @@ public class ReferralsControllerTests
         _sut.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         _sut.ControllerContext.HttpContext.Request.ContentLength = body.Length;
     }
-
 }

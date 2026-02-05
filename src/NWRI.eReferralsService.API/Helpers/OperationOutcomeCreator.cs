@@ -9,12 +9,19 @@ public static class OperationOutcomeCreator
 {
     public static OperationOutcome CreateOperationOutcome(params BaseFhirHttpError[] errors)
     {
-        var issues = errors.Select(error => new OperationOutcome.IssueComponent
+        var issues = errors.Select(error =>
         {
-            Severity = OperationOutcome.IssueSeverity.Error,
-            Code = error.IssueType,
-            Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
-            Diagnostics = error.DiagnosticsMessage
+            var issue = new OperationOutcome.IssueComponent
+            {
+                Severity = OperationOutcome.IssueSeverity.Error,
+                Code = error.IssueType,
+                Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
+            };
+
+            if (!string.IsNullOrWhiteSpace(error.DiagnosticsMessage))
+                issue.Diagnostics = error.DiagnosticsMessage;
+
+            return issue;
         }).ToList();
 
         return new OperationOutcome

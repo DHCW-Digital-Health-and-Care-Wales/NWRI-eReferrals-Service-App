@@ -131,6 +131,13 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(timeoutRejectedException.Message));
                 break;
 
+            case ProxyNotImplementedException proxyNotImplementedException:
+                _logger.ProxyNotImplemented(proxyNotImplementedException);
+
+                statusCode = HttpStatusCode.NotImplemented;
+                body = OperationOutcomeCreator.CreateOperationOutcome(proxyNotImplementedException);
+                break;
+
             default:
                 _logger.UnexpectedError(exception);
                 _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), exception);

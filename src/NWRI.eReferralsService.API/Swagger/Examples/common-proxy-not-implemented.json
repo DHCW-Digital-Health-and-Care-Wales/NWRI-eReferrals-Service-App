@@ -1,0 +1,24 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "5ec8b93c-1b54-4670-9fb9-c5709bb6e733",
+  "meta": {
+    "profile": [
+      "https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome"
+    ]
+  },
+  "issue": [
+    {
+      "severity": "error",
+      "code": "not-supported",
+      "details": {
+        "coding": [
+          {
+            "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
+            "code": "PROXY_NOT_IMPLEMENTED"
+          }
+        ],
+        "text": "501: BaRS did not recognize the request. This request has not been implemented within the API."
+      }
+    }
+  ]
+}

@@ -14,6 +14,7 @@ public class SwaggerOperationFilter : IOperationFilter
     {
         HandleProcessMessage(operation, context);
         HandleGetReferral(operation, context);
+        HandleGetReferrals(operation, context);
     }
 
     private static void HandleProcessMessage(OpenApiOperation operation, OperationFilterContext context)
@@ -58,6 +59,20 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
         AddGetReferralResponses(operation);
+    }
+
+    private static void HandleGetReferrals(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>();
+        if (attr is null)
+        {
+            return;
+        }
+
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+
+        AddGetReferralsResponses(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
@@ -263,6 +278,61 @@ public class SwaggerOperationFilter : IOperationFilter
                             {
                                 Example = new OpenApiString(
                                     File.ReadAllText("Swagger/Examples/common-external-server-error.json")),
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private static void AddGetReferralsResponses(OpenApiOperation operation)
+    {
+        operation.Responses = new OpenApiResponses
+        {
+            {
+                "429", new OpenApiResponse
+                {
+                    Description = "Too many requests",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-too-many-requests.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "500", new OpenApiResponse
+                {
+                    Description = "Internal Server Error",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-internal-server-error.json"))
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "501", new OpenApiResponse
+                {
+                    Description = "Not Implemented",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(
+                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
                             }
                         }
                     }
