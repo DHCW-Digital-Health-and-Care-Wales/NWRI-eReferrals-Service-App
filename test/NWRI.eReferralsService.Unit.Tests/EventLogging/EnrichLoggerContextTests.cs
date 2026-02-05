@@ -39,7 +39,7 @@ public class EnrichLoggerContextTests
     }
 
     [Fact]
-    public void InitializeShouldSetCorrelationIdGlobalPropertyToEmptyWhenHeaderIsMissing()
+    public void InitializeShouldNotSetCorrelationIdGlobalPropertyWhenHeaderIsMissing()
     {
         var context = new DefaultHttpContext();
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
@@ -47,20 +47,18 @@ public class EnrichLoggerContextTests
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
-        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
     }
 
     [Fact]
-    public void InitializeShouldSetCorrelationIdGlobalPropertyToEmptyWhenHttpContextIsNull()
+    public void InitializeShouldNotSetCorrelationIdGlobalPropertyWhenHttpContextIsNull()
     {
         var httpContextAccessor = new HttpContextAccessor { HttpContext = null };
         var sut = new EnrichLoggerContext(httpContextAccessor);
 
         sut.Initialize(_telemetry);
 
-        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeTrue();
-        _telemetryContext.GlobalProperties["CorrelationId"].Should().BeNullOrEmpty();
+        _telemetryContext.GlobalProperties.ContainsKey("CorrelationId").Should().BeFalse();
     }
 
     [Fact]
