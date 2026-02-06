@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.OptionValidators;
@@ -7,7 +8,6 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Middleware;
-using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
 using NWRI.eReferralsService.API.Validators;
@@ -28,7 +28,7 @@ builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileVali
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
 builder.Services.AddSingleton<FhirBase64Decoder>();
 builder.Services.AddSingleton<IRequestFhirHeadersDecoder, RequestFhirHeadersDecoder>();
-builder.Services.AddSingleton<IFhirJsonSerializerOptions, FhirJsonSerializerOptions>();
+builder.Services.AddSingleton(new JsonSerializerOptions().ForFhirExtended());
 
 builder.Services.AddHostedService<FhirBundleProfileValidatorWarmupService>();
 

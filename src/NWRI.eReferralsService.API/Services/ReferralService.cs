@@ -9,7 +9,6 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
@@ -38,7 +37,7 @@ public class ReferralService : IReferralService
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
-        IFhirJsonSerializerOptions jsonSerializerOptions,
+        JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder)
     {
@@ -47,7 +46,7 @@ public class ReferralService : IReferralService
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
-        _jsonSerializerOptions = jsonSerializerOptions.Value;
+        _jsonSerializerOptions = jsonSerializerOptions;
         _eventLogger = eventLogger;
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
     }

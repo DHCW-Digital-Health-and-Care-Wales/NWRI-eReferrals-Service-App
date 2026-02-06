@@ -15,7 +15,6 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
-using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
@@ -418,14 +417,14 @@ public class ResponseMiddlewareTests
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,
-            services => services.AddSingleton<IFhirJsonSerializerOptions, FhirJsonSerializerOptions>(),
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
             app => app.UseMiddleware<ResponseMiddleware>());
     }
 
     private static IHost StartHost()
     {
         return HostProvider.StartHostWithEndpoint(_ => Task.CompletedTask,
-            services => services.AddSingleton<IFhirJsonSerializerOptions, FhirJsonSerializerOptions>(),
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
             app => app.UseMiddleware<ResponseMiddleware>());
     }
 }

@@ -5,7 +5,6 @@ using Hl7.Fhir.Model;
 using Microsoft.Extensions.Logging.Abstractions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Helpers;
-using NWRI.eReferralsService.API.Serialization;
 
 namespace NWRI.eReferralsService.Unit.Tests.Helpers;
 
@@ -18,7 +17,7 @@ public class FhirBase64DecoderTests
     {
         _decoder = new FhirBase64Decoder(
             NullLogger<FhirBase64Decoder>.Instance,
-            new FhirJsonSerializerOptions());
+            new JsonSerializerOptions().ForFhirExtended());
     }
 
     [Theory]

@@ -7,7 +7,6 @@ using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 
@@ -22,7 +21,7 @@ public class HeadersModelValidatorTests
 
     public HeadersModelValidatorTests()
     {
-        _sut = new HeadersModelValidator(new FhirJsonSerializerOptions());
+        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended());
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
         _sut.RuleLevelCascadeMode = CascadeMode.Stop;
 

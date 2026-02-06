@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Microsoft.Extensions.Hosting;
@@ -5,7 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Serialization;
+using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 
@@ -13,7 +14,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
 public class FhirBundleProfileValidatorTests
 {
-    private readonly IFhirJsonSerializerOptions _jsonSerializerOptions = new FhirJsonSerializerOptions();
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
     [Fact]
     public async Task ValidateShouldReturnSuccessfulOutputWhenDisabled()

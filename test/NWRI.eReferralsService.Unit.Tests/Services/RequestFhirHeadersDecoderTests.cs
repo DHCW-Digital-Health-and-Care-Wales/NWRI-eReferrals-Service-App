@@ -5,7 +5,6 @@ using Hl7.Fhir.Model;
 using Microsoft.Extensions.Logging.Abstractions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Helpers;
-using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Services;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services
@@ -13,15 +12,10 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
     public class RequestFhirHeadersDecoderTests
     {
         private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions().ForFhirExtended();
-        private readonly RequestFhirHeadersDecoder _sut;
-
-        public RequestFhirHeadersDecoderTests()
-        {
-            _sut = new RequestFhirHeadersDecoder(
-                new FhirBase64Decoder(
-                    NullLogger<FhirBase64Decoder>.Instance,
-                    new FhirJsonSerializerOptions()));
-        }
+        private readonly RequestFhirHeadersDecoder _sut = new(
+            new FhirBase64Decoder(
+                NullLogger<FhirBase64Decoder>.Instance,
+                new JsonSerializerOptions().ForFhirExtended()));
 
         [Fact]
         public void GetDecodedSourceSystemShouldReturnIdentifierValueWhenPresent()

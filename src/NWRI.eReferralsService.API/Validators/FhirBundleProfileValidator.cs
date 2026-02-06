@@ -7,7 +7,6 @@ using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Extensions.Logger;
-using NWRI.eReferralsService.API.Serialization;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
@@ -37,12 +36,12 @@ namespace NWRI.eReferralsService.API.Validators
             IOptions<FhirBundleProfileValidationConfig> config,
             IHostEnvironment hostEnvironment,
             ILogger<FhirBundleProfileValidator> logger,
-            IFhirJsonSerializerOptions jsonSerializerOptions)
+            JsonSerializerOptions jsonSerializerOptions)
         {
             _config = config.Value;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
-            _jsonSerializerOptions = jsonSerializerOptions.Value;
+            _jsonSerializerOptions = jsonSerializerOptions;
         }
 
         public bool IsInitialized => _isInitialized;

@@ -6,7 +6,6 @@ using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Serialization;
 
 namespace NWRI.eReferralsService.API.Validators;
 
@@ -20,9 +19,9 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
     private const string AcceptTypePart = "application/fhir+json";
     private const string AcceptVersionPart = "version=1.2.0";
 
-    public HeadersModelValidator(IFhirJsonSerializerOptions jsonSerializerOptions)
+    public HeadersModelValidator(JsonSerializerOptions jsonSerializerOptions)
     {
-        _jsonSerializerOptions = jsonSerializerOptions.Value;
+        _jsonSerializerOptions = jsonSerializerOptions;
 
         ClassLevelCascadeMode = CascadeMode.Continue;
         RuleLevelCascadeMode = CascadeMode.Stop;
