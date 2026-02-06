@@ -1,21 +1,20 @@
 using System.Text.Json;
 using Hl7.Fhir.Model;
-using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Serialization;
 
 namespace NWRI.eReferralsService.API.Helpers
 {
     public class FhirBase64Decoder
     {
         private readonly ILogger<FhirBase64Decoder> _logger;
+        private readonly JsonSerializerOptions _serializerOptions;
 
-        public FhirBase64Decoder(ILogger<FhirBase64Decoder> logger)
+        public FhirBase64Decoder(ILogger<FhirBase64Decoder> logger, IFhirJsonSerializerOptions serializerOptions)
         {
             _logger = logger;
+            _serializerOptions = serializerOptions.Value;
         }
-
-        private readonly JsonSerializerOptions _serializerOptions =
-            new JsonSerializerOptions().ForFhirExtended();
 
         public bool TryDecode<T>(string? base64Value, out T? result)
             where T : Base

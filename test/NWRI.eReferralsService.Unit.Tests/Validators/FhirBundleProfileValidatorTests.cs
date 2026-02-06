@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 
@@ -12,6 +13,8 @@ namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
 public class FhirBundleProfileValidatorTests
 {
+    private readonly IFhirJsonSerializerOptions _jsonSerializerOptions = new FhirJsonSerializerOptions();
+
     [Fact]
     public async Task ValidateShouldReturnSuccessfulOutputWhenDisabled()
     {
@@ -24,7 +27,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Act
         var output = await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message });
@@ -46,7 +53,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Act
         var action = async () => await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message });
@@ -68,7 +79,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Assert
         sut.IsInitialized.Should().BeFalse();
@@ -86,7 +101,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Assert
         sut.IsReady.Should().BeFalse();
@@ -113,7 +132,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             // Act
             var action = async () => await sut.InitializeAsync();
@@ -149,7 +169,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             // Act
             var action = async () => await sut.InitializeAsync();
@@ -186,7 +207,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             await sut.InitializeAsync();
 
@@ -221,7 +243,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             await sut.InitializeAsync();
 
@@ -253,7 +276,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Act
         var action = () => sut.Dispose();
@@ -274,7 +301,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Act
         var action = () =>
@@ -305,7 +336,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             await sut.InitializeAsync();
 
@@ -339,7 +371,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             // Act
             await sut.InitializeAsync();
@@ -372,7 +405,8 @@ public class FhirBundleProfileValidatorTests
             var sut = new FhirBundleProfileValidator(
                 config,
                 hostEnvironment.Object,
-                NullLogger<FhirBundleProfileValidator>.Instance);
+                NullLogger<FhirBundleProfileValidator>.Instance,
+                _jsonSerializerOptions);
 
             // Act
             await sut.InitializeAsync();
@@ -399,7 +433,11 @@ public class FhirBundleProfileValidatorTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
 
-        var sut = new FhirBundleProfileValidator(config, hostEnvironment.Object, NullLogger<FhirBundleProfileValidator>.Instance);
+        var sut = new FhirBundleProfileValidator(
+            config,
+            hostEnvironment.Object,
+            NullLogger<FhirBundleProfileValidator>.Instance,
+            _jsonSerializerOptions);
 
         // Act
         var output = await sut.ValidateAsync(new Bundle { Type = Bundle.BundleType.Message });

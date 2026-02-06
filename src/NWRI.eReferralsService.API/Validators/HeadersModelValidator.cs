@@ -5,14 +5,14 @@ using System.Text.RegularExpressions;
 using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Serialization;
 
 namespace NWRI.eReferralsService.API.Validators;
 
 public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     [GeneratedRegex(@"([a-zA-Z0-9-]+\|?)+", RegexOptions.CultureInvariant)]
     private static partial Regex ValidUseCaseRegex();
@@ -20,8 +20,10 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
     private const string AcceptTypePart = "application/fhir+json";
     private const string AcceptVersionPart = "version=1.2.0";
 
-    public HeadersModelValidator()
+    public HeadersModelValidator(IFhirJsonSerializerOptions jsonSerializerOptions)
     {
+        _jsonSerializerOptions = jsonSerializerOptions.Value;
+
         ClassLevelCascadeMode = CascadeMode.Continue;
         RuleLevelCascadeMode = CascadeMode.Stop;
 

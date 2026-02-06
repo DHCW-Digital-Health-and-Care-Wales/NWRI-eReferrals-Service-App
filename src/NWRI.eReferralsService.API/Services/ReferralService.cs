@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
@@ -30,25 +31,25 @@ public class ReferralService : IReferralService
     private readonly IValidator<HeadersModel> _headerValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
-    private readonly IRequestHeadersDecoder _requestHeadersDecoder;
+    private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
 
     public ReferralService(IWpasApiClient wpasApiClient,
         IValidator<BundleCreateReferralModel> createBundleValidator,
         IValidator<BundleCancelReferralModel> cancelBundleValidator,
         IFhirBundleProfileValidator fhirBundleProfileValidator,
         IValidator<HeadersModel> headerValidator,
-        JsonSerializerOptions jsonSerializerOptions,
+        IFhirJsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
-        IRequestHeadersDecoder requestHeadersDecoder)
+        IRequestFhirHeadersDecoder requestFhirHeadersDecoder)
     {
         _wpasApiClient = wpasApiClient;
         _createBundleValidator = createBundleValidator;
         _cancelBundleValidator = cancelBundleValidator;
         _fhirBundleProfileValidator = fhirBundleProfileValidator;
         _headerValidator = headerValidator;
-        _jsonSerializerOptions = jsonSerializerOptions;
+        _jsonSerializerOptions = jsonSerializerOptions.Value;
         _eventLogger = eventLogger;
-        _requestHeadersDecoder = requestHeadersDecoder;
+        _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
     }
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
@@ -71,14 +72,36 @@ public class ReferralService : IReferralService
 
         processingStopwatch.Stop();
 
-        var sourceSystem = _requestHeadersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
-        var userRole = _requestHeadersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
+        var sourceSystem = _requestFhirHeadersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
+        var userRole = _requestFhirHeadersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
 
         // TODO: Extract WPAS referral ID from the response
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, null,
             processingStopwatch.ElapsedMilliseconds));
 
         return responseContent;
+    }
+
+    private async Task<string> CreateReferralAsync(
+        string requestBody,
+        Bundle bundle,
+        CancellationToken cancellationToken)
+    {
+        await ValidateFhirProfileAsync(bundle, cancellationToken);
+        await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
+
+        return await _wpasApiClient.CreateReferralAsync(requestBody, cancellationToken);
+    }
+
+    private async Task<string> CancelReferralAsync(
+        string requestBody,
+        Bundle bundle,
+        CancellationToken cancellationToken)
+    {
+        await ValidateFhirProfileAsync(bundle, cancellationToken);
+        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator, cancellationToken);
+
+        return await _wpasApiClient.CancelReferralAsync(requestBody, cancellationToken);
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
@@ -154,27 +177,5 @@ public class ReferralService : IReferralService
     {
         var serviceRequest = bundle.ResourceByType<ServiceRequest>();
         return serviceRequest?.Status;
-    }
-
-    private async Task<string> CreateReferralAsync(
-        string requestBody,
-        Bundle bundle,
-        CancellationToken cancellationToken)
-    {
-        await ValidateFhirProfileAsync(bundle, cancellationToken);
-        await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
-
-        return await _wpasApiClient.CreateReferralAsync(requestBody, cancellationToken);
-    }
-
-    private async Task<string> CancelReferralAsync(
-        string requestBody,
-        Bundle bundle,
-        CancellationToken cancellationToken)
-    {
-        await ValidateFhirProfileAsync(bundle, cancellationToken);
-        await ValidateMandatoryDataAsync(bundle, _cancelBundleValidator, cancellationToken);
-
-        return await _wpasApiClient.CancelReferralAsync(requestBody, cancellationToken);
     }
 }

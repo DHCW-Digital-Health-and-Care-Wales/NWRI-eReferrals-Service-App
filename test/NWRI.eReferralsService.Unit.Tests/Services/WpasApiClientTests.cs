@@ -32,7 +32,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
                 .With(x => x.GetReferralEndpoint, $"{_fixture.Create<string>()}/{{0}}")
                 .Create();
 
-            _ = _fixture.Mock<IOptions<WpasApiConfig>>().SetupGet(x => x.Value).Returns(_wpasApiConfig);
+            _fixture.Mock<IOptions<WpasApiConfig>>().SetupGet(x => x.Value).Returns(_wpasApiConfig);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var expectedResponse = _fixture.Create<string>();
 
             using var mockHttp = new MockHttpMessageHandler();
-            _ = mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
+            mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
                 .WithContent(requestBody)
                 .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
                 .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -58,7 +58,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var result = await sut.CreateReferralAsync(requestBody, CancellationToken.None);
 
             // Assert
-            _ = result.Should().Be(expectedResponse);
+            result.Should().Be(expectedResponse);
 
             eventLogger.Verify(
                 x => x.Audit(It.Is<EventCatalogue.DataSuccessfullyCommittedToWpas>(e => e.ExecutionTimeMs >= 0 && e.WpasReferralId == null)),
@@ -75,7 +75,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var expectedResponse = _fixture.Create<string>();
 
             using var mockHttp = new MockHttpMessageHandler();
-            _ = mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CancelReferralEndpoint}")
+            mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CancelReferralEndpoint}")
                 .WithContent(requestBody)
                 .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
                 .Respond(FhirConstants.FhirMediaType, expectedResponse);
@@ -90,7 +90,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var result = await sut.CancelReferralAsync(requestBody, CancellationToken.None);
 
             // Assert
-            _ = result.Should().Be(expectedResponse);
+            result.Should().Be(expectedResponse);
 
             eventLogger.Verify(
                 x => x.Audit(It.Is<EventCatalogue.DataSuccessfullyCommittedToWpas>(e => e.ExecutionTimeMs >= 0 && e.WpasReferralId == null)),
@@ -110,7 +110,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var problemDetails = _fixture.Create<ProblemDetails>();
 
             using var mockHttp = new MockHttpMessageHandler();
-            _ = mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
+            mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
                 .Respond(statusCode, JsonContent.Create(problemDetails));
 
             using var httpClient = mockHttp.ToHttpClient();
@@ -124,8 +124,8 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
 
             // Assert
             var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-            _ = exception[0].StatusCode.Should().Be(statusCode);
-            _ = exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
+            exception[0].StatusCode.Should().Be(statusCode);
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
         }
 
         [Theory]
@@ -139,7 +139,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             var rawContent = _fixture.Create<string>();
 
             using var mockHttp = new MockHttpMessageHandler();
-            _ = mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
+            mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
                 .Respond(statusCode, new StringContent(rawContent));
 
             using var httpClient = mockHttp.ToHttpClient();
@@ -153,8 +153,8 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
 
             // Assert
             var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-            _ = exception[0].StatusCode.Should().Be(statusCode);
-            _ = exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+            exception[0].StatusCode.Should().Be(statusCode);
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
         }
     }
 }

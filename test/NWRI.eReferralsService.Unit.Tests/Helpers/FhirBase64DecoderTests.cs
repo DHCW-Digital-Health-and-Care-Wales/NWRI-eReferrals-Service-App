@@ -5,13 +5,21 @@ using Hl7.Fhir.Model;
 using Microsoft.Extensions.Logging.Abstractions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.API.Serialization;
 
 namespace NWRI.eReferralsService.Unit.Tests.Helpers;
 
 public class FhirBase64DecoderTests
 {
     private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions().ForFhirExtended();
-    private readonly FhirBase64Decoder _decoder = new(NullLogger<FhirBase64Decoder>.Instance);
+    private readonly FhirBase64Decoder _decoder;
+
+    public FhirBase64DecoderTests()
+    {
+        _decoder = new FhirBase64Decoder(
+            NullLogger<FhirBase64Decoder>.Instance,
+            new FhirJsonSerializerOptions());
+    }
 
     [Theory]
     [InlineData(null)]

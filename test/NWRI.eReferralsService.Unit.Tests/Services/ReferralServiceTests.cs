@@ -13,6 +13,7 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Serialization;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
@@ -43,11 +44,11 @@ public class ReferralServiceTests
                 Errors = new List<string>()
             });
 
-        _fixture.Mock<IRequestHeadersDecoder>()
+        _fixture.Mock<IRequestFhirHeadersDecoder>()
             .Setup(x => x.GetDecodedSourceSystem(It.IsAny<string?>()))
             .Returns(_fixture.Create<string>());
 
-        _fixture.Mock<IRequestHeadersDecoder>()
+        _fixture.Mock<IRequestFhirHeadersDecoder>()
             .Setup(x => x.GetDecodedUserRole(It.IsAny<string?>()))
             .Returns(_fixture.Create<string>());
 
@@ -422,9 +423,9 @@ public class ReferralServiceTests
             _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object,
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
-            _jsonSerializerOptions,
+            new FhirJsonSerializerOptions(),
             _fixture.Mock<IEventLogger>().Object,
-            _fixture.Mock<IRequestHeadersDecoder>().Object
+            _fixture.Mock<IRequestFhirHeadersDecoder>().Object
         );
     }
 

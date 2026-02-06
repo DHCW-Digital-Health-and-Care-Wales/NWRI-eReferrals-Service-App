@@ -11,6 +11,7 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Helpers;
+using NWRI.eReferralsService.API.Serialization;
 using Polly.Timeout;
 using Task = System.Threading.Tasks.Task;
 
@@ -25,12 +26,12 @@ public class ResponseMiddleware
 
     public ResponseMiddleware(
         RequestDelegate next,
-        JsonSerializerOptions serializerOptions,
+        IFhirJsonSerializerOptions serializerOptions,
         ILogger<ResponseMiddleware> logger,
         IEventLogger eventLogger)
     {
         _next = next;
-        _serializerOptions = serializerOptions;
+        _serializerOptions = serializerOptions.Value;
         _logger = logger;
         _eventLogger = eventLogger;
     }

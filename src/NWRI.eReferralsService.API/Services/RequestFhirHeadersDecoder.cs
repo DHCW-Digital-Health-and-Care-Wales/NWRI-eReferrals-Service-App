@@ -3,11 +3,11 @@ using NWRI.eReferralsService.API.Helpers;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public class RequestHeadersDecoder : IRequestHeadersDecoder
+public class RequestFhirHeadersDecoder : IRequestFhirHeadersDecoder
 {
     private readonly FhirBase64Decoder _fhirBase64Decoder;
 
-    public RequestHeadersDecoder(FhirBase64Decoder fhirBase64Decoder)
+    public RequestFhirHeadersDecoder(FhirBase64Decoder fhirBase64Decoder)
     {
         _fhirBase64Decoder = fhirBase64Decoder;
     }

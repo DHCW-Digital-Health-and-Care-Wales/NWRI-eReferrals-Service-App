@@ -56,7 +56,10 @@ public static class ServiceCollectionExtensions
             var wpasApiConfig = provider.GetRequiredService<IOptions<WpasApiConfig>>().Value;
             client.BaseAddress = new Uri(wpasApiConfig.BaseUrl);
         }).AddResilienceHandler("default", CreateResiliencePipeline);
+    }
 
+    public static void AddServices(this IServiceCollection services)
+    {
         services.AddScoped<IReferralService, ReferralService>();
     }
 
