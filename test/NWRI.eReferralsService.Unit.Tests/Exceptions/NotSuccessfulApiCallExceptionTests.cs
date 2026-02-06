@@ -48,7 +48,7 @@ public class NotSuccessfulApiCallExceptionTests
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
-        var extensionDictionary = new Dictionary<string, object>
+        var extensionDictionary = new Dictionary<string, object?>
         {
             { _fixture.Create<string>(), _fixture.Create<FooObject>() },
             { _fixture.Create<string>(), _fixture.Create<FooObject>() },
@@ -56,7 +56,7 @@ public class NotSuccessfulApiCallExceptionTests
         };
 
         var problemDetails = _fixture.Build<ProblemDetails>()
-            .With(x => x.Extensions, extensionDictionary!)
+            .With(x => x.Extensions, extensionDictionary)
             .Create();
 
         var errorParts = extensionDictionary.Select(pair => $"{pair.Key}: {JsonSerializer.Serialize(pair.Value)}");

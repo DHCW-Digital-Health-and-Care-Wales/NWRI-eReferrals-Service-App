@@ -21,7 +21,7 @@ public class HeadersModelValidatorTests
 
     public HeadersModelValidatorTests()
     {
-        _sut = _fixture.CreateWithFrozen<HeadersModelValidator>();
+        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended());
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
         _sut.RuleLevelCascadeMode = CascadeMode.Stop;
 

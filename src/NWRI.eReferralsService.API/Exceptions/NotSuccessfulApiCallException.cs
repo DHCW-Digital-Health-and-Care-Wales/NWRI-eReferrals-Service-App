@@ -36,16 +36,23 @@ public class NotSuccessfulApiCallException : BaseFhirException
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
     {
         StatusCode = statusCode;
-        Errors = [new UnexpectedError("PAS API call failed.")];
+        Errors = [new UnexpectedError("WPAS API call failed.")];
         ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
     }
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
     {
-        if (problemDetails.Extensions.TryGetValue(ValidationErrorsKey, out var errorMessages))
+        if (problemDetails.Extensions.TryGetValue(ValidationErrorsKey, out var validationErrors) && validationErrors is not null)
         {
-            var errorList = JsonSerializer.Deserialize<List<string>>(errorMessages!.ToString()!);
-            return errorList!.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
+            var validationErrorsJson = validationErrors.ToString();
+            if (validationErrorsJson != null)
+            {
+                var errorList = JsonSerializer.Deserialize<List<string>>(validationErrorsJson);
+                if (errorList != null)
+                {
+                    return errorList.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
+                }
+            }
         }
 
         if (problemDetails.Extensions.Count > 0)

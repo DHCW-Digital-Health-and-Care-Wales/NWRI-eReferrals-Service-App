@@ -10,9 +10,9 @@ Make sure you have the following installed and set up:
 
 ## Required configuration for local development
 To configure the project, follow these steps:
-1. Open [appsettings.Development.json](./src/NWRI.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
+1. Open [appsettings.Development.json](./src/NWRI.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for WPAS API.
 ```
-"PasReferralsApi": {
+"WpasApi": {
     "BaseUrl": "<YOUR_URL>"
 ```
 
@@ -91,8 +91,8 @@ The service uses `ResponseMiddleware` to handle all exceptions and return proper
 - **Bundle validation errors** (invalid structure/workflow) → `400 Bad Request`
 - **FHIR profile validation errors** → `400 Bad Request` with specific profile violations
 - **Request parameter validation errors** (e.g., invalid GUID) → `400 Bad Request`
-- **External API errors** (PAS API returns 500) → `503 Service Unavailable`
-- **Network errors** (PAS API unreachable) → `503 Service Unavailable`
+- **External API errors** (WPAS API returns 500) → `503 Service Unavailable`
+- **Network errors** (WPAS API unreachable) → `503 Service Unavailable`
 - **Timeout errors** (after all retries) → `503 Service Unavailable`
 - **Unknown errors** → `500 Internal Server Error`
 
@@ -136,7 +136,7 @@ The service validates incoming FHIR Bundles against UK Core and BARS profiles. C
 **Note**: When validation is enabled, the service will reject requests with `400 Bad Request` if the FHIR Bundle does not conform to the required profiles.
 
 ## Resilience
-All HTTP requests to external services (PAS Referrals API) use a resilience policy with automatic retry and timeout. Configuration in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
+All HTTP requests to external services (WPAS API) use a resilience policy with automatic retry and timeout. Configuration in [appsettings.json](./src/NWRI.eReferralsService.API/appsettings.json):
 ```json
 "Resilience": {
   "TotalTimeoutSeconds": 30,         // Total execution timeout (includes all retries)
@@ -189,7 +189,7 @@ If either field is missing, or the combination does not match the supported set,
   - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
   - 429 - Too many requests. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
-  - 503 - PAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+  - 503 - WPAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
 
 ### GET /ServiceRequest/&#123;id&#125;
 
@@ -205,4 +205,4 @@ Route parameter **id** should be a valid GUID.
   - 404 - Referral with provided id wasn't found [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/get-referral-not-found.json)
   - 429 - Too many requests [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
-  - 503 - PAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+  - 503 - WPAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)

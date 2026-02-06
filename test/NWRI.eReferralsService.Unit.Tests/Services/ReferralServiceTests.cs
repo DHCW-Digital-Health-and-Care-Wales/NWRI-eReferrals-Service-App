@@ -1,6 +1,4 @@
-using System.Globalization;
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
@@ -9,19 +7,15 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 using Moq;
-using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.Errors;
+using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
-using RichardSzalay.MockHttp;
 using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
@@ -29,18 +23,10 @@ namespace NWRI.eReferralsService.Unit.Tests.Services;
 public class ReferralServiceTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
-    private readonly PasReferralsApiConfig _pasReferralsApiConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
     public ReferralServiceTests()
     {
-        _pasReferralsApiConfig = _fixture.Build<PasReferralsApiConfig>()
-            .With(x => x.GetReferralEndpoint, $"{_fixture.Create<string>()}/{{0}}")
-            .With(x => x.CancelReferralEndpoint, _fixture.Create<string>())
-            .Create();
-
-        _fixture.Mock<IOptions<PasReferralsApiConfig>>().SetupGet(x => x.Value).Returns(_pasReferralsApiConfig);
-
         _fixture.Register(() => new Bundle
         {
             Id = _fixture.Create<string>(),
@@ -56,6 +42,22 @@ public class ReferralServiceTests
                 IsSuccessful = true,
                 Errors = new List<string>()
             });
+
+        _fixture.Mock<IRequestFhirHeadersDecoder>()
+            .Setup(x => x.GetDecodedSourceSystem(It.IsAny<string?>()))
+            .Returns(_fixture.Create<string>());
+
+        _fixture.Mock<IRequestFhirHeadersDecoder>()
+            .Setup(x => x.GetDecodedUserRole(It.IsAny<string?>()))
+            .Returns(_fixture.Create<string>());
+
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CreateReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_fixture.Create<string>());
+
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CancelReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_fixture.Create<string>());
     }
 
     [Fact]
@@ -74,22 +76,18 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .WithContent(bundleJson)
-            .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-            .Respond(FhirConstants.FhirMediaType, expectedResponse);
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         //Act
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         result.Should().Be(expectedResponse);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -99,7 +97,7 @@ public class ReferralServiceTests
         var bundleJson = JsonSerializer.Serialize(CreateMessageBundle("not-supported"), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+        var sut = CreateReferralService();
 
         //Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -115,7 +113,7 @@ public class ReferralServiceTests
         var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, RequestStatus.Revoked), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+        var sut = CreateReferralService();
 
         //Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -137,14 +135,7 @@ public class ReferralServiceTests
         var modelArgs = new List<HeadersModel>();
         _fixture.Mock<IValidator<HeadersModel>>().Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()));
 
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         //Act
         await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -170,14 +161,7 @@ public class ReferralServiceTests
         _fixture.Mock<IValidator<HeadersModel>>().Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         //Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -200,14 +184,7 @@ public class ReferralServiceTests
         var modelArgs = new List<BundleCreateReferralModel>();
         _fixture.Mock<IValidator<BundleCreateReferralModel>>().Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()));
 
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         //Act
         await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -233,7 +210,7 @@ public class ReferralServiceTests
         _fixture.Mock<IValidator<BundleCreateReferralModel>>().Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+        var sut = CreateReferralService();
 
         //Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -269,7 +246,7 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<Bundle>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureOutput);
 
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+        var sut = CreateReferralService();
 
         //Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -286,223 +263,17 @@ public class ReferralServiceTests
         var expectedResponse = _fixture.Create<string>();
         var headers = _fixture.Create<IHeaderDictionary>();
 
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .WithContent(bundleJson)
-            .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-            .Respond(FhirConstants.FhirMediaType, expectedResponse);
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         //Act
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
         result.Should().Be(expectedResponse);
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNot200ResponseWithProblemDetails(HttpStatusCode statusCode)
-    {
-        //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
-        var problemDetails = _fixture.Create<ProblemDetails>();
-
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, JsonContent.Create(problemDetails));
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
-
-        //Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNotJsonAndNot200Response(HttpStatusCode statusCode)
-    {
-        //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
-        var stringContent = _fixture.Create<string>();
-
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, new StringContent(stringContent));
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
-
-        //Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
-    }
-
-    [Theory]
-    [InlineData("123")]
-    [InlineData(null)]
-    public async Task GetReferralAsyncShouldThrowWhenInvalidGuid(string? invalidGuid)
-    {
-        //Arrange
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Get,
-                string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", invalidGuid))
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var action = async () => await sut.GetReferralAsync(headers, invalidGuid);
-
-        //Assert
-        await action.Should().ThrowAsync<RequestParameterValidationException>()
-            .WithMessage("Request parameter validation failure. Parameter name: id, Error: Id should be a valid GUID.");
-    }
-
-    [Fact]
-    public async Task GetReferralAsyncShouldValidateHeaders()
-    {
-        //Arrange
-        var id = Guid.NewGuid().ToString();
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var expectedModel = HeadersModel.FromHeaderDictionary(headers);
-
-        var modelArgs = new List<HeadersModel>();
-        _fixture.Mock<IValidator<HeadersModel>>().Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()));
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Get, string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", id))
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        await sut.GetReferralAsync(headers, id);
-
-        //Assert
-        modelArgs[0].Should().BeEquivalentTo(expectedModel);
-        _fixture.Mock<IValidator<HeadersModel>>().Verify(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()));
-    }
-
-    [Fact]
-    public async Task GetReferralAsyncShouldThrowWhenInvalidHeaders()
-    {
-        //Arrange
-        var id = Guid.NewGuid().ToString();
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var validationFailures = _fixture.CreateMany<ValidationFailure>().ToList();
-        var validationResult = _fixture.Build<ValidationResult>()
-            .With(x => x.Errors, validationFailures)
-            .Create();
-
-        _fixture.Mock<IValidator<HeadersModel>>().Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(validationResult);
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Get, string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", id))
-            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var action = async () => await sut.GetReferralAsync(headers, id);
-
-        //Assert
-        (await action.Should().ThrowAsync<HeaderValidationException>())
-            .Which.Message.Should().Contain(string.Join(';', validationFailures.Select(x => x.ErrorMessage)));
-    }
-
-    [Fact]
-    public async Task GetReferralAsyncShouldReturnOutputBundleJson()
-    {
-        //Arrange
-        var id = Guid.NewGuid().ToString();
-
-        var expectedResponse = _fixture.Create<string>();
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Get, string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", id))
-            .Respond(FhirConstants.FhirMediaType, expectedResponse);
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var result = await sut.GetReferralAsync(headers, id);
-
-        //Assert
-        result.Should().Be(expectedResponse);
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task GetReferralAsyncShouldThrowWhenNot200Response(HttpStatusCode statusCode)
-    {
-        //Arrange
-        var id = Guid.NewGuid().ToString();
-        var problemDetails = _fixture.Create<ProblemDetails>();
-
-        var headers = _fixture.Create<IHeaderDictionary>();
-
-        var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Get, string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", id))
-            .Respond(statusCode, JsonContent.Create(problemDetails));
-
-        var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
-
-        //Act
-        var action = async () => await sut.GetReferralAsync(headers, id);
-
-        //Assert
-        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
-            .Which.StatusCode.Should().Be(statusCode);
     }
 
     [Fact]
@@ -524,22 +295,18 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
-            .WithContent(bundleJson)
-            .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-            .Respond(FhirConstants.FhirMediaType, expectedResponse);
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CancelReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         // Act
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
         result.Should().Be(expectedResponse);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(bundleJson, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -561,16 +328,11 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
-            .WithContent(bundleJson)
-            .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-            .Respond(FhirConstants.FhirMediaType, expectedResponse);
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CancelReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         // Act
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -607,7 +369,7 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<Bundle>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureOutput);
 
-        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+        var sut = CreateReferralService();
 
         // Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
@@ -620,7 +382,7 @@ public class ReferralServiceTests
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.NotFound)]
-    public async Task CancelReferralShouldThrowWhenPasReturnsNonSuccess(HttpStatusCode statusCode)
+    public async Task CancelReferralShouldThrowWhenWpasReturnsNonSuccess(HttpStatusCode statusCode)
     {
         // Arrange
         var bundleJson = JsonSerializer.Serialize(
@@ -638,34 +400,31 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCancelReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CancelReferralEndpoint}")
-            .Respond(statusCode, JsonContent.Create(problemDetails));
+        _fixture.Mock<IWpasApiClient>()
+            .Setup(x => x.CancelReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotSuccessfulApiCallException(statusCode, problemDetails));
 
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri("https://some.com");
-
-        var sut = CreateReferralService(httpClient);
+        var sut = CreateReferralService();
 
         // Act
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
+        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
+            .Which.StatusCode.Should().Be(statusCode);
     }
 
-    private ReferralService CreateReferralService(HttpClient httpClient)
+    private ReferralService CreateReferralService()
     {
         return new ReferralService(
-            httpClient,
-            _fixture.Mock<IOptions<PasReferralsApiConfig>>().Object,
+            _fixture.Mock<IWpasApiClient>().Object,
             _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object,
             _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object,
             _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
-            _jsonSerializerOptions
+            new JsonSerializerOptions().ForFhirExtended(),
+            _fixture.Mock<IEventLogger>().Object,
+            _fixture.Mock<IRequestFhirHeadersDecoder>().Object
         );
     }
 

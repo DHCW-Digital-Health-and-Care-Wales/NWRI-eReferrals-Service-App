@@ -4,9 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace NWRI.eReferralsService.API.Configuration;
 
 [ExcludeFromCodeCoverage]
-public class PasReferralsApiConfig
+public class WpasApiConfig
 {
-    public static string SectionName => "PasReferralsApi";
+    public static string SectionName => "WpasApi";
 
     [Required]
     public required string BaseUrl { get; set; }

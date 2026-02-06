@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
 
 namespace NWRI.eReferralsService.API.Controllers;
 
 [ApiController]
+[AuditLogRequest]
 public class ReferralsController : ControllerBase
 {
     private readonly IReferralService _referralService;
@@ -29,22 +31,6 @@ public class ReferralsController : ControllerBase
         var body = await reader.ReadToEndAsync(cancellationToken);
 
         var outputBundleJson = await _referralService.ProcessMessageAsync(HttpContext.Request.Headers, body, cancellationToken);
-
-        return new ContentResult
-        {
-            Content = outputBundleJson,
-            StatusCode = 200,
-            ContentType = FhirConstants.FhirMediaType
-        };
-    }
-
-    [HttpGet("ServiceRequest/{id}")]
-    [SwaggerGetReferralRequest]
-    public async Task<IActionResult> GetReferral(string? id)
-    {
-        _logger.CalledMethod(nameof(GetReferral));
-
-        var outputBundleJson = await _referralService.GetReferralAsync(HttpContext.Request.Headers, id);
 
         return new ContentResult
         {
