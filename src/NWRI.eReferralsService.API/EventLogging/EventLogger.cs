@@ -20,7 +20,7 @@ public sealed class EventLogger : IEventLogger
     private const string ExceptionTypeKey = "ExceptionType";
     private const string ExceptionMessageKey = "ExceptionMessage";
 
-    private readonly record struct EventTypeMetadata(string EventName, PropertyInfo[] Properties);
+    private sealed record EventTypeMetadata(string EventName, PropertyInfo[] Properties);
     private static readonly ConcurrentDictionary<Type, EventTypeMetadata> EventTypeMetadataCache = new();
 
     public EventLogger(TelemetryClient telemetryClient)
