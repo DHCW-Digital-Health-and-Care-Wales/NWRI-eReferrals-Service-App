@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
             .GetValue<string>(nameof(ApplicationInsightsConfig.ConnectionString));
 
         services.AddApplicationInsightsTelemetry(options => options.ConnectionString = appInsightsConnectionString);
+        services.AddSingleton<ITelemetryInitializer, EnrichLoggerContext>();
         services.Configure<TelemetryConfiguration>(config =>
         {
             if (isDevelopmentEnvironment)
@@ -49,11 +51,16 @@ public static class ServiceCollectionExtensions
 
     public static void AddHttpClients(this IServiceCollection services)
     {
-        services.AddHttpClient<IReferralService, ReferralService>((provider, client) =>
+        services.AddHttpClient<IWpasApiClient, WpasApiClient>((provider, client) =>
         {
-            var pasApiConfig = provider.GetRequiredService<IOptions<PasReferralsApiConfig>>().Value;
-            client.BaseAddress = new Uri(pasApiConfig.BaseUrl);
+            var wpasApiConfig = provider.GetRequiredService<IOptions<WpasApiConfig>>().Value;
+            client.BaseAddress = new Uri(wpasApiConfig.BaseUrl);
         }).AddResilienceHandler("default", CreateResiliencePipeline);
+    }
+
+    public static void AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<IReferralService, ReferralService>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)

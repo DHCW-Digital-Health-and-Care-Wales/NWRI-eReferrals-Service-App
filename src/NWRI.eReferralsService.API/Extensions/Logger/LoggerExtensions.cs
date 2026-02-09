@@ -29,10 +29,10 @@ public static partial class LoggerExtensions
     [LoggerMessage(Level = LogLevel.Error, Message = "Invalid JSON.")]
     public static partial void InvalidJson(this ILogger logger, JsonException exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while calling the PAS API.")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while calling the WPAS API.")]
     public static partial void ApiCallError(this ILogger logger, HttpRequestException exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "PAS API returned not successful response.")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "WPAS API returned not successful response.")]
     public static partial void NotSuccessfulApiResponseError(this ILogger logger, NotSuccessfulApiCallException exception);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error.")]
@@ -40,4 +40,7 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Proxy endpoint not implemented (BaRS Core Spec).")]
     public static partial void ProxyNotImplemented(this ILogger logger, ProxyNotImplementedException exception);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to decode base64 string.")]
+    public static partial void Base64DecodingFailure(this ILogger logger, Exception exception);
 }

@@ -17,6 +17,7 @@ using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Integration.Tests.Middleware;
 
@@ -50,7 +51,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Required);
@@ -85,7 +88,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Invalid);
@@ -116,7 +121,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Structure);
@@ -147,7 +154,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Structure);
@@ -181,7 +190,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(outCode);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component => { component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error); });
     }
 
@@ -209,7 +220,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Invalid);
@@ -240,7 +253,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Transient);
@@ -270,7 +285,9 @@ public class ResponseMiddlewareTests
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
+            new JsonSerializerOptions().ForFhirExtended());
+
+        operationOutcome.Should().NotBeNull();
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Transient);
@@ -400,14 +417,14 @@ public class ResponseMiddlewareTests
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,
-            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
-            configureApp: app => app.UseMiddleware<ResponseMiddleware>());
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
+            app => app.UseMiddleware<ResponseMiddleware>());
     }
 
     private static IHost StartHost()
     {
         return HostProvider.StartHostWithEndpoint(_ => Task.CompletedTask,
-            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
-            configureApp: app => app.UseMiddleware<ResponseMiddleware>());
+            services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
+            app => app.UseMiddleware<ResponseMiddleware>());
     }
 }
