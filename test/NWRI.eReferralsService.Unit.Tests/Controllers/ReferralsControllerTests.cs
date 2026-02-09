@@ -86,7 +86,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public void GetServiceRequest_ShouldThrowProxyNotImplementedException()
+    public void GetServiceRequestShouldThrowProxyNotImplementedException()
     {
         // Arrange
         var headers = _fixture.Create<IHeaderDictionary>();
