@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
 
 namespace NWRI.eReferralsService.API.Controllers;
 
 [ApiController]
+[AuditLogRequest]
 public class ReferralsController : ControllerBase
 {
     private readonly IReferralService _referralService;
