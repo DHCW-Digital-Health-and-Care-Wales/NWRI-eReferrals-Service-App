@@ -14,6 +14,8 @@ updates:
       - "security"
     ignore:
       - dependency-name: "FluentAssertions"
+      - dependency-name: "Microsoft.Extensions.Diagnostics.HealthChecks"
+        update-types: ["version-update:semver-major"]
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"

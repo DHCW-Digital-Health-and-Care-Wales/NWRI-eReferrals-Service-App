@@ -6,9 +6,9 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using Task = System.Threading.Tasks.Task;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Validators
 {
@@ -20,6 +20,7 @@ namespace NWRI.eReferralsService.API.Validators
         private readonly FhirBundleProfileValidationConfig _config;
         private readonly ILogger<FhirBundleProfileValidator> _logger;
         private readonly IHostEnvironment _hostEnvironment;
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         private Validator? _validator;
         private CachedResolver? _cachedResolver;
@@ -34,11 +35,13 @@ namespace NWRI.eReferralsService.API.Validators
         public FhirBundleProfileValidator(
             IOptions<FhirBundleProfileValidationConfig> config,
             IHostEnvironment hostEnvironment,
-            ILogger<FhirBundleProfileValidator> logger)
+            ILogger<FhirBundleProfileValidator> logger,
+            JsonSerializerOptions jsonSerializerOptions)
         {
             _config = config.Value;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
+            _jsonSerializerOptions = jsonSerializerOptions;
         }
 
         public bool IsInitialized => _isInitialized;
@@ -160,8 +163,7 @@ namespace NWRI.eReferralsService.API.Validators
             try
             {
                 var jsonContent = await File.ReadAllTextAsync(exampleFilePath, cancellationToken);
-                var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
-                var warmupBundle = JsonSerializer.Deserialize<Bundle>(jsonContent, jsonSerializerOptions);
+                var warmupBundle = JsonSerializer.Deserialize<Bundle>(jsonContent, _jsonSerializerOptions);
 
                 if (warmupBundle == null)
                 {

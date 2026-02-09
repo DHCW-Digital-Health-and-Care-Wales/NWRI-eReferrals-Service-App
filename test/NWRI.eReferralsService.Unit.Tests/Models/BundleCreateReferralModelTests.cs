@@ -5,6 +5,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+// ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Models;
 
