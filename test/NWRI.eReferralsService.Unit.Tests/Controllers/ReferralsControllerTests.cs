@@ -120,7 +120,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public void GetServiceRequestsShouldThrowProxyNotImplementedException()
+    public void GetAppointmentsShouldThrowProxyNotImplementedException()
     {
         // Arrange
         var headers = _fixture.Create<IHeaderDictionary>();
@@ -128,11 +128,11 @@ public class ReferralsControllerTests
         SetRequestDetails(headers);
 
         // Act
-        var act = _sut.GetReferrals;
+        var act = _sut.GetAppointments;
 
         // Assert
         var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
-        //ex.StatusCode.Should().Be(System.Net.HttpStatusCode.NotImplemented);
+        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
         ex.Message.Should().Contain("not been implemented");
     }
 
