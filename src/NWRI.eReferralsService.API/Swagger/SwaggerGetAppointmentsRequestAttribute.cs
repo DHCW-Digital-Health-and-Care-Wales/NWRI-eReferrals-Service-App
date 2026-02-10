@@ -4,4 +4,4 @@ namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method)]
-public class SwaggerGetAppointmentsAttribute : Attribute;
+public class SwaggerGetAppointmentsRequestAttribute : Attribute;

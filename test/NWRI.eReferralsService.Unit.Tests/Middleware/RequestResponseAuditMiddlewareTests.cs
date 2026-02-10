@@ -51,7 +51,7 @@ public class RequestResponseAuditMiddlewareTests
 
         var resp = (EventCatalogue.ResponseSent)spyLogger.AuditEvents[1];
         resp.StatusCode.Should().Be(StatusCodes.Status200OK);
-        resp.LatencyMs.Should().BeGreaterThanOrEqualTo(0);
+        resp.LatencyMs.Should().BeGreaterOrEqualTo(0);
     }
 
     [Fact]

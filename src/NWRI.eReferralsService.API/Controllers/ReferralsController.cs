@@ -50,7 +50,7 @@ public class ReferralsController : ControllerBase
     }
 
     [HttpGet("Appointment")]
-    [SwaggerGetReferralsRequest]
+    [SwaggerGetAppointmentsRequest]
     public IActionResult GetAppointments()
     {
         _logger.CalledMethod(nameof(GetAppointments));

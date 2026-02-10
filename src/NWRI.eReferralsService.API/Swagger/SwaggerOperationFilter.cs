@@ -78,7 +78,7 @@ public class SwaggerOperationFilter : IOperationFilter
 
     private static void HandleGetAppointments(OpenApiOperation operation, OperationFilterContext context)
     {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsAttribute>();
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>();
         if (attr is null)
         {
             return;
