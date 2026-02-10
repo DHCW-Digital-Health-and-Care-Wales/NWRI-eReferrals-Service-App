@@ -77,7 +77,7 @@ public class ReferralsControllerTests
         SetRequestDetails(headers);
 
         // Act
-        Action act = () => _sut.GetReferral(id);
+        Action act = () => _sut.GetReferralById(id);
 
         // Assert
         var ex = act.Should().Throw<ProxyNotImplementedException>().Which;

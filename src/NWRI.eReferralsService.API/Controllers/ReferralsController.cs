@@ -42,9 +42,9 @@ public class ReferralsController : ControllerBase
 
     [HttpGet("ServiceRequest/{id}")]
     [SwaggerGetReferralRequest]
-    public IActionResult GetReferral(string id)
+    public IActionResult GetReferralById(string id)
     {
-        _logger.CalledMethod(nameof(GetReferral));
+        _logger.CalledMethod(nameof(GetReferralById));
 
         throw new ProxyNotImplementedException();
     }
