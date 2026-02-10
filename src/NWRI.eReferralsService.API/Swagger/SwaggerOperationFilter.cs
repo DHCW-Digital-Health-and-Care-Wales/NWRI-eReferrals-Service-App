@@ -44,6 +44,17 @@ public class SwaggerOperationFilter : IOperationFilter
             return;
         }
 
+        operation.Parameters =
+        [
+            new OpenApiParameter
+            {
+                In = ParameterLocation.Path,
+                Name = "id",
+                Required = true,
+                Example = new OpenApiString(Guid.NewGuid().ToString())
+            }
+        ];
+
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
