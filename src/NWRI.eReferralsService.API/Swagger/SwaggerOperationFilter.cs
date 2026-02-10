@@ -15,6 +15,7 @@ public class SwaggerOperationFilter : IOperationFilter
         HandleProcessMessage(operation, context);
         HandleGetReferral(operation, context);
         HandleGetReferrals(operation, context);
+        HandleGetAppointments(operation, context);
     }
 
     private static void HandleProcessMessage(OpenApiOperation operation, OperationFilterContext context)
@@ -75,6 +76,20 @@ public class SwaggerOperationFilter : IOperationFilter
         AddGetReferralsResponses(operation);
     }
 
+    private static void HandleGetAppointments(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>();
+        if (attr is null)
+        {
+            return;
+        }
+
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+
+        AddGetAppointmentsResponses(operation);
+    }
+
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
     {
         foreach (var header in headers)
@@ -101,103 +116,46 @@ public class SwaggerOperationFilter : IOperationFilter
             });
     }
 
+    private static OpenApiResponse CreateFhirResponseWithExample(string description, string examplePath)
+    {
+        return new OpenApiResponse
+        {
+            Description = description,
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                {
+                    RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept),
+                    new OpenApiMediaType
+                    {
+                        Example = new OpenApiString(File.ReadAllText(examplePath))
+                    }
+                }
+            }
+        };
+    }
+
     private static void AddGetReferralResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {
-            {
-                "200", new OpenApiResponse
-                {
-                    Description = "OK",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/get-referral-ok-response.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "400", new OpenApiResponse
-                {
-                    Description = "Bad Request",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/get-referral-bad-request.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "404", new OpenApiResponse
-                {
-                    Description = "Not Found",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/get-referral-not-found.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "429", new OpenApiResponse
-                {
-                    Description = "Too many requests",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/common-too-many-requests.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "500", new OpenApiResponse
-                {
-                    Description = "Internal Server Error",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-internal-server-error.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "503", new OpenApiResponse
-                {
-                    Description = "Service Unavailable",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-external-server-error.json")),
-                            }
-                        }
-                    }
-                }
-            }
+            ["200"] = CreateFhirResponseWithExample(
+                "OK",
+                "Swagger/Examples/get-referral-ok-response.json"),
+            ["400"] = CreateFhirResponseWithExample(
+                "Bad Request",
+                "Swagger/Examples/get-referral-bad-request.json"),
+            ["404"] = CreateFhirResponseWithExample(
+                "Not Found",
+                "Swagger/Examples/get-referral-not-found.json"),
+            ["429"] = CreateFhirResponseWithExample(
+                "Too many requests",
+                "Swagger/Examples/common-too-many-requests.json"),
+            ["500"] = CreateFhirResponseWithExample(
+                "Internal Server Error",
+                "Swagger/Examples/common-internal-server-error.json"),
+            ["503"] = CreateFhirResponseWithExample(
+                "Service Unavailable",
+                "Swagger/Examples/common-external-server-error.json")
         };
     }
 
@@ -205,84 +163,21 @@ public class SwaggerOperationFilter : IOperationFilter
     {
         operation.Responses = new OpenApiResponses
         {
-            {
-                "200", new OpenApiResponse
-                {
-                    Description = "OK",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "400", new OpenApiResponse
-                {
-                    Description = "Bad Request",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/process-message-bad-request.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "429", new OpenApiResponse
-                {
-                    Description = "Too many requests",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/common-too-many-requests.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "500", new OpenApiResponse
-                {
-                    Description = "Internal Server Error",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-internal-server-error.json")),
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "503", new OpenApiResponse
-                {
-                    Description = "Service Unavailable",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-external-server-error.json")),
-                            }
-                        }
-                    }
-                }
-            }
+            ["200"] = CreateFhirResponseWithExample(
+                "OK",
+                "Swagger/Examples/process-message-payload-and-response.json"),
+            ["400"] = CreateFhirResponseWithExample(
+                "Bad Request",
+                "Swagger/Examples/process-message-bad-request.json"),
+            ["429"] = CreateFhirResponseWithExample(
+                "Too many requests",
+                "Swagger/Examples/common-too-many-requests.json"),
+            ["500"] = CreateFhirResponseWithExample(
+                "Internal Server Error",
+                "Swagger/Examples/common-internal-server-error.json"),
+            ["503"] = CreateFhirResponseWithExample(
+                "Service Unavailable",
+                "Swagger/Examples/common-external-server-error.json")
         };
     }
 
@@ -290,54 +185,31 @@ public class SwaggerOperationFilter : IOperationFilter
     {
         operation.Responses = new OpenApiResponses
         {
-            {
-                "429", new OpenApiResponse
-                {
-                    Description = "Too many requests",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-too-many-requests.json"))
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "500", new OpenApiResponse
-                {
-                    Description = "Internal Server Error",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-internal-server-error.json"))
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                "501", new OpenApiResponse
-                {
-                    Description = "Not Implemented",
-                    Content = new Dictionary<string, OpenApiMediaType>
-                    {
-                        {
-                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
-                            {
-                                Example = new OpenApiString(
-                                    File.ReadAllText("Swagger/Examples/common-proxy-not-implemented.json"))
-                            }
-                        }
-                    }
-                }
-            }
+            ["429"] = CreateFhirResponseWithExample(
+                "Too many requests",
+                "Swagger/Examples/common-too-many-requests.json"),
+            ["500"] = CreateFhirResponseWithExample(
+                "Internal Server Error",
+                "Swagger/Examples/common-internal-server-error.json"),
+            ["501"] = CreateFhirResponseWithExample(
+                "Not Implemented",
+                "Swagger/Examples/common-proxy-not-implemented.json")
+        };
+    }
+
+    private static void AddGetAppointmentsResponses(OpenApiOperation operation)
+    {
+        operation.Responses = new OpenApiResponses
+        {
+            ["429"] = CreateFhirResponseWithExample(
+                "Too many requests",
+                "Swagger/Examples/common-too-many-requests.json"),
+            ["500"] = CreateFhirResponseWithExample(
+                "Internal Server Error",
+                "Swagger/Examples/common-internal-server-error.json"),
+            ["501"] = CreateFhirResponseWithExample(
+                "Not Implemented",
+                "Swagger/Examples/common-proxy-not-implemented.json")
         };
     }
 }
