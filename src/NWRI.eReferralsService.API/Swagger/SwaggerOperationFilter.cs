@@ -286,7 +286,7 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 
-    private static void AddGetAppointmentsResponses(OpenApiOperation operation)
+    private static void AddProxyNotImplementedResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {
@@ -302,19 +302,13 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 
+    private static void AddGetAppointmentsResponses(OpenApiOperation operation)
+    {
+        AddProxyNotImplementedResponses(operation);
+    }
+
     private static void AddGetBookingSlotResponses(OpenApiOperation operation)
     {
-        operation.Responses = new OpenApiResponses
-        {
-            ["429"] = CreateFhirResponseWithExample(
-                "Too many requests",
-                "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
-            ["501"] = CreateFhirResponseWithExample(
-                "Not Implemented",
-                "Swagger/Examples/common-proxy-not-implemented.json")
-        };
+        AddProxyNotImplementedResponses(operation);
     }
 }
