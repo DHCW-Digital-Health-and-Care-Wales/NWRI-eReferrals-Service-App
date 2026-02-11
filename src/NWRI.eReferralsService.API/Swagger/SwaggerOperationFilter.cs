@@ -16,6 +16,7 @@ public class SwaggerOperationFilter : IOperationFilter
         HandleGetReferral(operation, context);
         HandleGetReferrals(operation, context);
         HandleGetAppointments(operation, context);
+        HandleGetBookingSlot(operation, context);
     }
 
     private static void HandleProcessMessage(OpenApiOperation operation, OperationFilterContext context)
@@ -88,6 +89,20 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
         AddGetAppointmentsResponses(operation);
+    }
+
+    private static void HandleGetBookingSlot(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>();
+        if (attr is null)
+        {
+            return;
+        }
+
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+
+        AddGetBookingSlotResponses(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
@@ -198,6 +213,22 @@ public class SwaggerOperationFilter : IOperationFilter
     }
 
     private static void AddGetAppointmentsResponses(OpenApiOperation operation)
+    {
+        operation.Responses = new OpenApiResponses
+        {
+            ["429"] = CreateFhirResponseWithExample(
+                "Too many requests",
+                "Swagger/Examples/common-too-many-requests.json"),
+            ["500"] = CreateFhirResponseWithExample(
+                "Internal Server Error",
+                "Swagger/Examples/common-internal-server-error.json"),
+            ["501"] = CreateFhirResponseWithExample(
+                "Not Implemented",
+                "Swagger/Examples/common-proxy-not-implemented.json")
+        };
+    }
+
+    private static void AddGetBookingSlotResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {
