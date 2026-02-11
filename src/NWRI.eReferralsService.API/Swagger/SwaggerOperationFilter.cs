@@ -102,6 +102,7 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
+        AddGetBookingSlotQueryOperation(operation);
         AddGetBookingSlotResponses(operation);
     }
 
@@ -129,6 +130,79 @@ public class SwaggerOperationFilter : IOperationFilter
                 Example = new OpenApiString(
                     File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
             });
+    }
+
+    private static void AddGetBookingSlotQueryOperation(OpenApiOperation operation)
+    {
+        operation.Parameters =
+        [
+            new OpenApiParameter
+            {
+                Name = "status",
+                In = ParameterLocation.Query,
+                Required = true,
+                Description = "Comma-separated Slot status values (free, busy). Default: free.",
+                Schema = new OpenApiSchema
+                {
+                    Type = "string",
+                    Example = new OpenApiString("free,busy")
+                }
+            },
+            new OpenApiParameter
+            {
+                Name = "start",
+                In = ParameterLocation.Query,
+                Required = true,
+                Description = "Use twice with ge and le prefixes to define time window.",
+                Schema = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "string" },
+                    Example = new OpenApiArray
+                    {
+                        new OpenApiString("ge2022-03-01T12:00:00+00:00"),
+                        new OpenApiString("le2022-03-01T13:30:00+00:00")
+                    }
+                },
+                Style = ParameterStyle.Form,
+                Explode = true
+            },
+            new OpenApiParameter
+            {
+                Name = "_include",
+                In = ParameterLocation.Query,
+                Required = true,
+                Description =
+                    "FHIR _include parameters. Repeat the parameter to include multiple values. " +
+                    "Minimum required: Slot:schedule and Schedule:actor:HealthcareService. " +
+                    "Unsupported _include values will be ignored and omitted from the response Bundle.link.url.",
+                Style = ParameterStyle.Form,
+                Explode = true,
+                Schema = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema
+                    {
+                        Type = "string",
+                        Enum = new List<IOpenApiAny>
+                        {
+                            new OpenApiString("Slot:schedule"),
+                            new OpenApiString("Schedule:actor:Practitioner"),
+                            new OpenApiString("Schedule:actor:PractitionerRole"),
+                            new OpenApiString("Schedule:actor:HealthcareService"),
+                            new OpenApiString("HealthcareService:providedBy"),
+                            new OpenApiString("HealthcareService:location"),
+                            new OpenApiString("Slot:*")
+                        }
+                    }
+                },
+                Example = new OpenApiArray
+                {
+                    new OpenApiString("Slot:schedule"),
+                    new OpenApiString("Schedule:actor:HealthcareService")
+                }
+            }
+        ];
     }
 
     private static OpenApiResponse CreateFhirResponseWithExample(string description, string examplePath)
