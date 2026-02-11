@@ -13,8 +13,8 @@ public class SwaggerOperationFilter : IOperationFilter
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         HandleProcessMessage(operation, context);
-        HandleGetReferral(operation, context);
         HandleGetReferrals(operation, context);
+        HandleGetReferralById(operation, context);
         HandleGetAppointments(operation, context);
         HandleGetAppointmentById(operation, context);
     }
@@ -37,23 +37,6 @@ public class SwaggerOperationFilter : IOperationFilter
         AddProcessMessageRequests(operation);
     }
 
-    private static void HandleGetReferral(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var getReferralRequestAttribute = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralRequestAttribute>();
-
-        if (getReferralRequestAttribute is null)
-        {
-            return;
-        }
-
-        EnsureIdPathParameter(operation);
-
-        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
-        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
-
-        AddGetReferralResponses(operation);
-    }
-
     private static void HandleGetReferrals(OpenApiOperation operation, OperationFilterContext context)
     {
         var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>();
@@ -65,9 +48,25 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
-        AddGetReferralsResponses(operation);
+        AddNotImplementedResponses(operation);
     }
 
+    private static void HandleGetReferralById(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralByIdRequestAttribute>();
+
+        if (attr is null)
+        {
+            return;
+        }
+
+        EnsureIdPathParameter(operation);
+
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+
+        AddNotImplementedResponses(operation);
+    }
     private static void HandleGetAppointments(OpenApiOperation operation, OperationFilterContext context)
     {
         var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>();
@@ -79,13 +78,14 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
-        AddGetAppointmentsResponses(operation);
+        AddNotImplementedResponses(operation);
     }
+
     private static void HandleGetAppointmentById(OpenApiOperation operation, OperationFilterContext context)
     {
-        var getAppointmentByIdRequestAttribute = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentByIdRequestAttribute>();
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentByIdRequestAttribute>();
 
-        if (getAppointmentByIdRequestAttribute is null)
+        if (attr is null)
         {
             return;
         }
@@ -95,7 +95,7 @@ public class SwaggerOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
-        AddGetAppointmentByIdResponses(operation);
+        AddNotImplementedResponses(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
@@ -164,31 +164,6 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 
-    private static void AddGetReferralResponses(OpenApiOperation operation)
-    {
-        operation.Responses = new OpenApiResponses
-        {
-            ["200"] = CreateFhirResponseWithExample(
-                "OK",
-                "Swagger/Examples/get-referral-ok-response.json"),
-            ["400"] = CreateFhirResponseWithExample(
-                "Bad Request",
-                "Swagger/Examples/get-referral-bad-request.json"),
-            ["404"] = CreateFhirResponseWithExample(
-                "Not Found",
-                "Swagger/Examples/get-referral-not-found.json"),
-            ["429"] = CreateFhirResponseWithExample(
-                "Too many requests",
-                "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
-            ["503"] = CreateFhirResponseWithExample(
-                "Service Unavailable",
-                "Swagger/Examples/common-external-server-error.json")
-        };
-    }
-
     private static void AddProcessMessageResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
@@ -211,39 +186,8 @@ public class SwaggerOperationFilter : IOperationFilter
         };
     }
 
-    private static void AddGetReferralsResponses(OpenApiOperation operation)
-    {
-        operation.Responses = new OpenApiResponses
-        {
-            ["429"] = CreateFhirResponseWithExample(
-                "Too many requests",
-                "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
-            ["501"] = CreateFhirResponseWithExample(
-                "Not Implemented",
-                "Swagger/Examples/common-proxy-not-implemented.json")
-        };
-    }
 
-    private static void AddGetAppointmentsResponses(OpenApiOperation operation)
-    {
-        operation.Responses = new OpenApiResponses
-        {
-            ["429"] = CreateFhirResponseWithExample(
-                "Too many requests",
-                "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
-            ["501"] = CreateFhirResponseWithExample(
-                "Not Implemented",
-                "Swagger/Examples/common-proxy-not-implemented.json")
-        };
-    }
-
-    private static void AddGetAppointmentByIdResponses(OpenApiOperation operation)
+    private static void AddNotImplementedResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {

@@ -41,7 +41,7 @@ public class ReferralsController : ControllerBase
     }
 
     [HttpGet("ServiceRequest/{id}")]
-    [SwaggerGetReferralRequest]
+    [SwaggerGetReferralByIdRequest]
     public IActionResult GetReferralById(string id)
     {
         _logger.CalledMethod(nameof(GetReferralById));
@@ -67,20 +67,11 @@ public class ReferralsController : ControllerBase
         throw new ProxyNotImplementedException();
     }
 
-    [HttpGet("ServiceRequest")]
-    [SwaggerGetReferralsRequest]
-    public IActionResult GetReferrals()
+    [HttpGet("Appointment/{id}")]
+    [SwaggerGetAppointmentByIdRequest]
+    public IActionResult GetAppointmentById(string id)
     {
-        _logger.CalledMethod(nameof(GetReferrals));
-
-        throw new ProxyNotImplementedException();
-    }
-
-    [HttpGet("Appointment")]
-    [SwaggerGetAppointmentsRequest]
-    public IActionResult GetAppointments()
-    {
-        _logger.CalledMethod(nameof(GetAppointments));
+        _logger.CalledMethod(nameof(GetAppointmentById));
 
         throw new ProxyNotImplementedException();
     }
