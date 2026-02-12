@@ -31,6 +31,7 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
+    private readonly IWpasOutpatientReferralMapper _wpasOutpatientReferralMapper;
 
     public ReferralService(IWpasApiClient wpasApiClient,
         IValidator<BundleCreateReferralModel> createBundleValidator,
@@ -39,7 +40,8 @@ public class ReferralService : IReferralService
         IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
-        IRequestFhirHeadersDecoder requestFhirHeadersDecoder)
+        IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
+        IWpasOutpatientReferralMapper wpasOutpatientReferralMapper)
     {
         _wpasApiClient = wpasApiClient;
         _createBundleValidator = createBundleValidator;
@@ -49,6 +51,7 @@ public class ReferralService : IReferralService
         _jsonSerializerOptions = jsonSerializerOptions;
         _eventLogger = eventLogger;
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
+        _wpasOutpatientReferralMapper = wpasOutpatientReferralMapper;
     }
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
@@ -64,7 +67,7 @@ public class ReferralService : IReferralService
         var workflowAction = DetermineReferralWorkflowAction(bundle);
         var responseContent = workflowAction switch
         {
-            ReferralWorkflowAction.Create => await CreateReferralAsync(requestBody, bundle, cancellationToken),
+            ReferralWorkflowAction.Create => await CreateReferralAsync(bundle, cancellationToken),
             ReferralWorkflowAction.Cancel => await CancelReferralAsync(requestBody, bundle, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported workflow action '{workflowAction}'.")
         };
@@ -82,14 +85,17 @@ public class ReferralService : IReferralService
     }
 
     private async Task<string> CreateReferralAsync(
-        string requestBody,
         Bundle bundle,
         CancellationToken cancellationToken)
     {
         await ValidateFhirProfileAsync(bundle, cancellationToken);
-        await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
+        var bundleModel = await ValidateMandatoryDataAsync(bundle, _createBundleValidator, cancellationToken);
 
-        return await _wpasApiClient.CreateReferralAsync(requestBody, cancellationToken);
+        var outpatientReferralPayload = _wpasOutpatientReferralMapper.Map(bundleModel);
+        _eventLogger.Audit(new EventCatalogue.MapFhirToWpas());
+
+        var wpasRequestBody = JsonSerializer.Serialize(outpatientReferralPayload);
+        return await _wpasApiClient.CreateReferralAsync(wpasRequestBody, cancellationToken);
     }
 
     private async Task<string> CancelReferralAsync(
@@ -151,7 +157,7 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.FhirSchemaValidated());
     }
 
-    private async Task ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator, CancellationToken cancellationToken)
+    private async Task<TModel> ValidateMandatoryDataAsync<TModel>(Bundle bundle, IValidator<TModel> validator, CancellationToken cancellationToken)
        where TModel : IBundleModel<TModel>
     {
         var bundleModel = TModel.FromBundle(bundle);
@@ -162,6 +168,7 @@ public class ReferralService : IReferralService
             throw new BundleValidationException(bundleValidationResult.Errors);
         }
         _eventLogger.Audit(new EventCatalogue.MandatoryFieldsValidated());
+        return bundleModel;
     }
 
     private static string? GetMessageReasonCode(Bundle bundle)

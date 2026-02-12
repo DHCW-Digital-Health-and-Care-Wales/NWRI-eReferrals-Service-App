@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
@@ -39,7 +39,7 @@ public sealed class WpasApiClient : IWpasApiClient
         var stopwatch = Stopwatch.StartNew();
         using var response = await _httpClient.PostAsync(
             endpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)),
+            new StringContent(requestBody, new MediaTypeHeaderValue(MediaTypeNames.Application.Json)),
             cancellationToken);
         stopwatch.Stop();
 

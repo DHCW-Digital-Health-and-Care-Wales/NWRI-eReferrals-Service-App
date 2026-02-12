@@ -13,6 +13,7 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
+using NWRI.eReferralsService.API.Models.WPAS;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
@@ -58,6 +59,49 @@ public class ReferralServiceTests
         _fixture.Mock<IWpasApiClient>()
             .Setup(x => x.CancelReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_fixture.Create<string>());
+
+        _fixture.Mock<IWpasOutpatientReferralMapper>()
+            .Setup(x => x.Map(It.IsAny<BundleCreateReferralModel>()))
+            .Returns(new WpasOutpatientReferralRequest
+            {
+                RecordId = "record-id",
+                ContractDetails = new WpasOutpatientReferralRequest.ContractDetailsModel
+                {
+                    ProviderOrganisationCode = "TP2VC"
+                },
+                PatientDetails = new WpasOutpatientReferralRequest.PatientDetailsModel
+                {
+                    NhsNumber = "3478526985",
+                    NhsNumberStatusIndicator = "01",
+                    PatientName = new WpasOutpatientReferralRequest.PatientDetailsModel.PatientNameModel
+                    {
+                        Surname = "Jones",
+                        FirstName = "Julie"
+                    },
+                    BirthDate = "19590504",
+                    Sex = "F",
+                    UsualAddress = new WpasOutpatientReferralRequest.PatientDetailsModel.UsualAddressModel
+                    {
+                        NoAndStreet = "22 Brightside Crescent",
+                        Town = "Overtown",
+                        Postcode = "LS10 4YU",
+                        Locality = ""
+                    }
+                },
+                ReferralDetails = new WpasOutpatientReferralRequest.ReferralDetailsModel
+                {
+                    OutpatientReferralSource = "15",
+                    ReferringOrganisationCode = "TP2VC",
+                    ServiceTypeRequested = "6",
+                    ReferrerCode = "01-99999",
+                    AdministrativeCategory = "01",
+                    DateOfReferral = "20240820",
+                    MainSpecialty = "130",
+                    ReferrerPriorityType = "2",
+                    ReasonForReferral = "Reason",
+                    ReferralIdentifier = "referral-id"
+                }
+            });
     }
 
     [Fact]
@@ -77,7 +121,7 @@ public class ReferralServiceTests
             .ReturnsAsync(new ValidationResult());
 
         _fixture.Mock<IWpasApiClient>()
-            .Setup(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         var sut = CreateReferralService();
@@ -87,7 +131,7 @@ public class ReferralServiceTests
 
         //Assert
         result.Should().Be(expectedResponse);
-        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()), Times.Once);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -264,7 +308,7 @@ public class ReferralServiceTests
         var headers = _fixture.Create<IHeaderDictionary>();
 
         _fixture.Mock<IWpasApiClient>()
-            .Setup(x => x.CreateReferralAsync(bundleJson, It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateReferralAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         var sut = CreateReferralService();
@@ -425,6 +469,8 @@ public class ReferralServiceTests
             new JsonSerializerOptions().ForFhirExtended(),
             _fixture.Mock<IEventLogger>().Object,
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object
+            ,
+            _fixture.Mock<IWpasOutpatientReferralMapper>().Object
         );
     }
 
