@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.Mime;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
         }
 
         [Fact]
-        public async Task CreateReferralAsyncShouldPostJsonWithFhirMediaType()
+        public async Task CreateReferralAsyncShouldPostJsonWithJsonMediaType()
         {
             // Arrange
             var requestBody = _fixture.Create<string>();
@@ -45,8 +46,8 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             using var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
                 .WithContent(requestBody)
-                .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-                .Respond(FhirConstants.FhirMediaType, expectedResponse);
+                .WithHeaders(HeaderNames.ContentType, MediaTypeNames.Application.Json)
+                .Respond(MediaTypeNames.Application.Json, expectedResponse);
 
             using var httpClient = mockHttp.ToHttpClient();
             httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
@@ -68,7 +69,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
         }
 
         [Fact]
-        public async Task CancelReferralAsyncShouldPostJsonWithFhirMediaType()
+        public async Task CancelReferralAsyncShouldPostJsonWithJsonMediaType()
         {
             // Arrange
             var requestBody = _fixture.Create<string>();
@@ -77,8 +78,8 @@ namespace NWRI.eReferralsService.Unit.Tests.Services
             using var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CancelReferralEndpoint}")
                 .WithContent(requestBody)
-                .WithHeaders(HeaderNames.ContentType, FhirConstants.FhirMediaType)
-                .Respond(FhirConstants.FhirMediaType, expectedResponse);
+                .WithHeaders(HeaderNames.ContentType, MediaTypeNames.Application.Json)
+                .Respond(MediaTypeNames.Application.Json, expectedResponse);
 
             using var httpClient = mockHttp.ToHttpClient();
             httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
