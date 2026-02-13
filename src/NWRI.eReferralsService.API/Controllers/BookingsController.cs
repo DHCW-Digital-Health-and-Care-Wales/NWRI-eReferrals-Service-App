@@ -29,7 +29,7 @@ public class BookingsController : ControllerBase
 
     [HttpGet("Slot")]
     [SwaggerGetBookingSlotRequest]
-    public IActionResult GetBookingSlot([FromQuery] GetBookingSlotQuery _)
+    public IActionResult GetBookingSlot([FromQuery] GetBookingSlotQuery query)
     {
         _logger.CalledMethod(nameof(GetBookingSlot));
 

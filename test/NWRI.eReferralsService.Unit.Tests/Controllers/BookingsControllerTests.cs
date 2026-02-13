@@ -34,7 +34,7 @@ public class BookingsControllerTests
         SetRequestDetails(headers);
 
         // Act
-        var act = _sut.GetAppointments;
+        Action act = () => _sut.GetAppointments();
 
         // Assert
         var ex = act.Should().Throw<ProxyNotImplementedException>().Which;

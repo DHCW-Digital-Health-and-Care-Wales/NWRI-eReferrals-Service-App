@@ -1,0 +1,116 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
+using NWRI.eReferralsService.API.Constants;
+using Swashbuckle.AspNetCore.SwaggerGen;
+
+namespace NWRI.eReferralsService.API.Swagger;
+
+[ExcludeFromCodeCoverage]
+public sealed class BookingsOperationFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        HandleGetAppointments(operation, context);
+        HandleGetBookingSlot(operation, context);
+    }
+
+    private static void AddCommonHeaders(OpenApiOperation operation)
+    {
+        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+    }
+
+    private static void HandleGetAppointments(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>();
+        if (attr is null) return;
+
+        AddCommonHeaders(operation);
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void HandleGetBookingSlot(OpenApiOperation operation, OperationFilterContext context)
+    {
+        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>();
+        if (attr is null) return;
+
+        AddCommonHeaders(operation);
+        AddGetBookingSlotQueryOperation(operation);
+
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void AddGetBookingSlotQueryOperation(OpenApiOperation operation)
+    {
+        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        {
+            Name = "status",
+            In = ParameterLocation.Query,
+            Required = true,
+            Description = "Comma-separated Slot status values (free, busy). Default: free.",
+            Schema = new OpenApiSchema
+            {
+                Type = "string",
+                Example = new OpenApiString("free,busy")
+            }
+        });
+
+        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        {
+            Name = "start",
+            In = ParameterLocation.Query,
+            Required = true,
+            Description = "Use twice with ge and le prefixes to define time window.",
+            Style = ParameterStyle.Form,
+            Explode = true,
+            Schema = new OpenApiSchema
+            {
+                Type = "array",
+                Items = new OpenApiSchema { Type = "string" },
+                Example = new OpenApiArray
+                {
+                    new OpenApiString("ge2022-03-01T12:00:00+00:00"),
+                    new OpenApiString("le2022-03-01T13:30:00+00:00")
+                }
+            }
+        });
+
+        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        {
+            Name = "_include",
+            In = ParameterLocation.Query,
+            Required = true,
+            Description =
+                "FHIR _include parameters. Repeat the parameter to include multiple values. " +
+                "Minimum required: Slot:schedule and Schedule:actor:HealthcareService. " +
+                "Unsupported _include values will be ignored and omitted from the response Bundle.link.url.",
+            Style = ParameterStyle.Form,
+            Explode = true,
+            Schema = new OpenApiSchema
+            {
+                Type = "array",
+                Items = new OpenApiSchema
+                {
+                    Type = "string",
+                    Enum = new List<IOpenApiAny>
+                    {
+                        new OpenApiString("Slot:schedule"),
+                        new OpenApiString("Schedule:actor:Practitioner"),
+                        new OpenApiString("Schedule:actor:PractitionerRole"),
+                        new OpenApiString("Schedule:actor:HealthcareService"),
+                        new OpenApiString("HealthcareService:providedBy"),
+                        new OpenApiString("HealthcareService:location"),
+                        new OpenApiString("Slot:*")
+                    }
+                }
+            },
+            Example = new OpenApiArray
+            {
+                new OpenApiString("Slot:schedule"),
+                new OpenApiString("Schedule:actor:HealthcareService")
+            }
+        });
+    }
+}
