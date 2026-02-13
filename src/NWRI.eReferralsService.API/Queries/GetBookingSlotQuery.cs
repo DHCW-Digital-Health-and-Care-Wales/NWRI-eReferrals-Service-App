@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 namespace NWRI.eReferralsService.API.Queries;
+
 public class GetBookingSlotQuery
 {
     [FromQuery(Name = "status")]
