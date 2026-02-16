@@ -5,5 +5,5 @@ namespace NWRI.eReferralsService.API.Services;
 
 public interface IWpasOutpatientReferralMapper
 {
-    WpasOutpatientReferralRequest Map(BundleCreateReferralModel createReferralModel);
+    WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel);
 }

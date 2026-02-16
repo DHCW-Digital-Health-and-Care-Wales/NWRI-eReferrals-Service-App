@@ -10,7 +10,6 @@ using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Models.WPAS;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using Polly;
@@ -63,6 +62,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IReferralService, ReferralService>();
         services.AddScoped<IWpasOutpatientReferralMapper, WpasOutpatientReferralMapper>();
+        services.AddSingleton<IJsonSchemaValidator, JsonSchemaValidator>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)

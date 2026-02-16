@@ -60,4 +60,7 @@ public static class EventCatalogue
 
     [Description("ERR_INTERNAL_HANDLER")]
     public record InternalHandlerError : IErrorEvent;
+
+    [Description("ERR_MAP_FHIR_TO_WPAS")]
+    public record MapFhirToWpasFailed : IErrorEvent;
 }

@@ -8,6 +8,8 @@ using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Models.WPAS;
 
 namespace NWRI.eReferralsService.API.Services;
 
@@ -16,39 +18,64 @@ public sealed class WpasApiClient : IWpasApiClient
     private readonly HttpClient _httpClient;
     private readonly WpasApiConfig _wpasApiConfig;
     private readonly IEventLogger _eventLogger;
+    private readonly ILogger<WpasApiClient> _logger;
 
-    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, IEventLogger eventLogger)
+    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, IEventLogger eventLogger, ILogger<WpasApiClient> logger)
     {
         _httpClient = httpClient;
         _wpasApiConfig = wpasApiOptions.Value;
         _eventLogger = eventLogger;
+        _logger = logger;
     }
 
-    public Task<string> CreateReferralAsync(string requestBody, CancellationToken cancellationToken)
+    public Task<WpasCreateReferralResponse?> CreateReferralAsync(WpasCreateReferralRequest request, CancellationToken cancellationToken)
     {
-        return PostAsync(_wpasApiConfig.CreateReferralEndpoint, requestBody, cancellationToken);
+        return PostAsync<WpasCreateReferralResponse>(_wpasApiConfig.CreateReferralEndpoint, request, cancellationToken);
     }
 
-    public Task<string> CancelReferralAsync(string requestBody, CancellationToken cancellationToken)
+    public Task<WpasCancelReferralResponse?> CancelReferralAsync(WpasCancelReferralRequest request, CancellationToken cancellationToken)
     {
-        return PostAsync(_wpasApiConfig.CancelReferralEndpoint, requestBody, cancellationToken);
+        return PostAsync<WpasCancelReferralResponse>(_wpasApiConfig.CancelReferralEndpoint, request, cancellationToken);
     }
 
-    private async Task<string> PostAsync(string endpoint, string requestBody, CancellationToken cancellationToken)
+    private async Task<TResponse?> PostAsync<TResponse>(
+        string endpoint,
+        object requestBody,
+        CancellationToken cancellationToken)
+        where TResponse : IWpasReferralResponse
     {
         var stopwatch = Stopwatch.StartNew();
+
+        var requestBodyJson = JsonSerializer.Serialize(requestBody);
         using var response = await _httpClient.PostAsync(
             endpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(MediaTypeNames.Application.Json)),
+            new StringContent(requestBodyJson, new MediaTypeHeaderValue(MediaTypeNames.Application.Json)),
             cancellationToken);
         stopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
-            // TODO: Extract WPAS referral ID from the response and pass it to the event
-            _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(stopwatch.ElapsedMilliseconds, null));
+            string? referralId = null;
+            TResponse? responseModel = default;
 
-            return await response.Content.ReadAsStringAsync(cancellationToken);
+            try
+            {
+                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                responseModel = await JsonSerializer.DeserializeAsync<TResponse>(stream, cancellationToken: cancellationToken);
+                referralId = responseModel?.ReferralId;
+            }
+            catch (JsonException exception)
+            {
+                _logger.WpasResponseDeserializationFailed(exception, typeof(TResponse).Name);
+            }
+            finally
+            {
+                _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
+                    stopwatch.ElapsedMilliseconds,
+                    referralId));
+            }
+
+            return responseModel;
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace NWRI.eReferralsService.API.Models.WPAS;
 
-public sealed class WpasOutpatientReferralRequest
+public sealed class WpasCreateReferralRequest
 {
     public required string RecordId { get; init; }
     public required ContractDetailsModel ContractDetails { get; init; }

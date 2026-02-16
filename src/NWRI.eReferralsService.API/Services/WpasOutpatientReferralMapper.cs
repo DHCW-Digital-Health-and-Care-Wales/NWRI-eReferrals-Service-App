@@ -8,70 +8,79 @@ namespace NWRI.eReferralsService.API.Services;
 
 public sealed class WpasOutpatientReferralMapper : IWpasOutpatientReferralMapper
 {
-    public WpasOutpatientReferralRequest Map(BundleCreateReferralModel createReferralModel)
+    private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
+    private const string NhsNumberVerificationStatusSystem =
+        "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus";
+    private const string ServiceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
+    private const string BarsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
+
+    public WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel)
     {
         var encounterId = createReferralModel.Encounter?.Identifier.First().Value!;
-        var receiverOrganisationId = createReferralModel.Organizations?.First(x => x.Name == "Receiver Organization").Identifier.First().Value!;
-        var patientName = createReferralModel.Patient?.Name.First();
-        var address = createReferralModel.Patient?.Address.First();
+        var receiverOrganisationId = createReferralModel.Organizations?.First(x => x.Name == "Receiving/performing Organization").Identifier.First().Value!;
+        var senderOrganisationId = createReferralModel.Organizations?.First(x => x.Name == "Sender Organization").Identifier.First().Value!;
+        var patientName = createReferralModel.Patient!.Name.First();
+        var address = createReferralModel.Patient!.Address.First();
+        var nhsIdentifier = createReferralModel.Patient!
+            .Identifier
+            .First(x => string.Equals(x.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase));
 
-        return new WpasOutpatientReferralRequest
+        var nhsNumberVerificationStatusCode = nhsIdentifier
+            .Extension
+            .Select(e => e.Value as CodeableConcept)
+            .Where(cc => cc is not null)
+            .SelectMany(cc => cc!.Coding)
+            .FirstOrDefault(c => string.Equals(c.System, NhsNumberVerificationStatusSystem, StringComparison.OrdinalIgnoreCase))
+            ?.Code;
+
+        return new WpasCreateReferralRequest
         {
             RecordId = encounterId,
-            ContractDetails = new WpasOutpatientReferralRequest.ContractDetailsModel
+            ContractDetails = new WpasCreateReferralRequest.ContractDetailsModel
             {
                 ProviderOrganisationCode = receiverOrganisationId
             },
-            PatientDetails = new WpasOutpatientReferralRequest.PatientDetailsModel
+            PatientDetails = new WpasCreateReferralRequest.PatientDetailsModel
             {
-                NhsNumber = createReferralModel.Patient?
-                    .Identifier
-                    .First(x => x.System == "https://fhir.nhs.uk/Id/nhs-number").Value!,
-                // TODO: TBC - What is the mapping for this field?
-                NhsNumberStatusIndicator = string.Empty,
-                PatientName = new WpasOutpatientReferralRequest.PatientDetailsModel.PatientNameModel
+                NhsNumber = nhsIdentifier.Value!,
+                NhsNumberStatusIndicator = nhsNumberVerificationStatusCode!,
+                PatientName = new WpasCreateReferralRequest.PatientDetailsModel.PatientNameModel
                 {
-                    Surname = patientName?.Family!,
-                    FirstName = patientName?.Given.First()!
+                    Surname = patientName.Family!,
+                    FirstName = patientName.Given.First()!
                 },
-                BirthDate = WpasDate(createReferralModel.Patient?.BirthDate),
-                Sex = MapGender(createReferralModel.Patient?.Gender),
-                UsualAddress = new WpasOutpatientReferralRequest.PatientDetailsModel.UsualAddressModel
+                BirthDate = WpasDate(createReferralModel.Patient!.BirthDate),
+                Sex = char.ToUpperInvariant(createReferralModel.Patient!.Gender!.Value.ToString()[0]).ToString(),
+                UsualAddress = new WpasCreateReferralRequest.PatientDetailsModel.UsualAddressModel
                 {
-                    NoAndStreet = address?.Line.FirstOrDefault() ?? string.Empty,
-                    Town = address?.City ?? string.Empty,
-                    Postcode = address?.PostalCode ?? string.Empty,
+                    NoAndStreet = address.Line.First()!,
+                    Town = address.City!,
+                    Postcode = address.PostalCode!,
                     Locality = string.Empty
                 }
             },
-            ReferralDetails = new WpasOutpatientReferralRequest.ReferralDetailsModel
+            ReferralDetails = new WpasCreateReferralRequest.ReferralDetailsModel
             {
-                OutpatientReferralSource = "15",
+                OutpatientReferralSource = senderOrganisationId,
                 ReferringOrganisationCode = receiverOrganisationId,
-                ServiceTypeRequested = "6",
-                ReferrerCode = createReferralModel.ServiceRequest?.Requester?.Identifier?.Value!,
-                AdministrativeCategory = "01",
+                ServiceTypeRequested = createReferralModel.ServiceRequest?.Category
+                                           .SelectMany(c => c.Coding)
+                                           .First(c => string.Equals(c.System, ServiceRequestCategorySystem, StringComparison.OrdinalIgnoreCase))
+                                           .Code!,
+                ReferrerCode = createReferralModel.Practitioners?.First()
+                    .Identifier.First()
+                    .Value!,
+                AdministrativeCategory = createReferralModel.ServiceRequest?.Category
+                                             .SelectMany(c => c.Coding)
+                                             .First(c => string.Equals(c.System, BarsUseCaseCategorySystem, StringComparison.OrdinalIgnoreCase))
+                                             .Code!,
                 DateOfReferral = WpasDate(createReferralModel.ServiceRequest?.AuthoredOn),
-                // TODO: TBC - Fixed value: 130 or 460 ?
                 MainSpecialty = "130",
-                // TODO: TBC - What is the mapping for this field?
-                ReferrerPriorityType = string.Empty,
-                // TODO: TBC - What is the exact mapping for this field?
-                ReasonForReferral = createReferralModel.Conditions?.First().Code?.Text!,
+                ReferrerPriorityType = "2",
+                ReasonForReferral =
+                    createReferralModel.Conditions!.First().Code!.Coding.First().Display!.Trim()[..8],
                 ReferralIdentifier = encounterId
             }
-        };
-    }
-
-    // TODO: TBC - What are the possible values
-    private static string MapGender(AdministrativeGender? gender)
-    {
-        return gender switch
-        {
-            AdministrativeGender.Female => "F",
-            AdministrativeGender.Male => "M",
-            AdministrativeGender.Other => "O",
-            _ => "U"
         };
     }
 
