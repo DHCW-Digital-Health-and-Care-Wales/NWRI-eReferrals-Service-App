@@ -8,18 +8,11 @@ namespace NWRI.eReferralsService.API.Swagger;
 [ExcludeFromCodeCoverage]
 internal static class SwaggerHelpers
 {
-    public static void EnsureParameters(OpenApiOperation operation)
-    {
-        operation.Parameters ??= new List<OpenApiParameter>();
-    }
-
     public static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
     {
-        EnsureParameters(operation);
-
         foreach (var header in headers)
         {
-            AddParameterIfMissing(operation, new OpenApiParameter
+            AddIfMissing(operation, new OpenApiParameter
             {
                 In = ParameterLocation.Header,
                 Name = header,
@@ -32,25 +25,40 @@ internal static class SwaggerHelpers
 
     public static void AddPathParameter(OpenApiOperation operation, string name, bool required, IOpenApiAny? example = null)
     {
-        EnsureParameters(operation);
-
-        AddParameterIfMissing(operation, new OpenApiParameter
+        UpsertParameter(operation, new OpenApiParameter
         {
             In = ParameterLocation.Path,
             Name = name,
             Required = required,
-            Example = example
+            Example = example,
+            Schema = new OpenApiSchema { Type = "string" }
         });
     }
 
-    public static void AddParameterIfMissing(OpenApiOperation operation, OpenApiParameter parameter)
+    public static void AddIfMissing(OpenApiOperation operation, OpenApiParameter parameter)
     {
-        EnsureParameters(operation);
+        operation.Parameters ??= new List<OpenApiParameter>();
 
-        if (operation.Parameters.Any(p =>
-                p.In == parameter.In &&
-                p.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase)))
+        var location = parameter.In ?? throw new ArgumentException("Parameter.In must be set.", nameof(parameter));
+
+        if (FindParameterIndex(operation, location, parameter.Name) >= 0)
         {
+            return;
+        }
+
+        operation.Parameters.Add(parameter);
+    }
+
+    public static void UpsertParameter(OpenApiOperation operation, OpenApiParameter parameter)
+    {
+        operation.Parameters ??= new List<OpenApiParameter>();
+
+        var location = parameter.In ?? throw new ArgumentException("Parameter.In must be set.", nameof(parameter));
+
+        var index = FindParameterIndex(operation, location, parameter.Name);
+        if (index >= 0)
+        {
+            operation.Parameters[index] = parameter;
             return;
         }
 
@@ -89,5 +97,33 @@ internal static class SwaggerHelpers
                 "Not Implemented",
                 "Swagger/Examples/common-proxy-not-implemented.json")
         };
+    }
+
+    private static int FindParameterIndex(OpenApiOperation operation, ParameterLocation location, string name)
+    {
+        for (var i = 0; i < operation.Parameters.Count; i++)
+        {
+            var p = operation.Parameters[i];
+
+            var pLoc = p.In;
+            if (pLoc is null)
+            {
+                continue;
+            }
+
+            if (pLoc.Value != location)
+            {
+                continue;
+            }
+
+            if (!p.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            return i;
+        }
+
+        return -1;
     }
 }

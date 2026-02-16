@@ -12,41 +12,36 @@ public sealed class ReferralsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        HandleGetReferral(operation, context);
-        HandleGetReferrals(operation, context);
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralRequestAttribute>() is not null)
+        {
+            ApplyGetReferral(operation);
+            return;
+        }
+
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>() is not null)
+        {
+            ApplyGetReferrals(operation);
+        }
     }
 
-    private static void HandleGetReferral(OpenApiOperation operation, OperationFilterContext context)
+    private static void ApplyGetReferral(OpenApiOperation operation)
     {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralRequestAttribute>();
-        if (attr is null) return;
+        AddCommonHeaders(operation);
 
         SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: new OpenApiString(Guid.NewGuid().ToString()));
-
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
-
-        AddGetReferralResponses(operation);
-    }
-
-    private static void HandleGetReferrals(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>();
-        if (attr is null) return;
-
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
-
-        AddGetReferralsResponses(operation);
-    }
-
-    private static void AddGetReferralResponses(OpenApiOperation operation)
-    {
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 
-    private static void AddGetReferralsResponses(OpenApiOperation operation)
+    private static void ApplyGetReferrals(OpenApiOperation operation)
     {
+        AddCommonHeaders(operation);
+
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void AddCommonHeaders(OpenApiOperation operation)
+    {
+        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
     }
 }

@@ -12,8 +12,31 @@ public sealed class BookingsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        HandleGetAppointments(operation, context);
-        HandleGetBookingSlot(operation, context);
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>() is not null)
+        {
+            ApplyGetAppointments(operation);
+            return;
+        }
+
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>() is not null)
+        {
+            ApplyGetBookingSlot(operation);
+        }
+    }
+
+    private static void ApplyGetAppointments(OpenApiOperation operation)
+    {
+        AddCommonHeaders(operation);
+
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void ApplyGetBookingSlot(OpenApiOperation operation)
+    {
+        AddCommonHeaders(operation);
+
+        AddBookingSlotQueryParameters(operation);
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 
     private static void AddCommonHeaders(OpenApiOperation operation)
@@ -22,29 +45,9 @@ public sealed class BookingsOperationFilter : IOperationFilter
         SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
     }
 
-    private static void HandleGetAppointments(OpenApiOperation operation, OperationFilterContext context)
+    private static void AddBookingSlotQueryParameters(OpenApiOperation operation)
     {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>();
-        if (attr is null) return;
-
-        AddCommonHeaders(operation);
-        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
-    }
-
-    private static void HandleGetBookingSlot(OpenApiOperation operation, OperationFilterContext context)
-    {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>();
-        if (attr is null) return;
-
-        AddCommonHeaders(operation);
-        AddGetBookingSlotQueryOperation(operation);
-
-        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
-    }
-
-    private static void AddGetBookingSlotQueryOperation(OpenApiOperation operation)
-    {
-        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        SwaggerHelpers.UpsertParameter(operation, new OpenApiParameter
         {
             Name = "status",
             In = ParameterLocation.Query,
@@ -57,7 +60,7 @@ public sealed class BookingsOperationFilter : IOperationFilter
             }
         });
 
-        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        SwaggerHelpers.UpsertParameter(operation, new OpenApiParameter
         {
             Name = "start",
             In = ParameterLocation.Query,
@@ -77,7 +80,7 @@ public sealed class BookingsOperationFilter : IOperationFilter
             }
         });
 
-        SwaggerHelpers.AddParameterIfMissing(operation, new OpenApiParameter
+        SwaggerHelpers.UpsertParameter(operation, new OpenApiParameter
         {
             Name = "_include",
             In = ParameterLocation.Query,

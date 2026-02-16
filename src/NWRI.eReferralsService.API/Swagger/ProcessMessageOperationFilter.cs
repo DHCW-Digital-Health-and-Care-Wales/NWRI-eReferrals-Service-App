@@ -12,30 +12,37 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var attr = context.MethodInfo.GetCustomAttribute<SwaggerProcessMessageRequestAttribute>();
-        if (attr is null) return;
+        if (context.MethodInfo.GetCustomAttribute<SwaggerProcessMessageRequestAttribute>() is null)
+        {
+            return;
+        }
 
-        operation.Parameters = new List<OpenApiParameter>();
+        operation.Parameters ??= new List<OpenApiParameter>();
+        operation.Parameters.Clear();
 
         SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
         SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
-        AddProcessMessageResponses(operation);
-        AddProcessMessageRequests(operation);
+        AddRequestBody(operation);
+        AddResponses(operation);
     }
 
-    private static void AddProcessMessageRequests(OpenApiOperation operation)
+    private static void AddRequestBody(OpenApiOperation operation)
     {
-        operation.RequestBody = new OpenApiRequestBody();
-        operation.RequestBody.Content.Add(FhirConstants.FhirMediaType,
-            new OpenApiMediaType
+        operation.RequestBody = new OpenApiRequestBody
+        {
+            Content =
             {
-                Example = new OpenApiString(
-                    File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
-            });
+                [FhirConstants.FhirMediaType] = new OpenApiMediaType
+                {
+                    Example = new OpenApiString(
+                        File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
+                }
+            }
+        };
     }
 
-    private static void AddProcessMessageResponses(OpenApiOperation operation)
+    private static void AddResponses(OpenApiOperation operation)
     {
         operation.Responses = new OpenApiResponses
         {
