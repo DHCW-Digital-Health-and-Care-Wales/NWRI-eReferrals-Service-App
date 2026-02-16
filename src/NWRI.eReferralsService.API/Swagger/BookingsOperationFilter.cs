@@ -21,6 +21,7 @@ public sealed class BookingsOperationFilter : IOperationFilter
         if (context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>() is not null)
         {
             ApplyGetBookingSlot(operation);
+            return;
         }
     }
 

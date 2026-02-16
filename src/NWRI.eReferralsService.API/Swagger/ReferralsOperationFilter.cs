@@ -21,6 +21,7 @@ public sealed class ReferralsOperationFilter : IOperationFilter
         if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralsRequestAttribute>() is not null)
         {
             ApplyGetReferrals(operation);
+            return;
         }
     }
 
