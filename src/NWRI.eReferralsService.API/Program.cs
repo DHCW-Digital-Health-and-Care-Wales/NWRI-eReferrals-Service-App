@@ -37,7 +37,12 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddSwaggerGen(options => { options.OperationFilter<SwaggerOperationFilter>(); });
+builder.Services.AddSwaggerGen(options =>
+{
+    options.OperationFilter<ProcessMessageOperationFilter>();
+    options.OperationFilter<ReferralsOperationFilter>();
+    options.OperationFilter<BookingsOperationFilter>();
+});
 
 builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), builder.Configuration);
 
