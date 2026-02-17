@@ -12,19 +12,16 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        if (context.MethodInfo.GetCustomAttribute<SwaggerProcessMessageRequestAttribute>() is null)
+        if (context.MethodInfo.GetCustomAttribute<SwaggerProcessMessageRequestAttribute>() is not null)
         {
-            return;
+            operation.Parameters ??= new List<OpenApiParameter>();
+            operation.Parameters.Clear();
+
+            SwaggerHelpers.AddCommonHeaders(operation);
+
+            AddRequestBody(operation);
+            AddResponses(operation);
         }
-
-        operation.Parameters ??= new List<OpenApiParameter>();
-        operation.Parameters.Clear();
-
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
-
-        AddRequestBody(operation);
-        AddResponses(operation);
     }
 
     private static void AddRequestBody(OpenApiOperation operation)

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using NWRI.eReferralsService.API.Constants;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NWRI.eReferralsService.API.Swagger;
@@ -15,35 +14,26 @@ public sealed class BookingsOperationFilter : IOperationFilter
         if (context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentsRequestAttribute>() is not null)
         {
             ApplyGetAppointments(operation);
-            return;
         }
-
-        if (context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>() is not null)
+        else if (context.MethodInfo.GetCustomAttribute<SwaggerGetBookingSlotRequestAttribute>() is not null)
         {
             ApplyGetBookingSlot(operation);
-            return;
         }
     }
 
     private static void ApplyGetAppointments(OpenApiOperation operation)
     {
-        AddCommonHeaders(operation);
-
+        SwaggerHelpers.AddCommonHeaders(operation);
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 
     private static void ApplyGetBookingSlot(OpenApiOperation operation)
     {
-        AddCommonHeaders(operation);
+        SwaggerHelpers.AddCommonHeaders(operation);
 
         AddBookingSlotQueryParameters(operation);
-        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
-    }
 
-    private static void AddCommonHeaders(OpenApiOperation operation)
-    {
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
-        SwaggerHelpers.AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 
     private static void AddBookingSlotQueryParameters(OpenApiOperation operation)

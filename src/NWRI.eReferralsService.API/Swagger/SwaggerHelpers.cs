@@ -23,6 +23,12 @@ internal static class SwaggerHelpers
         }
     }
 
+    public static void AddCommonHeaders(OpenApiOperation operation)
+    {
+        AddHeaders(operation, RequestHeaderKeys.GetAllRequired(), true);
+        AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
+    }
+
     public static void AddPathParameter(OpenApiOperation operation, string name, bool required, IOpenApiAny? example = null)
     {
         UpsertParameter(operation, new OpenApiParameter
