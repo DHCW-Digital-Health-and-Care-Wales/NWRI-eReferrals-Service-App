@@ -2,7 +2,6 @@ using Microsoft.Extensions.FileProviders;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 
-
 namespace NWRI.eReferralsService.API.Services;
 
 public sealed class StaticFileCapabilityStatementProvider : ICapabilityStatementProvider
