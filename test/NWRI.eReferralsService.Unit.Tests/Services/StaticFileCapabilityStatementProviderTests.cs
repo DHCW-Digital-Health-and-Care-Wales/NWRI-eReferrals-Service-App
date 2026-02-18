@@ -13,14 +13,14 @@ public class StaticFileCapabilityStatementProviderTests
     private const string ResourcePath = "Resources/Fhir/BaRS-Compatibility-Statement.json";
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenFileExistsReturnsJson()
+    public async Task GetCapabilityStatementAsyncWhenFileExistsReturnsJson()
     {
         // Arrange
         var json = """{"resourceType":"CapabilityStatement","status":"active"}""";
         var (provider, fileProviderMock, fileInfo) = CreateSutWithFile(json);
 
         // Act
-        var result = await provider.GetCapabilityStatementJsonAsync(CancellationToken.None);
+        var result = await provider.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
         Assert.Equal(json, result);
@@ -29,15 +29,15 @@ public class StaticFileCapabilityStatementProviderTests
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncCachesResultSecondCallDoesNotTouchFileSystem()
+    public async Task GetCapabilityStatementAsyncCachesResultSecondCallDoesNotTouchFileSystem()
     {
         // Arrange
         var json = """{"resourceType":"CapabilityStatement"}""";
         var (provider, fileProviderMock, fileInfo) = CreateSutWithFile(json);
 
         // Act
-        var first = await provider.GetCapabilityStatementJsonAsync(CancellationToken.None);
-        var second = await provider.GetCapabilityStatementJsonAsync(CancellationToken.None);
+        var first = await provider.GetCapabilityStatementAsync(CancellationToken.None);
+        var second = await provider.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
         Assert.Equal(json, first);
@@ -48,7 +48,7 @@ public class StaticFileCapabilityStatementProviderTests
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenFileMissingThrowsCapabilityStatementUnavailableException()
+    public async Task GetCapabilityStatementAsyncWhenFileMissingThrowsCapabilityStatementUnavailableException()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementProvider>>();
@@ -69,7 +69,7 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act + Assert
         await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
 
@@ -77,7 +77,7 @@ public class StaticFileCapabilityStatementProviderTests
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenFileMissingPhysicalPathNullStillThrowsAndLogs()
+    public async Task GetCapabilityStatementAsyncWhenFileMissingPhysicalPathNullStillThrowsAndLogs()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementProvider>>();
@@ -93,13 +93,13 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act + Assert
         await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         VerifyLogged(loggerMock, LogLevel.Error, "CapabilityStatement JSON file not found", Times.Once());
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenFileMissingDoesNotCacheNextCallTriesAgain()
+    public async Task GetCapabilityStatementAsyncWhenFileMissingDoesNotCacheNextCallTriesAgain()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementProvider>>();
@@ -115,16 +115,16 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act
         await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Exactly(2));
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenCreateReadStreamThrowsPropagatesAndDoesNotCache()
+    public async Task GetCapabilityStatementAsyncWhenCreateReadStreamThrowsPropagatesAndDoesNotCache()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementProvider>>();
@@ -146,16 +146,16 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act + Assert
         await Assert.ThrowsAsync<IOException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         await Assert.ThrowsAsync<IOException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Exactly(2));
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncWhenCancelledThrowsOperationCanceledExceptionAndDoesNotCache()
+    public async Task GetCapabilityStatementAsyncWhenCancelledThrowsOperationCanceledExceptionAndDoesNotCache()
     {
         // Arrange
         var json = """{"resourceType":"CapabilityStatement"}""";
@@ -166,9 +166,9 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act + Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            sut.GetCapabilityStatementJsonAsync(cts.Token));
+            sut.GetCapabilityStatementAsync(cts.Token));
 
-        var result = await sut.GetCapabilityStatementJsonAsync(CancellationToken.None);
+        var result = await sut.GetCapabilityStatementAsync(CancellationToken.None);
         Assert.Equal(json, result);
 
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Exactly(2));
@@ -176,7 +176,7 @@ public class StaticFileCapabilityStatementProviderTests
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncDisposesStreamEvenOnReadFailure()
+    public async Task GetCapabilityStatementAsyncDisposesStreamEvenOnReadFailure()
     {
         // Arrange
         var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementProvider>>();
@@ -199,13 +199,13 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act + Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.GetCapabilityStatementJsonAsync(CancellationToken.None));
+            sut.GetCapabilityStatementAsync(CancellationToken.None));
 
         Assert.True(stream.Disposed);
     }
 
     [Fact]
-    public async Task GetCapabilityStatementJsonAsyncConcurrentCallsDoNotDeadlockAndReturnSameJson()
+    public async Task GetCapabilityStatementAsyncConcurrentCallsDoNotDeadlockAndReturnSameJson()
     {
         // Arrange
         var json = """{"resourceType":"CapabilityStatement"}""";
@@ -213,7 +213,7 @@ public class StaticFileCapabilityStatementProviderTests
 
         // Act
         var tasks = Enumerable.Range(0, 20)
-            .Select(_ => sut.GetCapabilityStatementJsonAsync(CancellationToken.None))
+            .Select(_ => sut.GetCapabilityStatementAsync(CancellationToken.None))
             .ToArray();
 
         var results = await Task.WhenAll(tasks);

@@ -21,7 +21,7 @@ public sealed class StaticFileCapabilityStatementProvider : ICapabilityStatement
         _logger = logger;
     }
 
-    public async Task<string> GetCapabilityStatementJsonAsync(CancellationToken ct)
+    public async Task<string> GetCapabilityStatementAsync(CancellationToken ct)
     {
         lock (_lock)
         {

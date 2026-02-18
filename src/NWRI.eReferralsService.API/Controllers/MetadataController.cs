@@ -26,7 +26,7 @@ public sealed class MetadataController : ControllerBase
     {
         _logger.CalledMethod(nameof(GetMetadata));
 
-        var json = await _provider.GetCapabilityStatementJsonAsync(cancellationToken);
+        var json = await _provider.GetCapabilityStatementAsync(cancellationToken);
 
         return new ContentResult
         {
