@@ -414,6 +414,60 @@ public class ResponseMiddlewareTests
         });
     }
 
+    [Fact]
+    public async Task ShouldHandleCapabilityStatementUnavailableException()
+    {
+        // Arrange
+        var exception = new CapabilityStatementUnavailableException();
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        // Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        response.Headers.GetValues("X-Operation-Id").Should().NotBeNullOrEmpty();
+        response.Headers.GetValues(RequestHeaderKeys.RequestId).Should().Contain(requestId);
+        response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should().Contain(correlationId);
+
+        response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
+            .NotBeNull()
+            .And.Contain(FhirConstants.FhirMediaType);
+
+        var raw = await response.Content.ReadAsStringAsync();
+
+        Action parse = () => JsonDocument.Parse(raw);
+        parse.Should().NotThrow(raw);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(
+            raw,
+            new JsonSerializerOptions().ForFhirExtended())!;
+
+        operationOutcome.Issue.Should().NotBeNullOrEmpty();
+
+        operationOutcome.Issue.Should().AllSatisfy(issue =>
+        {
+            issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+
+            issue.Code.Should().Be(OperationOutcome.IssueType.Exception);
+
+            issue.Details.Should().NotBeNull();
+            issue.Details.Coding.Should().NotBeNullOrEmpty();
+            issue.Details.Coding.Should().Contain(c =>
+                c.System == "https://fhir.nhs.uk/CodeSystem/http-error-codes" &&
+                c.Code == "PROXY_SERVER_ERROR");
+        });
+    }
+
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,
