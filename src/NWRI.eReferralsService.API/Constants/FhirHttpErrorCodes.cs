@@ -9,4 +9,5 @@ public static class FhirHttpErrorCodes
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string ReceiverNotFound = "REC_NOT_FOUND";
     public const string ProxyNotImplemented = "PROXY_NOT_IMPLEMENTED";
+    public const string ProxyServerError = "PROXY_SERVER_ERROR";
 }
