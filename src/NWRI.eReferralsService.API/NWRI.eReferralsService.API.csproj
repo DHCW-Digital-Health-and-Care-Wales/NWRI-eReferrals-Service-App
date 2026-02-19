@@ -16,9 +16,9 @@
     <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="6.0.2" />
     <PackageReference Include="Firely.Fhir.Packages" Version="5.0.1" />
     <PackageReference Include="Firely.Fhir.Validation.R4" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="[8.0.24,9.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
     <PackageReference Include="JsonSchema.Net" Version="9.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="[8.0.23,9.0.0)" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="[7.3.2]" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="[2.23.0,3.0)" />
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
