@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Swagger;
 
