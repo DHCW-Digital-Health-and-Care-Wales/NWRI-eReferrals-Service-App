@@ -107,8 +107,8 @@ public class ReferralServiceTests
                 }
             });
 
-        _fixture.Mock<IJsonSchemaValidator>()
-            .Setup(x => x.Validate(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<string>()))
+        _fixture.Mock<IWpasJsonSchemaValidator>()
+            .Setup(x => x.ValidateWpasCreateReferralRequest(It.IsAny<WpasCreateReferralRequest>()))
             .Returns(CreateValidSchemaResult());
     }
 
@@ -141,8 +141,8 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        _fixture.Mock<IJsonSchemaValidator>()
-            .Setup(x => x.Validate(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<string>()))
+        _fixture.Mock<IWpasJsonSchemaValidator>()
+            .Setup(x => x.ValidateWpasCreateReferralRequest(It.IsAny<WpasCreateReferralRequest>()))
             .Returns(CreateInvalidSchemaResult());
 
         var sut = CreateReferralService();
@@ -589,7 +589,7 @@ public class ReferralServiceTests
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object
             ,
             _fixture.Mock<IWpasOutpatientReferralMapper>().Object,
-            _fixture.Mock<IJsonSchemaValidator>().Object,
+            _fixture.Mock<IWpasJsonSchemaValidator>().Object,
             _fixture.Mock<ILogger<ReferralService>>().Object
         );
     }

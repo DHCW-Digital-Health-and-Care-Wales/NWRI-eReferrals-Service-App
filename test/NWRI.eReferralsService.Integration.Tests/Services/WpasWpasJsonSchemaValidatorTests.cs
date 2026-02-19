@@ -6,7 +6,7 @@ using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.Integration.Tests.Services;
 
-public class JsonSchemaValidatorTests
+public class WpasWpasJsonSchemaValidatorTests
 {
     [Fact]
     public void ValidateShouldReturnInvalidWhenPayloadViolatesSchema()
@@ -54,7 +54,7 @@ public class JsonSchemaValidatorTests
             }
         };
 
-        var result = sut.Validate(payload, JsonSchemaValidator.WpasCreateReferralRequestJsonSchemaPath);
+        var result = sut.ValidateWpasCreateReferralRequest(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors.Should().BeNull();
@@ -66,7 +66,7 @@ public class JsonSchemaValidatorTests
         var sut = CreateSut();
 
         var payload = CreateKnownGoodPayload();
-        var result = sut.Validate(payload, JsonSchemaValidator.WpasCreateReferralRequestJsonSchemaPath);
+        var result = sut.ValidateWpasCreateReferralRequest(payload);
 
         result.IsValid.Should().BeTrue();
     }
@@ -115,10 +115,10 @@ public class JsonSchemaValidatorTests
         };
     }
 
-    private static IJsonSchemaValidator CreateSut()
+    private static IWpasJsonSchemaValidator CreateSut()
     {
         var hostEnvironment = new TestHostEnvironment(AppContext.BaseDirectory);
-        return new JsonSchemaValidator(hostEnvironment);
+        return new WpasWpasJsonSchemaValidator(hostEnvironment);
     }
 
     private sealed class TestHostEnvironment(string contentRootPath) : IHostEnvironment

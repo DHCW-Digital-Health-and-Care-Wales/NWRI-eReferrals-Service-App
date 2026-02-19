@@ -34,7 +34,7 @@ public class ReferralService : IReferralService
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
     private readonly IWpasOutpatientReferralMapper _wpasOutpatientReferralMapper;
-    private readonly IJsonSchemaValidator _jsonSchemaValidator;
+    private readonly IWpasJsonSchemaValidator _wpasJsonSchemaValidator;
     private readonly ILogger<ReferralService> _logger;
 
     public ReferralService(IWpasApiClient wpasApiClient,
@@ -46,7 +46,7 @@ public class ReferralService : IReferralService
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
         IWpasOutpatientReferralMapper wpasOutpatientReferralMapper,
-        IJsonSchemaValidator jsonSchemaValidator,
+        IWpasJsonSchemaValidator wpasJsonSchemaValidator,
         ILogger<ReferralService> logger)
     {
         _wpasApiClient = wpasApiClient;
@@ -58,7 +58,7 @@ public class ReferralService : IReferralService
         _eventLogger = eventLogger;
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
         _wpasOutpatientReferralMapper = wpasOutpatientReferralMapper;
-        _jsonSchemaValidator = jsonSchemaValidator;
+        _wpasJsonSchemaValidator = wpasJsonSchemaValidator;
         _logger = logger;
     }
 
@@ -102,7 +102,7 @@ public class ReferralService : IReferralService
         await ValidateMandatoryDataAsync(bundleModel, _createBundleValidator, cancellationToken);
 
         var payload = MapToPayload(bundleModel);
-        ValidateSchema(payload, JsonSchemaValidator.WpasCreateReferralRequestJsonSchemaPath);
+        ValidateSchema(payload);
         _eventLogger.Audit(new EventCatalogue.MapFhirToWpas());
 
         return await _wpasApiClient.CreateReferralAsync(payload, cancellationToken);
@@ -194,9 +194,9 @@ public class ReferralService : IReferralService
         }
     }
 
-    private void ValidateSchema(WpasCreateReferralRequest payload, string jsonSchemaPath)
+    private void ValidateSchema(WpasCreateReferralRequest payload)
     {
-        var results = _jsonSchemaValidator.Validate(payload, jsonSchemaPath);
+        var results = _wpasJsonSchemaValidator.ValidateWpasCreateReferralRequest(payload);
         if (!results.IsValid)
         {
             var errors = results.Details?

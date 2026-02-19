@@ -62,7 +62,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IReferralService, ReferralService>();
         services.AddScoped<IWpasOutpatientReferralMapper, WpasOutpatientReferralMapper>();
-        services.AddSingleton<IJsonSchemaValidator, JsonSchemaValidator>();
+        services.AddSingleton<IWpasJsonSchemaValidator, WpasWpasJsonSchemaValidator>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)
