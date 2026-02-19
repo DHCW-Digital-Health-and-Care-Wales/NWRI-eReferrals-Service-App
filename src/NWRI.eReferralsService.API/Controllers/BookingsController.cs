@@ -3,7 +3,7 @@ using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Queries;
-using NWRI.eReferralsService.API.Swagger;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Controllers;
 
@@ -32,6 +32,15 @@ public class BookingsController : ControllerBase
     public IActionResult GetBookingSlot([FromQuery] GetBookingSlotQuery query)
     {
         _logger.CalledMethod(nameof(GetBookingSlot));
+
+        throw new ProxyNotImplementedException();
+    }
+
+    [HttpGet("Appointment/{id}")]
+    [SwaggerGetAppointmentByIdRequest]
+    public IActionResult GetAppointmentById(string id)
+    {
+        _logger.CalledMethod(nameof(GetAppointmentById));
 
         throw new ProxyNotImplementedException();
     }
