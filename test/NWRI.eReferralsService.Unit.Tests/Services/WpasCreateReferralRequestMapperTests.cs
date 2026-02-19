@@ -8,7 +8,7 @@ using NWRI.eReferralsService.API.Services;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public class WpasOutpatientReferralMapperTests
+public class WpasCreateReferralRequestMapperTests
 {
     [Fact]
     public void MapShouldProduceSchemaValidPayloadFromExampleBundle()
@@ -18,7 +18,7 @@ public class WpasOutpatientReferralMapperTests
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
         var model = BundleCreateReferralModel.FromBundle(bundle);
 
-        var mapper = new WpasOutpatientReferralMapper();
+        var mapper = new WpasCreateReferralRequestMapper();
         var payload = mapper.Map(model);
 
         payload.ContractDetails.ProviderOrganisationCode.Should().Be("7A4BV");

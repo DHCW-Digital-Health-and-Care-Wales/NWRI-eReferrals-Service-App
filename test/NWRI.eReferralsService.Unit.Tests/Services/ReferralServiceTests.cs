@@ -64,7 +64,7 @@ public class ReferralServiceTests
             .Setup(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_fixture.Create<WpasCancelReferralResponse>());
 
-        _fixture.Mock<IWpasOutpatientReferralMapper>()
+        _fixture.Mock<IWpasCreateReferralRequestMapper>()
             .Setup(x => x.Map(It.IsAny<BundleCreateReferralModel>()))
             .Returns(new WpasCreateReferralRequest
             {
@@ -172,7 +172,7 @@ public class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        _fixture.Mock<IWpasOutpatientReferralMapper>()
+        _fixture.Mock<IWpasCreateReferralRequestMapper>()
             .Setup(x => x.Map(It.IsAny<BundleCreateReferralModel>()))
             .Throws(new InvalidOperationException("boom"));
 
@@ -588,7 +588,7 @@ public class ReferralServiceTests
             _fixture.Mock<IEventLogger>().Object,
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object
             ,
-            _fixture.Mock<IWpasOutpatientReferralMapper>().Object,
+            _fixture.Mock<IWpasCreateReferralRequestMapper>().Object,
             _fixture.Mock<IWpasJsonSchemaValidator>().Object,
             _fixture.Mock<ILogger<ReferralService>>().Object
         );

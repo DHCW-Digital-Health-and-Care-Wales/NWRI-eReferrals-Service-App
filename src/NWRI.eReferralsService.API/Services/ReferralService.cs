@@ -33,7 +33,7 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
-    private readonly IWpasOutpatientReferralMapper _wpasOutpatientReferralMapper;
+    private readonly IWpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
     private readonly IWpasJsonSchemaValidator _wpasJsonSchemaValidator;
     private readonly ILogger<ReferralService> _logger;
 
@@ -45,7 +45,7 @@ public class ReferralService : IReferralService
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
-        IWpasOutpatientReferralMapper wpasOutpatientReferralMapper,
+        IWpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
         IWpasJsonSchemaValidator wpasJsonSchemaValidator,
         ILogger<ReferralService> logger)
     {
@@ -57,7 +57,7 @@ public class ReferralService : IReferralService
         _jsonSerializerOptions = jsonSerializerOptions;
         _eventLogger = eventLogger;
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
-        _wpasOutpatientReferralMapper = wpasOutpatientReferralMapper;
+        _wpasCreateReferralRequestMapper = wpasCreateReferralRequestMapper;
         _wpasJsonSchemaValidator = wpasJsonSchemaValidator;
         _logger = logger;
     }
@@ -185,7 +185,7 @@ public class ReferralService : IReferralService
     {
         try
         {
-            return _wpasOutpatientReferralMapper.Map(model);
+            return _wpasCreateReferralRequestMapper.Map(model);
         }
         catch (Exception ex)
         {

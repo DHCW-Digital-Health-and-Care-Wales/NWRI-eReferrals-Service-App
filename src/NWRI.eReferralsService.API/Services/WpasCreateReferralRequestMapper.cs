@@ -6,7 +6,7 @@ using NWRI.eReferralsService.API.Models.WPAS;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public sealed class WpasOutpatientReferralMapper : IWpasOutpatientReferralMapper
+public sealed class WpasCreateReferralRequestMapper : IWpasCreateReferralRequestMapper
 {
     private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
     private const string NhsNumberVerificationStatusSystem =
