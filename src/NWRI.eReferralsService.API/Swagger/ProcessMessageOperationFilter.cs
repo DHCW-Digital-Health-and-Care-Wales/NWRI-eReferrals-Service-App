@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NWRI.eReferralsService.API.Constants;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Swagger;
 

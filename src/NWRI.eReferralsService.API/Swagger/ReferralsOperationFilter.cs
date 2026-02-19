@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Swagger;
 
@@ -11,7 +12,7 @@ public sealed class ReferralsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralRequestAttribute>() is not null)
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralByIdRequestAttribute>() is not null)
         {
             ApplyGetReferral(operation);
         }
