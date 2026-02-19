@@ -101,11 +101,12 @@ public class ReferralService : IReferralService
         var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
         await ValidateMandatoryDataAsync(bundleModel, _createBundleValidator, cancellationToken);
 
-        var payload = MapToPayload(bundleModel);
-        ValidateSchema(payload);
+        var wpasCreateReferralRequest = MapToWpasCreateReferralRequest(bundleModel);
         _eventLogger.Audit(new EventCatalogue.MapFhirToWpas());
 
-        return await _wpasApiClient.CreateReferralAsync(payload, cancellationToken);
+        ValidateWpasCreateReferralRequestAgainstSchema(wpasCreateReferralRequest);
+
+        return await _wpasApiClient.CreateReferralAsync(wpasCreateReferralRequest, cancellationToken);
     }
 
     private async Task<WpasCancelReferralResponse?> CancelReferralAsync(
@@ -118,8 +119,9 @@ public class ReferralService : IReferralService
         await ValidateMandatoryDataAsync(bundleModel, _cancelBundleValidator, cancellationToken);
 
         // TODO: Implement mapping of FHIR Bundle to WPAS cancel referral payload
-        var payload = new WpasCancelReferralRequest();
-        return await _wpasApiClient.CancelReferralAsync(payload, cancellationToken);
+        var wpasCancelReferralRequest = new WpasCancelReferralRequest();
+
+        return await _wpasApiClient.CancelReferralAsync(wpasCancelReferralRequest, cancellationToken);
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
@@ -181,7 +183,7 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.MandatoryFieldsValidated());
     }
 
-    private WpasCreateReferralRequest MapToPayload(BundleCreateReferralModel model)
+    private WpasCreateReferralRequest MapToWpasCreateReferralRequest(BundleCreateReferralModel model)
     {
         try
         {
@@ -194,7 +196,7 @@ public class ReferralService : IReferralService
         }
     }
 
-    private void ValidateSchema(WpasCreateReferralRequest payload)
+    private void ValidateWpasCreateReferralRequestAgainstSchema(WpasCreateReferralRequest payload)
     {
         var results = _wpasJsonSchemaValidator.ValidateWpasCreateReferralRequest(payload);
         if (!results.IsValid)
