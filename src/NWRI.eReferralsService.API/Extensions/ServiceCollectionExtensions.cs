@@ -6,7 +6,6 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Configuration.OptionValidators;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;

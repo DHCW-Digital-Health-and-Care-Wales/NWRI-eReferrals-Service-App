@@ -10,7 +10,6 @@ using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
-using NWRI.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
