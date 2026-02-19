@@ -43,6 +43,24 @@ public class BookingsControllerTests
     }
 
     [Fact]
+    public void GetAppointmentByIdShouldThrowProxyNotImplementedException()
+    {
+        // Arrange
+        var id = _fixture.Create<string>();
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        SetRequestDetails(headers);
+
+        // Act
+        Action act = () => _sut.GetAppointmentById(id);
+
+        // Assert
+        var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
+        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
+        ex.Message.Should().Contain("not been implemented");
+    }
+
+    [Fact]
     public void GetBookingSlotShouldThrowProxyNotImplementedException()
     {
         // Arrange
