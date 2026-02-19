@@ -19,11 +19,22 @@ public sealed class BookingsOperationFilter : IOperationFilter
         {
             ApplyGetBookingSlot(operation);
         }
+        else if (context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentByIdRequestAttribute>() is not null)
+        {
+            ApplyGetAppointmentById(operation);
+        }
     }
 
     private static void ApplyGetAppointments(OpenApiOperation operation)
     {
         SwaggerHelpers.AddCommonHeaders(operation);
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void ApplyGetAppointmentById(OpenApiOperation operation)
+    {
+        SwaggerHelpers.AddCommonHeaders(operation);
+        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: new OpenApiString(Guid.NewGuid().ToString()));
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 

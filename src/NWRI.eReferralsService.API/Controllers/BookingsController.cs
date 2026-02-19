@@ -35,4 +35,13 @@ public class BookingsController : ControllerBase
 
         throw new ProxyNotImplementedException();
     }
+
+    [HttpGet("Appointment/{id}")]
+    [SwaggerGetAppointmentByIdRequest]
+    public IActionResult GetAppointmentById(string id)
+    {
+        _logger.CalledMethod(nameof(GetAppointmentById));
+
+        throw new ProxyNotImplementedException();
+    }
 }

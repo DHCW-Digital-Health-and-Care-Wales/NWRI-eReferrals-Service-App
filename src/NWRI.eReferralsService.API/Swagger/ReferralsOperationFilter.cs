@@ -11,7 +11,7 @@ public sealed class ReferralsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralRequestAttribute>() is not null)
+        if (context.MethodInfo.GetCustomAttribute<SwaggerGetReferralByIdRequestAttribute>() is not null)
         {
             ApplyGetReferral(operation);
         }
