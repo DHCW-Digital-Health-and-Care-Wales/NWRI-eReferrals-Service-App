@@ -154,7 +154,7 @@ public class ReferralServiceTests
         await action.Should().ThrowAsync<BundleValidationException>();
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         VerifyErrorEventWasLogged(_fixture.Mock<ILogger<ReferralService>>(), "WpasSchemaValidationFailed");
-        _fixture.Mock<IEventLogger>().Verify(x => x.Audit(It.Is<IAuditEvent>(e => e is EventCatalogue.MapFhirToWpas)), Times.Never);
+        _fixture.Mock<IEventLogger>().Verify(x => x.Audit(It.Is<IAuditEvent>(e => e is EventCatalogue.MapFhirToWpas)), Times.Once);
     }
 
     [Fact]
