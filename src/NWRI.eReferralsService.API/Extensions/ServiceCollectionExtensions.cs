@@ -47,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
         services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddSingleton<IWpasJsonSchemaValidator, WpasWpasJsonSchemaValidator>();
     }
 
     public static void AddHttpClients(this IServiceCollection services)
@@ -62,7 +63,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IReferralService, ReferralService>();
         services.AddScoped<IWpasCreateReferralRequestMapper, WpasCreateReferralRequestMapper>();
-        services.AddSingleton<IWpasJsonSchemaValidator, WpasWpasJsonSchemaValidator>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)
