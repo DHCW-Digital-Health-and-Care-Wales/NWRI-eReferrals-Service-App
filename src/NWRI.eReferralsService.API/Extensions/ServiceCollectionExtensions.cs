@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
+using NWRI.eReferralsService.API.Configuration.OptionValidators;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
@@ -47,7 +48,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
         services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
         services.AddSingleton<IWpasJsonSchemaValidator, WpasWpasJsonSchemaValidator>();
+    }
+
+    public static void AddMappers(this IServiceCollection services)
+    {
+        services.AddScoped<IWpasCreateReferralRequestMapper, WpasCreateReferralRequestMapper>();
     }
 
     public static void AddHttpClients(this IServiceCollection services)
@@ -62,7 +69,6 @@ public static class ServiceCollectionExtensions
     public static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IReferralService, ReferralService>();
-        services.AddScoped<IWpasCreateReferralRequestMapper, WpasCreateReferralRequestMapper>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)

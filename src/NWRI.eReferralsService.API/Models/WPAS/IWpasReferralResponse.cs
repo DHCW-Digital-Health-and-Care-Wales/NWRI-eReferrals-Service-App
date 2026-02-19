@@ -1,7 +1,6 @@
-namespace NWRI.eReferralsService.API.Models.WPAS
+namespace NWRI.eReferralsService.API.Models.WPAS;
+
+public interface IWpasReferralResponse
 {
-    public interface IWpasReferralResponse
-    {
-        public string? ReferralId { get; init; }
-    }
+    string? ReferralId { get; }
 }
