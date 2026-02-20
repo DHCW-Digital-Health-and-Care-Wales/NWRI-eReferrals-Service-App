@@ -6,13 +6,18 @@ using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.Integration.Tests.Services;
 
-public class WpasJsonSchemaValidatorTests
+public class WpasJsonSchemaValidatorTests : IClassFixture<WpasJsonSchemaValidatorTests.SchemaValidatorFixture>
 {
+    private readonly WpasJsonSchemaValidator _sut;
+
+    public WpasJsonSchemaValidatorTests(SchemaValidatorFixture fixture)
+    {
+        _sut = fixture.Sut;
+    }
+
     [Fact]
     public void ValidateShouldReturnInvalidWhenPayloadViolatesSchema()
     {
-        var sut = CreateSut();
-
         var payload = new WpasCreateReferralRequest
         {
             RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
@@ -54,7 +59,7 @@ public class WpasJsonSchemaValidatorTests
             }
         };
 
-        var result = sut.ValidateWpasCreateReferralRequest(payload);
+        var result = _sut.ValidateWpasCreateReferralRequest(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors.Should().BeNull();
@@ -63,10 +68,8 @@ public class WpasJsonSchemaValidatorTests
     [Fact]
     public void ValidateShouldReturnValidForKnownGoodPayload()
     {
-        var sut = CreateSut();
-
         var payload = CreateKnownGoodPayload();
-        var result = sut.ValidateWpasCreateReferralRequest(payload);
+        var result = _sut.ValidateWpasCreateReferralRequest(payload);
 
         result.IsValid.Should().BeTrue();
     }
@@ -115,17 +118,22 @@ public class WpasJsonSchemaValidatorTests
         };
     }
 
-    private static WpasJsonSchemaValidator CreateSut()
+    public sealed class SchemaValidatorFixture
     {
-        var hostEnvironment = new TestHostEnvironment(AppContext.BaseDirectory);
-        return new WpasJsonSchemaValidator(hostEnvironment);
-    }
+        public WpasJsonSchemaValidator Sut { get; }
 
-    private sealed class TestHostEnvironment(string contentRootPath) : IHostEnvironment
-    {
-        public string EnvironmentName { get; set; } = Environments.Development;
-        public string ApplicationName { get; set; } = "IntegrationTests";
-        public string ContentRootPath { get; set; } = contentRootPath;
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+        public SchemaValidatorFixture()
+        {
+            var hostEnvironment = new TestHostEnvironment(AppContext.BaseDirectory);
+            Sut = new WpasJsonSchemaValidator(hostEnvironment);
+        }
+
+        private sealed class TestHostEnvironment(string contentRootPath) : IHostEnvironment
+        {
+            public string EnvironmentName { get; set; } = Environments.Development;
+            public string ApplicationName { get; set; } = "IntegrationTests";
+            public string ContentRootPath { get; set; } = contentRootPath;
+            public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+        }
     }
 }
