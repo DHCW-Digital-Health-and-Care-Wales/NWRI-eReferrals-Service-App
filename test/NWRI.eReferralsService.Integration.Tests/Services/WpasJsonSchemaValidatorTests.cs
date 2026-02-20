@@ -1,12 +1,12 @@
 using FluentAssertions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using NWRI.eReferralsService.API.Models.WPAS;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.Integration.Tests.Services;
 
-public class WpasWpasJsonSchemaValidatorTests
+public class WpasJsonSchemaValidatorTests
 {
     [Fact]
     public void ValidateShouldReturnInvalidWhenPayloadViolatesSchema()
@@ -16,22 +16,22 @@ public class WpasWpasJsonSchemaValidatorTests
         var payload = new WpasCreateReferralRequest
         {
             RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
-            ContractDetails = new WpasCreateReferralRequest.ContractDetailsModel
+            ContractDetails = new ContractDetails
             {
                 ProviderOrganisationCode = "T"
             },
-            PatientDetails = new WpasCreateReferralRequest.PatientDetailsModel
+            PatientDetails = new PatientDetails
             {
                 NhsNumber = "3478526985",
                 NhsNumberStatusIndicator = "01",
-                PatientName = new WpasCreateReferralRequest.PatientDetailsModel.PatientNameModel
+                PatientName = new PatientName
                 {
                     Surname = "Jones",
                     FirstName = "Julie"
                 },
                 BirthDate = "19590504",
                 Sex = "F",
-                UsualAddress = new WpasCreateReferralRequest.PatientDetailsModel.UsualAddressModel
+                UsualAddress = new UsualAddress
                 {
                     NoAndStreet = "22 Brightside Crescent",
                     Town = "Overtown",
@@ -39,7 +39,7 @@ public class WpasWpasJsonSchemaValidatorTests
                     Locality = ""
                 }
             },
-            ReferralDetails = new WpasCreateReferralRequest.ReferralDetailsModel
+            ReferralDetails = new ReferralDetails
             {
                 OutpatientReferralSource = "15",
                 ReferringOrganisationCode = "TP2VC",
@@ -76,22 +76,22 @@ public class WpasWpasJsonSchemaValidatorTests
         return new WpasCreateReferralRequest
         {
             RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
-            ContractDetails = new WpasCreateReferralRequest.ContractDetailsModel
+            ContractDetails = new ContractDetails
             {
                 ProviderOrganisationCode = "TP2VC"
             },
-            PatientDetails = new WpasCreateReferralRequest.PatientDetailsModel
+            PatientDetails = new PatientDetails
             {
                 NhsNumber = "3478526985",
                 NhsNumberStatusIndicator = "01",
-                PatientName = new WpasCreateReferralRequest.PatientDetailsModel.PatientNameModel
+                PatientName = new PatientName
                 {
                     Surname = "Jones",
                     FirstName = "Julie"
                 },
                 BirthDate = "19590504",
                 Sex = "F",
-                UsualAddress = new WpasCreateReferralRequest.PatientDetailsModel.UsualAddressModel
+                UsualAddress = new UsualAddress
                 {
                     NoAndStreet = "22 Brightside Crescent",
                     Town = "Overtown",
@@ -99,7 +99,7 @@ public class WpasWpasJsonSchemaValidatorTests
                     Locality = ""
                 }
             },
-            ReferralDetails = new WpasCreateReferralRequest.ReferralDetailsModel
+            ReferralDetails = new ReferralDetails
             {
                 OutpatientReferralSource = "15",
                 ReferringOrganisationCode = "TP2VC",
@@ -115,10 +115,10 @@ public class WpasWpasJsonSchemaValidatorTests
         };
     }
 
-    private static IWpasJsonSchemaValidator CreateSut()
+    private static WpasJsonSchemaValidator CreateSut()
     {
         var hostEnvironment = new TestHostEnvironment(AppContext.BaseDirectory);
-        return new WpasWpasJsonSchemaValidator(hostEnvironment);
+        return new WpasJsonSchemaValidator(hostEnvironment);
     }
 
     private sealed class TestHostEnvironment(string contentRootPath) : IHostEnvironment

@@ -2,6 +2,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 // ReSharper disable NullableWarningSuppressionIsUsed

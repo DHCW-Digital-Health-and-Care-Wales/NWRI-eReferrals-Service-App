@@ -11,17 +11,15 @@ using Microsoft.Net.Http.Headers;
 using Moq;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Errors;
-using NWRI.eReferralsService.API.EventLogging;
-using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
-using NWRI.eReferralsService.API.Models.WPAS;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using RichardSzalay.MockHttp;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public class WpasApiClientTests
+public sealed class WpasApiClientTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
     private readonly WpasApiConfig _wpasApiConfig;
@@ -56,9 +54,8 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var eventLogger = new Mock<IEventLogger>();
         var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, eventLogger.Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
 
         // Act
         var result = await sut.CreateReferralAsync(request, CancellationToken.None);
@@ -66,45 +63,6 @@ public class WpasApiClientTests
         // Assert
         result.Should().NotBeNull();
         result.ReferralId.Should().Be(expectedReferralId);
-
-        eventLogger.Verify(
-            x => x.Audit(It.Is<EventCatalogue.DataSuccessfullyCommittedToWpas>(e => e.ExecutionTimeMs >= 0 && e.WpasReferralId == expectedReferralId)),
-            Times.Once);
-
-        mockHttp.VerifyNoOutstandingExpectation();
-    }
-
-    [Fact]
-    public async Task CreateReferralAsyncShouldAuditWithWpasReferralIdWhenPresentInJsonResponse()
-    {
-        // Arrange
-        var request = CreateWpasCreateReferralRequest();
-        var expectedRequestJson = JsonSerializer.Serialize(request);
-        var expectedReferralId = "140:12345678";
-        var jsonResponse = $@"{{""System"":""Welsh PAS"",""ReferralId"":""{expectedReferralId}""}}";
-
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
-            .WithContent(expectedRequestJson)
-            .WithHeaders(HeaderNames.ContentType, MediaTypeNames.Application.Json)
-            .Respond(MediaTypeNames.Application.Json, jsonResponse);
-
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
-
-        var eventLogger = new Mock<IEventLogger>();
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, eventLogger.Object, logger);
-
-        // Act
-        var result = await sut.CreateReferralAsync(request, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.ReferralId.Should().Be(expectedReferralId);
-        eventLogger.Verify(
-            x => x.Audit(It.Is<EventCatalogue.DataSuccessfullyCommittedToWpas>(e => e.ExecutionTimeMs >= 0 && e.WpasReferralId == expectedReferralId)),
-            Times.Once);
 
         mockHttp.VerifyNoOutstandingExpectation();
     }
@@ -127,9 +85,8 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var eventLogger = new Mock<IEventLogger>();
         var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, eventLogger.Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
 
         // Act
         var result = await sut.CancelReferralAsync(requestBody, CancellationToken.None);
@@ -137,10 +94,6 @@ public class WpasApiClientTests
         // Assert
         result.Should().NotBeNull();
         result.ReferralId.Should().Be(expectedReferralId);
-
-        eventLogger.Verify(
-            x => x.Audit(It.Is<EventCatalogue.DataSuccessfullyCommittedToWpas>(e => e.ExecutionTimeMs >= 0 && e.WpasReferralId == expectedReferralId)),
-            Times.Once);
 
         mockHttp.VerifyNoOutstandingExpectation();
     }
@@ -162,9 +115,8 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var eventLogger = new Mock<IEventLogger>();
         var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, eventLogger.Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
 
         // Act
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
@@ -192,9 +144,8 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var eventLogger = new Mock<IEventLogger>();
         var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, eventLogger.Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
 
         // Act
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
@@ -210,22 +161,22 @@ public class WpasApiClientTests
         return new WpasCreateReferralRequest
         {
             RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
-            ContractDetails = new WpasCreateReferralRequest.ContractDetailsModel
+            ContractDetails = new ContractDetails
             {
                 ProviderOrganisationCode = "TP2VC"
             },
-            PatientDetails = new WpasCreateReferralRequest.PatientDetailsModel
+            PatientDetails = new PatientDetails
             {
                 NhsNumber = "3478526985",
                 NhsNumberStatusIndicator = "01",
-                PatientName = new WpasCreateReferralRequest.PatientDetailsModel.PatientNameModel
+                PatientName = new PatientName
                 {
                     Surname = "Jones",
                     FirstName = "Julie"
                 },
                 BirthDate = "19590504",
                 Sex = "F",
-                UsualAddress = new WpasCreateReferralRequest.PatientDetailsModel.UsualAddressModel
+                UsualAddress = new UsualAddress
                 {
                     NoAndStreet = "22 Brightside Crescent",
                     Town = "Overtown",
@@ -233,7 +184,7 @@ public class WpasApiClientTests
                     Locality = ""
                 }
             },
-            ReferralDetails = new WpasCreateReferralRequest.ReferralDetailsModel
+            ReferralDetails = new ReferralDetails
             {
                 OutpatientReferralSource = "15",
                 ReferringOrganisationCode = "TP2VC",

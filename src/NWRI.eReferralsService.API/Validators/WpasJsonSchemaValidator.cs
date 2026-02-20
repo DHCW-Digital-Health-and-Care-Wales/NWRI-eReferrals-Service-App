@@ -2,17 +2,18 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using Json.Schema;
 using NWRI.eReferralsService.API.Models.WPAS;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
 
 namespace NWRI.eReferralsService.API.Validators;
 
-public sealed class WpasWpasJsonSchemaValidator : IWpasJsonSchemaValidator
+public class WpasJsonSchemaValidator
 {
     private const string WpasCreateReferralRequestJsonSchemaPath = "Schemas/WPAS-create-referral-request.schema.json";
 
-    private static readonly ConcurrentDictionary<string, JsonSchema> SchemaCache = new();
+    private readonly ConcurrentDictionary<string, JsonSchema> _schemaCache = new();
     private readonly IHostEnvironment _hostEnvironment;
 
-    public WpasWpasJsonSchemaValidator(IHostEnvironment hostEnvironment)
+    public WpasJsonSchemaValidator(IHostEnvironment hostEnvironment)
     {
         _hostEnvironment = hostEnvironment;
     }
@@ -27,7 +28,7 @@ public sealed class WpasWpasJsonSchemaValidator : IWpasJsonSchemaValidator
         var jsonElement = JsonSerializer.SerializeToElement(model);
         var schemaPath = Path.Combine(_hostEnvironment.ContentRootPath, jsonSchemaPath);
 
-        var schema = SchemaCache.GetOrAdd(schemaPath, static path => JsonSchema.FromFile(path));
+        var schema = _schemaCache.GetOrAdd(schemaPath, static path => JsonSchema.FromFile(path));
 
         return schema.Evaluate(jsonElement, new EvaluationOptions { OutputFormat = OutputFormat.List });
     }

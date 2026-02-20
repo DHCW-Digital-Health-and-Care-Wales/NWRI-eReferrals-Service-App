@@ -4,6 +4,7 @@
   "title": "Planned Care Referral Data Set",
   "description": "The Planned Care Referral (PCR) Data Set captures all referrals received by NHS Wales provider organisations for the following service requests: Request for Advice, Request for Investigation, Request for Treatment",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "RecordId": {
       "description": "This is the field to identify the type of record being submitted.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/recordid.htm",
@@ -12,6 +13,7 @@
     },
     "ContractDetails": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "ProviderOrganisationCode": {
           "description": "The provider code that identifies the health care provider who is responsible for managing the treatment of the patient.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/organisationcodecodeofprovider.htm",
@@ -24,6 +26,7 @@
     },
     "PatientDetails": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "LocalPatientIdentifier": {
           "description": "This is the case record number. It is a unique identifier for a patient within a health care provider.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/localpatientidentifier.htm",
@@ -57,6 +60,7 @@
         },
         "PatientName": {
           "type": "object",
+          "additionalProperties": false,
           "description": "The patient's official name.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/patientsname.htm",
           "properties": {
             "Surname": {
@@ -86,6 +90,7 @@
         },
         "UsualAddress": {
           "type": "object",
+          "additionalProperties": false,
           "description": "The patient's usual address.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/patientsusualaddress.htm",
           "properties": {
             "NoAndStreet": {
@@ -112,8 +117,9 @@
     },
     "ReferralDetails": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "OupatientReferralSource": {
+        "OutpatientReferralSource": {
           "description": "This is a classification which is used to identify the source of referral of each Outpatient Episode or Outpatient Referral.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/sourceofreferraloutpatients.htm",
           "type": "string",
           "minLength": 2,
@@ -172,7 +178,7 @@
         }
       },
       "required": [
-        "OupatientReferralSource",
+        "OutpatientReferralSource",
         "ReferringOrganisationCode",
         "ServiceTypeRequested",
         "ReferrerCode",

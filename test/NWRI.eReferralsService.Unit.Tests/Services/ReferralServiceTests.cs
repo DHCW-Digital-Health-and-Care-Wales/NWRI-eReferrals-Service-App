@@ -5,9 +5,9 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
-using Json.Schema;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
@@ -15,8 +15,11 @@ using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Models.WPAS;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
+using NWRI.eReferralsService.API.Models.WPAS.Responses;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
@@ -25,10 +28,20 @@ using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public class ReferralServiceTests
+public sealed class ReferralServiceTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
+
+    private static readonly Lazy<WpasJsonSchemaValidator> SharedSchemaValidator = new(() =>
+    {
+        var hostEnvironment = new Mock<IHostEnvironment>();
+        hostEnvironment
+            .SetupGet(x => x.ContentRootPath)
+            .Returns(Path.Combine(GetRepoRootPath(), "test", "NWRI.eReferralsService.Unit.Tests", "TestData"));
+
+        return new WpasJsonSchemaValidator(hostEnvironment.Object);
+    });
 
     public ReferralServiceTests()
     {
@@ -64,73 +77,44 @@ public class ReferralServiceTests
             .Setup(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_fixture.Create<WpasCancelReferralResponse>());
 
-        _fixture.Mock<IWpasCreateReferralRequestMapper>()
-            .Setup(x => x.Map(It.IsAny<BundleCreateReferralModel>()))
-            .Returns(new WpasCreateReferralRequest
+        _fixture.Register(() => new WpasCreateReferralRequestMapper());
+
+        _fixture.Mock<IHostEnvironment>()
+            .SetupGet(x => x.ContentRootPath)
+            .Returns(Path.Combine(GetRepoRootPath(), "test", "NWRI.eReferralsService.Unit.Tests", "TestData"));
+
+        _fixture.Register(() => SharedSchemaValidator.Value);
+    }
+
+    private static string GetRepoRootPath()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (dir != null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "NWRI.eReferralsService.sln")))
             {
-                RecordId = "record-id",
-                ContractDetails = new WpasCreateReferralRequest.ContractDetailsModel
-                {
-                    ProviderOrganisationCode = "TP2VC"
-                },
-                PatientDetails = new WpasCreateReferralRequest.PatientDetailsModel
-                {
-                    NhsNumber = "3478526985",
-                    NhsNumberStatusIndicator = "01",
-                    PatientName = new WpasCreateReferralRequest.PatientDetailsModel.PatientNameModel
-                    {
-                        Surname = "Jones",
-                        FirstName = "Julie"
-                    },
-                    BirthDate = "19590504",
-                    Sex = "F",
-                    UsualAddress = new WpasCreateReferralRequest.PatientDetailsModel.UsualAddressModel
-                    {
-                        NoAndStreet = "22 Brightside Crescent",
-                        Town = "Overtown",
-                        Postcode = "LS10 4YU",
-                        Locality = ""
-                    }
-                },
-                ReferralDetails = new WpasCreateReferralRequest.ReferralDetailsModel
-                {
-                    OutpatientReferralSource = "15",
-                    ReferringOrganisationCode = "TP2VC",
-                    ServiceTypeRequested = "6",
-                    ReferrerCode = "01-99999",
-                    AdministrativeCategory = "01",
-                    DateOfReferral = "20240820",
-                    MainSpecialty = "130",
-                    ReferrerPriorityType = "2",
-                    ReasonForReferral = "Reason",
-                    ReferralIdentifier = "referral-id"
-                }
-            });
+                return dir.FullName;
+            }
 
-        _fixture.Mock<IWpasJsonSchemaValidator>()
-            .Setup(x => x.ValidateWpasCreateReferralRequest(It.IsAny<WpasCreateReferralRequest>()))
-            .Returns(CreateValidSchemaResult());
-    }
+            dir = dir.Parent;
+        }
 
-    private static EvaluationResults CreateValidSchemaResult()
-    {
-        var schema = new JsonSchemaBuilder().Type(SchemaValueType.Object).Build();
-        using var doc = JsonDocument.Parse("{}");
-        return schema.Evaluate(doc.RootElement);
-    }
-
-    private static EvaluationResults CreateInvalidSchemaResult()
-    {
-        var schema = new JsonSchemaBuilder().Type(SchemaValueType.String).Build();
-        using var doc = JsonDocument.Parse("{}");
-        return schema.Evaluate(doc.RootElement);
+        throw new DirectoryNotFoundException("Unable to locate repository root (NWRI.eReferralsService.sln) from test execution directory.");
     }
 
     [Fact]
     public async Task ProcessMessageAsyncShouldThrowWhenWpasSchemaValidationFails()
     {
         // Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var receiverOrganisation = bundle.Entry
+            .Select(e => e.Resource)
+            .OfType<Organization>()
+            .First(o => string.Equals(o.Name, "Receiving/performing Organization", StringComparison.Ordinal));
+        receiverOrganisation.Identifier.First().Value = "TP2V"; // invalid length: schema requires exactly 5
+
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         _fixture.Mock<IValidator<HeadersModel>>()
@@ -140,10 +124,6 @@ public class ReferralServiceTests
         _fixture.Mock<IValidator<BundleCreateReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
-
-        _fixture.Mock<IWpasJsonSchemaValidator>()
-            .Setup(x => x.ValidateWpasCreateReferralRequest(It.IsAny<WpasCreateReferralRequest>()))
-            .Returns(CreateInvalidSchemaResult());
 
         var sut = CreateReferralService();
 
@@ -161,7 +141,13 @@ public class ReferralServiceTests
     public async Task ProcessMessageAsyncShouldThrowWhenWpasMappingThrowsException()
     {
         // Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew), _jsonSerializerOptions);
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var patient = bundle.Entry
+            .Select(e => e.Resource)
+            .OfType<Patient>()
+            .First();
+        patient.Identifier.Clear();
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         _fixture.Mock<IValidator<HeadersModel>>()
@@ -171,10 +157,6 @@ public class ReferralServiceTests
         _fixture.Mock<IValidator<BundleCreateReferralModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
-
-        _fixture.Mock<IWpasCreateReferralRequestMapper>()
-            .Setup(x => x.Map(It.IsAny<BundleCreateReferralModel>()))
-            .Throws(new InvalidOperationException("boom"));
 
         var sut = CreateReferralService();
 
@@ -588,8 +570,8 @@ public class ReferralServiceTests
             _fixture.Mock<IEventLogger>().Object,
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object
             ,
-            _fixture.Mock<IWpasCreateReferralRequestMapper>().Object,
-            _fixture.Mock<IWpasJsonSchemaValidator>().Object,
+            _fixture.Create<WpasCreateReferralRequestMapper>(),
+            _fixture.Create<WpasJsonSchemaValidator>(),
             _fixture.Mock<ILogger<ReferralService>>().Object
         );
     }
@@ -608,6 +590,12 @@ public class ReferralServiceTests
 
     private static Bundle CreateMessageBundle(string reasonCode, RequestStatus? serviceRequestStatus = RequestStatus.Active)
     {
+        const string serviceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
+        const string barsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
+        const string nhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
+        const string nhsNumberVerificationStatusSystem =
+            "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus";
+
         const string serviceRequestId = "sr-1";
         var messageHeader = new MessageHeader
         {
@@ -624,13 +612,135 @@ public class ReferralServiceTests
         {
             Id = serviceRequestId,
             IntentElement = new Code<RequestIntent>(RequestIntent.Order),
-            Subject = new ResourceReference("Patient/pat-1")
+            Subject = new ResourceReference("Patient/pat-1"),
+            AuthoredOn = "2024-08-20",
+            Category =
+            [
+                new CodeableConcept
+                {
+                    Coding =
+                    [
+                        new Coding(serviceRequestCategorySystem, "6"),
+                        new Coding(barsUseCaseCategorySystem, "01")
+                    ]
+                }
+            ]
         };
 
         if (serviceRequestStatus is not null)
         {
             serviceRequest.StatusElement = new Code<RequestStatus>(serviceRequestStatus.Value);
         }
+
+        var encounter = new Encounter
+        {
+            Id = "enc-1",
+            Status = Encounter.EncounterStatus.Finished,
+            Class = new Coding("http://terminology.hl7.org/CodeSystem/v3-ActCode", "AMB"),
+            Identifier =
+            [
+                new Identifier
+                {
+                    Value = "record-id"
+                }
+            ]
+        };
+
+        var patient = new Patient
+        {
+            Id = "pat-1",
+            Name =
+            [
+                new HumanName
+                {
+                    Family = "Jones",
+                    Given = ["Julie"]
+                }
+            ],
+            Address =
+            [
+                new Address
+                {
+                    Line = ["22 Brightside Crescent"],
+                    City = "Overtown",
+                    PostalCode = "LS10 4YU"
+                }
+            ],
+            BirthDate = "1959-05-04",
+            Gender = AdministrativeGender.Female,
+            Identifier =
+            [
+                new Identifier
+                {
+                    System = nhsNumberSystem,
+                    Value = "3478526985",
+                    Extension =
+                    [
+                        new Extension
+                        {
+                            Url = "https://example.org/fhir/StructureDefinition/nhs-number-verification",
+                            Value = new CodeableConcept
+                            {
+                                Coding =
+                                [
+                                    new Coding(nhsNumberVerificationStatusSystem, "01")
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var receiverOrganisation = new Organization
+        {
+            Name = "Receiving/performing Organization",
+            Identifier =
+            [
+                new Identifier
+                {
+                    Value = "TP2VC"
+                }
+            ]
+        };
+
+        var senderOrganisation = new Organization
+        {
+            Name = "Sender Organization",
+            Identifier =
+            [
+                new Identifier
+                {
+                    Value = "15"
+                }
+            ]
+        };
+
+        var practitioner = new Practitioner
+        {
+            Identifier =
+            [
+                new Identifier
+                {
+                    Value = "01-99999"
+                }
+            ]
+        };
+
+        var condition = new Condition
+        {
+            Subject = new ResourceReference("Patient/pat-1"),
+            Code = new CodeableConcept
+            {
+                Coding =
+                [
+                    new Coding
+                    {
+                        Display = "ReasonForReferral"
+                    }
+                ]
+            }
+        };
 
         return new Bundle
         {
@@ -644,6 +754,30 @@ public class ReferralServiceTests
                 new Bundle.EntryComponent
                 {
                     Resource = serviceRequest
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = encounter
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = patient
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = receiverOrganisation
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = senderOrganisation
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = practitioner
+                },
+                new Bundle.EntryComponent
+                {
+                    Resource = condition
                 }
             ]
         };

@@ -9,8 +9,10 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Models.WPAS;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
+using NWRI.eReferralsService.API.Models.WPAS.Responses;
 using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
@@ -33,8 +35,8 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
-    private readonly IWpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
-    private readonly IWpasJsonSchemaValidator _wpasJsonSchemaValidator;
+    private readonly WpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
+    private readonly WpasJsonSchemaValidator _wpasJsonSchemaValidator;
     private readonly ILogger<ReferralService> _logger;
 
     public ReferralService(IWpasApiClient wpasApiClient,
@@ -45,8 +47,8 @@ public class ReferralService : IReferralService
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
-        IWpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
-        IWpasJsonSchemaValidator wpasJsonSchemaValidator,
+        WpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
+        WpasJsonSchemaValidator wpasJsonSchemaValidator,
         ILogger<ReferralService> logger)
     {
         _wpasApiClient = wpasApiClient;
@@ -73,7 +75,7 @@ public class ReferralService : IReferralService
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
 
         var workflowAction = DetermineReferralWorkflowAction(bundle);
-        IWpasReferralResponse? response = workflowAction switch
+        WpasReferralResponse? response = workflowAction switch
         {
             ReferralWorkflowAction.Create => await CreateReferralAsync(bundle, cancellationToken),
             ReferralWorkflowAction.Cancel => await CancelReferralAsync(bundle, cancellationToken),
@@ -88,11 +90,11 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response?.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
-        // TODO: Define response contract and return appropriate response instead of empty string
+        // TODO: To be implemented as part of story 565927, for now returning empty string to return 200 OK with empty body to the sender system
         return string.Empty;
     }
 
-    private async Task<WpasCreateReferralResponse?> CreateReferralAsync(
+    private async Task<WpasCreateReferralResponse> CreateReferralAsync(
         Bundle bundle,
         CancellationToken cancellationToken)
     {
@@ -104,12 +106,18 @@ public class ReferralService : IReferralService
         var wpasCreateReferralRequest = MapToWpasCreateReferralRequest(bundleModel);
         _eventLogger.Audit(new EventCatalogue.MapFhirToWpas());
 
-        ValidateWpasCreateReferralRequestAgainstSchema(wpasCreateReferralRequest);
+        ValidateWpasRequestSchema(wpasCreateReferralRequest);
 
-        return await _wpasApiClient.CreateReferralAsync(wpasCreateReferralRequest, cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+        var response = await _wpasApiClient.CreateReferralAsync(wpasCreateReferralRequest, cancellationToken);
+        _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
+            stopwatch.ElapsedMilliseconds,
+            response.ReferralId));
+
+        return response;
     }
 
-    private async Task<WpasCancelReferralResponse?> CancelReferralAsync(
+    private async Task<WpasCancelReferralResponse> CancelReferralAsync(
         Bundle bundle,
         CancellationToken cancellationToken)
     {
@@ -121,7 +129,13 @@ public class ReferralService : IReferralService
         // TODO: Implement mapping of FHIR Bundle to WPAS cancel referral payload
         var wpasCancelReferralRequest = new WpasCancelReferralRequest();
 
-        return await _wpasApiClient.CancelReferralAsync(wpasCancelReferralRequest, cancellationToken);
+        var stopwatch = Stopwatch.StartNew();
+        var response = await _wpasApiClient.CancelReferralAsync(wpasCancelReferralRequest, cancellationToken);
+        _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(
+            stopwatch.ElapsedMilliseconds,
+            response.ReferralId));
+
+        return response;
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
@@ -196,7 +210,7 @@ public class ReferralService : IReferralService
         }
     }
 
-    private void ValidateWpasCreateReferralRequestAgainstSchema(WpasCreateReferralRequest payload)
+    private void ValidateWpasRequestSchema(WpasCreateReferralRequest payload)
     {
         var results = _wpasJsonSchemaValidator.ValidateWpasCreateReferralRequest(payload);
         if (!results.IsValid)
