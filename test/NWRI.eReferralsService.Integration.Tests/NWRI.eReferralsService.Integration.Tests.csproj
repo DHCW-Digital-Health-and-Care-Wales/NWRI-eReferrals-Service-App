@@ -35,4 +35,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\src\NWRI.eReferralsService.API\Schemas\WPAS-create-referral-request.schema.json" Link="Schemas\WPAS-create-referral-request.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

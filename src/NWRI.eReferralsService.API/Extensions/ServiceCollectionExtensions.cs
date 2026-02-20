@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
+using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
@@ -47,6 +48,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
         services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
+        services.AddSingleton<WpasJsonSchemaValidator>();
+    }
+
+    public static void AddMappers(this IServiceCollection services)
+    {
+        services.AddSingleton<WpasCreateReferralRequestMapper>();
     }
 
     public static void AddHttpClients(this IServiceCollection services)

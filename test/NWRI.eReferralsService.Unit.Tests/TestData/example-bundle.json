@@ -60,12 +60,12 @@
           {
             "coding": [
               {
-                "code": "referral",
+                "code": "6",
                 "display": "Transfer of Care",
                 "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest"
               },
               {
-                "code": "referraltosecondarycare",
+                "code": "01",
                 "display": "Primary Care to Secondary Care",
                 "system": "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars"
               }
@@ -112,7 +112,7 @@
         "identifier": [
           {
             "system": "https://wrds.wales.nhs.uk/AllWalesData/AssigningAuthorities/AssigningAuthority/Optom-Referrals",
-            "value": "2.16.840.1.113883.2.1.8.1.3.987"
+            "value": "140:12345678"
           }
         ],
         "meta": {
@@ -280,6 +280,7 @@
             "city": "Overtown",
             "district": "West Yorkshire",
             "line": [
+              "Flat 2",
               "22 Brightside Crescent"
             ],
             "postalCode": "LS10 4YU",
@@ -298,7 +299,7 @@
                 "valueCodeableConcept": {
                   "coding": [
                     {
-                      "code": "number-present-and-verified",
+                      "code": "01",
                       "display": "Number present and verified",
                       "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus"
                     }
