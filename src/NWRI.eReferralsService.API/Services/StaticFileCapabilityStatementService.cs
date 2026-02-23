@@ -4,18 +4,18 @@ using NWRI.eReferralsService.API.Extensions.Logger;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public sealed class StaticFileCapabilityStatementProvider : ICapabilityStatementProvider
+public class StaticFileCapabilityStatementService : ICapabilityStatementService
 {
     private const string ResourcePath = "Resources/Fhir/BaRS-Compatibility-Statement.json";
 
     private readonly IFileProvider _files;
-    private readonly ILogger<StaticFileCapabilityStatementProvider> _logger;
+    private readonly ILogger<StaticFileCapabilityStatementService> _logger;
 
     private string? _cached;
     private readonly object _lock = new();
 
-    public StaticFileCapabilityStatementProvider(IWebHostEnvironment env,
-        ILogger<StaticFileCapabilityStatementProvider> logger)
+    public StaticFileCapabilityStatementService(IWebHostEnvironment env,
+        ILogger<StaticFileCapabilityStatementService> logger)
     {
         _files = env.ContentRootFileProvider;
         _logger = logger;
@@ -33,7 +33,7 @@ public sealed class StaticFileCapabilityStatementProvider : ICapabilityStatement
         {
             var inner = new FileNotFoundException("CapabilityStatement JSON file not found", fileInfo.PhysicalPath);
 
-            _logger.CapabilityStatementJsonNotFound(ResourcePath, fileInfo.PhysicalPath, inner);
+            _logger.CapabilityStatementJsonNotFound(ResourcePath, inner);
 
             throw new CapabilityStatementUnavailableException();
         }

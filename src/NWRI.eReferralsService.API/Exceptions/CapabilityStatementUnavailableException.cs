@@ -5,7 +5,9 @@ namespace NWRI.eReferralsService.API.Exceptions;
 public sealed class CapabilityStatementUnavailableException : BaseFhirException
 {
     public override IEnumerable<BaseFhirHttpError> Errors { get; } =
-        [new ProxyServerError()];
+        [
+            new ProxyServerError("CapabilityStatement resource is unavailable.")
+        ];
 
-    public override string Message => ProxyServerError.Message;
+    public override string Message => "CapabilityStatement resource is unavailable.";
 }

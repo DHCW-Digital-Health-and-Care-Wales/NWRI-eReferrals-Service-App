@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using NWRI.eReferralsService.API.Constants;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NWRI.eReferralsService.API.Swagger;
@@ -12,7 +13,16 @@ public sealed class MetadataOperationFilter : IOperationFilter
     {
         if (context.MethodInfo.GetCustomAttribute<SwaggerGetMetadataRequestAttribute>() is not null)
         {
-            SwaggerHelpers.AddCommonHeaders(operation);
+            SwaggerHelpers.AddHeaders(
+                operation,
+                RequestHeaderKeys.GetAllExcept(
+                    RequestHeaderKeys.TargetIdentifier,
+                    RequestHeaderKeys.RequestingPractitioner,
+                    RequestHeaderKeys.UseContext),
+                true);
+
+            SwaggerHelpers.AddHeaders(operation, [RequestHeaderKeys.TargetIdentifier, RequestHeaderKeys.RequestingPractitioner], false);
+
             AddResponses(operation);
         }
     }

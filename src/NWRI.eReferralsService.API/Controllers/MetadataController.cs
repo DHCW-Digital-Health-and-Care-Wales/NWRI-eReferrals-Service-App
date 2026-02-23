@@ -11,10 +11,10 @@ namespace NWRI.eReferralsService.API.Controllers;
 [AuditLogRequest]
 public sealed class MetadataController : ControllerBase
 {
-    private readonly ICapabilityStatementProvider _provider;
+    private readonly ICapabilityStatementService _provider;
     private readonly ILogger<MetadataController> _logger;
 
-    public MetadataController(ICapabilityStatementProvider provider, ILogger<MetadataController> logger)
+    public MetadataController(ICapabilityStatementService provider, ILogger<MetadataController> logger)
     {
         _provider = provider;
         _logger = logger;

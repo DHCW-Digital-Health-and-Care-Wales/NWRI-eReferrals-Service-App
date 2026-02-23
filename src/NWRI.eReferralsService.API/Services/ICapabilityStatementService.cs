@@ -1,6 +1,6 @@
 namespace NWRI.eReferralsService.API.Services;
 
-public interface ICapabilityStatementProvider
+public interface ICapabilityStatementService
 {
     Task<string> GetCapabilityStatementAsync(CancellationToken ct);
 }

@@ -5,11 +5,14 @@ namespace NWRI.eReferralsService.API.Errors;
 
 public sealed class ProxyServerError : BaseFhirHttpError
 {
-    internal const string Message = "Proxy Error.";
+    private readonly string _errorMessage;
+
+    public ProxyServerError(string errorMessage)
+    {
+        _errorMessage = errorMessage;
+    }
 
     public override string Code => FhirHttpErrorCodes.ProxyServerError;
-
-    public override string DiagnosticsMessage => string.Empty;
-
+    public override string DiagnosticsMessage => $"Proxy server error: {_errorMessage}";
     public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Exception;
 }

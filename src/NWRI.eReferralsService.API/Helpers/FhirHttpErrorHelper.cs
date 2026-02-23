@@ -13,7 +13,7 @@ public static class FhirHttpErrorHelper
         { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." },
         { FhirHttpErrorCodes.ProxyNotImplemented, "501: BaRS did not recognize the request. This request has not been implemented within the API." },
         { FhirHttpErrorCodes.ReceiverUnavailable, "503: The Receiver is currently unavailable." },
-        { FhirHttpErrorCodes.ProxyServerError, "500: Proxy Error." }
+        { FhirHttpErrorCodes.ProxyServerError, "500: The Proxy encountered an internal error while processing the request." }
     };
 
     public static string GetDisplayMessageByCode(string code)

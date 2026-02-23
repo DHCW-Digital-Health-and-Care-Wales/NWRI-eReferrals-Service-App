@@ -29,7 +29,7 @@ public class MetadataControllerTests
 
         var ct = new CancellationTokenSource().Token;
 
-        _fixture.Mock<ICapabilityStatementProvider>()
+        _fixture.Mock<ICapabilityStatementService>()
             .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(outputJson);
 
@@ -37,7 +37,7 @@ public class MetadataControllerTests
         await _sut.GetMetadata(ct);
 
         // Assert
-        _fixture.Mock<ICapabilityStatementProvider>()
+        _fixture.Mock<ICapabilityStatementService>()
             .Verify(x => x.GetCapabilityStatementAsync(ct), Times.Once);
     }
 
@@ -47,7 +47,7 @@ public class MetadataControllerTests
         // Arrange
         var outputJson = _fixture.Create<string>();
 
-        _fixture.Mock<ICapabilityStatementProvider>()
+        _fixture.Mock<ICapabilityStatementService>()
             .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(outputJson);
 
@@ -67,7 +67,7 @@ public class MetadataControllerTests
         // Arrange
         var ex = new FileNotFoundException(_fixture.Create<string>());
 
-        _fixture.Mock<ICapabilityStatementProvider>()
+        _fixture.Mock<ICapabilityStatementService>()
             .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(ex);
 

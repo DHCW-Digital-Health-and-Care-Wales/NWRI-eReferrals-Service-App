@@ -1,4 +1,5 @@
 using FluentAssertions;
+using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using static Hl7.Fhir.Model.VerificationResult;
@@ -10,8 +11,9 @@ public class CapabilityStatementUnavailableExceptionTests
     [Fact]
     public void ShouldCorrectlyCreateCapabilityStatementUnavailableException()
     {
-        //Arrange
-        var expectedMessage = $"Proxy Error.";
+        // Arrange
+        const string expectedMessage = "CapabilityStatement resource is unavailable.";
+        const string expectedDiagnostics = $"Proxy server error: {expectedMessage}";
 
         // Act
         var exception = new CapabilityStatementUnavailableException();
@@ -22,7 +24,8 @@ public class CapabilityStatementUnavailableExceptionTests
         exception.Errors.Should().NotBeNull();
         exception.Errors.Should().HaveCount(1);
 
-        exception.Errors.Single().Should().BeOfType<ProxyServerError>()
-            .Which.Code.Should().Be(API.Constants.FhirHttpErrorCodes.ProxyServerError);
+        var error = exception.Errors.Single().Should().BeOfType<ProxyServerError>().Subject;
+        error.Code.Should().Be(FhirHttpErrorCodes.ProxyServerError);
+        error.DiagnosticsMessage.Should().Be(expectedDiagnostics);
     }
 }

@@ -61,7 +61,7 @@ public static class ServiceCollectionExtensions
     public static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IReferralService, ReferralService>();
-        services.AddSingleton<ICapabilityStatementProvider, StaticFileCapabilityStatementProvider>();
+        services.AddSingleton<ICapabilityStatementService, StaticFileCapabilityStatementService>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)

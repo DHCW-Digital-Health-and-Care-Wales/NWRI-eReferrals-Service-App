@@ -46,10 +46,6 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(
         Level = LogLevel.Error,
-        Message = "CapabilityStatement JSON file not found. RelativePath: '{RelativePath}', PhysicalPath: '{PhysicalPath}'.")]
-    public static partial void CapabilityStatementJsonNotFound(
-        this ILogger logger,
-        string relativePath,
-        string? physicalPath,
-        FileNotFoundException exception);
+        Message = "CapabilityStatement JSON resource not found. ResourcePath={ResourcePath}.")]
+    public static partial void CapabilityStatementJsonNotFound(this ILogger logger, string resourcePath, FileNotFoundException exception);
 }
