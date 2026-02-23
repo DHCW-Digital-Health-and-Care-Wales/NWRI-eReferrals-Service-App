@@ -418,7 +418,8 @@ public class ResponseMiddlewareTests
     public async Task ShouldHandleCapabilityStatementUnavailableException()
     {
         // Arrange
-        var exception = new CapabilityStatementUnavailableException();
+        var cause = new FileNotFoundException("CapabilityStatement JSON file not found", "x");
+        var exception = new CapabilityStatementUnavailableException(cause);
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();

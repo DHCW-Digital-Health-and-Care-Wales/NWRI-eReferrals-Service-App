@@ -1,7 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Services;
@@ -10,68 +9,57 @@ namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class StaticFileCapabilityStatementServiceTests
 {
-    private const string ResourcePath = "Resources/Fhir/BaRS-Compatibility-Statement.json";
+    private const string ResourcePath = "Swagger/Examples/metadata-capability-statement-response.json";
 
     [Fact]
-    public async Task GetCapabilityStatementAsyncWhenFileExistsReturnsJsonAndCaches()
+    public async Task GetCapabilityStatementAsyncWhenFileExistsReturnsJson()
     {
         // Arrange
         var json = """{"resourceType":"CapabilityStatement"}""";
         var (sut, fileProviderMock, fileInfo) = CreateSutWithFile(json);
 
         // Act
-        var first = await sut.GetCapabilityStatementAsync(CancellationToken.None);
-        var second = await sut.GetCapabilityStatementAsync(CancellationToken.None);
+        var result = await sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        Assert.Equal(json, first);
-        Assert.Equal(json, second);
-
+        Assert.Equal(json, result);
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
         Assert.Equal(1, fileInfo.CreateReadStreamCallCount);
     }
 
     [Fact]
-    public async Task GetCapabilityStatementAsyncWhenFileMissingThrowsAndLogs()
+    public async Task GetCapabilityStatementAsyncWhenFileMissingThrowsCapabilityStatementUnavailableExceptionWithFileNotFoundCause()
     {
         // Arrange
-        var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementService>>();
         var fileProviderMock = new Mock<IFileProvider>();
+        var fileInfo = new TestFileInfo { Exists = false, PhysicalPath = "C:\\missing.json" };
 
-        var fileInfo = new TestFileInfo { Exists = false, PhysicalPath = "x" };
         fileProviderMock.Setup(fp => fp.GetFileInfo(ResourcePath)).Returns(fileInfo);
 
         var envMock = new Mock<IWebHostEnvironment>();
         envMock.SetupGet(e => e.ContentRootFileProvider).Returns(fileProviderMock.Object);
 
-        var sut = new StaticFileCapabilityStatementService(envMock.Object, loggerMock.Object);
+        var sut = new StaticFileCapabilityStatementService(envMock.Object);
 
-        // Act + Assert
-        await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
+        // Act
+        var ex = await Assert.ThrowsAsync<CapabilityStatementUnavailableException>(() =>
             sut.GetCapabilityStatementAsync(CancellationToken.None));
 
+        // Assert
         fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
-
-        loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.Is<FileNotFoundException>(ex => ex.Message.Contains("CapabilityStatement", StringComparison.OrdinalIgnoreCase)),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
+        Assert.IsType<FileNotFoundException>(ex.Cause);
+        Assert.Contains("CapabilityStatement JSON file not found", ex.Cause.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     private static (StaticFileCapabilityStatementService Sut, Mock<IFileProvider> FileProviderMock, TestFileInfo FileInfo)
         CreateSutWithFile(string json)
     {
-        var loggerMock = new Mock<ILogger<StaticFileCapabilityStatementService>>();
         var fileProviderMock = new Mock<IFileProvider>();
 
         var fileInfo = new TestFileInfo
         {
             Exists = true,
-            PhysicalPath = "C:\\fake\\BaRS-Compatibility-Statement.json",
+            PhysicalPath = "C:\\fake\\metadata-capability-statement-response.json",
             StreamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(json))
         };
 
@@ -80,7 +68,7 @@ public class StaticFileCapabilityStatementServiceTests
         var envMock = new Mock<IWebHostEnvironment>();
         envMock.SetupGet(e => e.ContentRootFileProvider).Returns(fileProviderMock.Object);
 
-        var sut = new StaticFileCapabilityStatementService(envMock.Object, loggerMock.Object);
+        var sut = new StaticFileCapabilityStatementService(envMock.Object);
         return (sut, fileProviderMock, fileInfo);
     }
 
@@ -89,7 +77,7 @@ public class StaticFileCapabilityStatementServiceTests
         public bool Exists { get; set; }
         public long Length => 0;
         public string? PhysicalPath { get; set; }
-        public string Name => "BaRS-Compatibility-Statement.json";
+        public string Name => "metadata-capability-statement-response.json";
         public DateTimeOffset LastModified => DateTimeOffset.UtcNow;
         public bool IsDirectory => false;
 

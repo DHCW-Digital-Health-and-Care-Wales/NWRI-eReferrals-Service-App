@@ -2,7 +2,6 @@ using FluentAssertions;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
-using static Hl7.Fhir.Model.VerificationResult;
 
 namespace NWRI.eReferralsService.Unit.Tests.Exceptions;
 
@@ -14,12 +13,14 @@ public class CapabilityStatementUnavailableExceptionTests
         // Arrange
         const string expectedMessage = "CapabilityStatement resource is unavailable.";
         const string expectedDiagnostics = $"Proxy server error: {expectedMessage}";
+        var cause = new Exception("file not foundss");
 
         // Act
-        var exception = new CapabilityStatementUnavailableException();
+        var exception = new CapabilityStatementUnavailableException(cause);
 
         // Assert
         exception.Message.Should().Be(expectedMessage);
+        exception.Cause.Should().BeSameAs(cause);
 
         exception.Errors.Should().NotBeNull();
         exception.Errors.Should().HaveCount(1);

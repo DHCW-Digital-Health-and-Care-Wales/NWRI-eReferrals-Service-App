@@ -44,9 +44,9 @@
           "code": "search-system"
         }
       ],
-      "security": [
-        {
-          "service": {
+      "security": {
+        "service": [
+          {
             "coding": [
               {
                 "code": "OAuth",
@@ -55,8 +55,8 @@
               }
             ]
           }
-        }
-      ],
+        ]
+      },
       "resource": [
         {
           "type": "CapabilityStatement",
