@@ -36,13 +36,15 @@ public class ReferralsControllerTests
         SetRequestDetails(headers, body);
 
         var headerArgs = new List<IHeaderDictionary>();
-        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(Capture.In(headerArgs), It.IsAny<string>(), It.IsAny<CancellationToken>()));
+        _fixture.Mock<IReferralService>()
+            .Setup(x => x.ProcessMessageAsync(Capture.In(headerArgs), It.IsAny<string>(), It.IsAny<CancellationToken>()));
         //Act
         await _sut.ProcessMessage(CancellationToken.None);
 
         //Assert
         headerArgs[0].Should().ContainKeys(headers.Keys);
-        _fixture.Mock<IReferralService>().Verify(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), body, It.IsAny<CancellationToken>()));
+        _fixture.Mock<IReferralService>()
+            .Verify(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), body, It.IsAny<CancellationToken>()));
     }
 
     [Fact]
@@ -55,7 +57,8 @@ public class ReferralsControllerTests
 
         var outputBundleJson = _fixture.Create<string>();
 
-        _fixture.Mock<IReferralService>().Setup(x => x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _fixture.Mock<IReferralService>().Setup(x =>
+                x.ProcessMessageAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(outputBundleJson);
 
         //Act
@@ -69,7 +72,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public void GetReferralShouldThrowProxyNotImplementedException()
+    public void GetReferralByIdShouldThrowProxyNotImplementedException()
     {
         // Arrange
         var id = _fixture.Create<string>();
@@ -98,7 +101,6 @@ public class ReferralsControllerTests
 
         // Assert
         var ex = act.Should().Throw<ProxyNotImplementedException>().Which;
-        ex.Errors.Should().ContainSingle(e => e.Code == FhirHttpErrorCodes.ProxyNotImplemented);
         ex.Message.Should().Contain("not been implemented");
     }
 

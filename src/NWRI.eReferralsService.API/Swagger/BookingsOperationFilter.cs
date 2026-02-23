@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NWRI.eReferralsService.API.Swagger;
@@ -19,11 +20,22 @@ public sealed class BookingsOperationFilter : IOperationFilter
         {
             ApplyGetBookingSlot(operation);
         }
+        else if (context.MethodInfo.GetCustomAttribute<SwaggerGetAppointmentByIdRequestAttribute>() is not null)
+        {
+            ApplyGetAppointmentById(operation);
+        }
     }
 
     private static void ApplyGetAppointments(OpenApiOperation operation)
     {
         SwaggerHelpers.AddCommonHeaders(operation);
+        SwaggerHelpers.AddProxyNotImplementedResponses(operation);
+    }
+
+    private static void ApplyGetAppointmentById(OpenApiOperation operation)
+    {
+        SwaggerHelpers.AddCommonHeaders(operation);
+        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: new OpenApiString(Guid.NewGuid().ToString()));
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 

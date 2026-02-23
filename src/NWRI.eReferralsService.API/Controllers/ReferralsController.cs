@@ -4,7 +4,7 @@ using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
-using NWRI.eReferralsService.API.Swagger;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Controllers;
 
@@ -41,7 +41,7 @@ public class ReferralsController : ControllerBase
     }
 
     [HttpGet("ServiceRequest/{id}")]
-    [SwaggerGetReferralRequest]
+    [SwaggerGetReferralByIdRequest]
     public IActionResult GetReferralById(string id)
     {
         _logger.CalledMethod(nameof(GetReferralById));
