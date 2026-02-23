@@ -30,15 +30,7 @@
     <ProjectReference Include="..\..\src\NWRI.eReferralsService.API\NWRI.eReferralsService.API.csproj" />
     <ProjectReference Include="..\NWRI.eReferralsService.Unit.Tests\NWRI.eReferralsService.Unit.Tests.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\src\NWRI.eReferralsService.API\Schemas\WPAS-create-referral-request.schema.json" Link="Schemas\WPAS-create-referral-request.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
