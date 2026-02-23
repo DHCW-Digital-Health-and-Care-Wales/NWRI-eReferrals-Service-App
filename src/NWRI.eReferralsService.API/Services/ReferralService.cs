@@ -8,7 +8,6 @@ using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
-using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
@@ -37,7 +36,6 @@ public class ReferralService : IReferralService
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
     private readonly WpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
     private readonly WpasJsonSchemaValidator _wpasJsonSchemaValidator;
-    private readonly ILogger<ReferralService> _logger;
 
     public ReferralService(IWpasApiClient wpasApiClient,
         IValidator<BundleCreateReferralModel> createBundleValidator,
@@ -48,8 +46,7 @@ public class ReferralService : IReferralService
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
         WpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
-        WpasJsonSchemaValidator wpasJsonSchemaValidator,
-        ILogger<ReferralService> logger)
+        WpasJsonSchemaValidator wpasJsonSchemaValidator)
     {
         _wpasApiClient = wpasApiClient;
         _createBundleValidator = createBundleValidator;
@@ -61,7 +58,6 @@ public class ReferralService : IReferralService
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
         _wpasCreateReferralRequestMapper = wpasCreateReferralRequestMapper;
         _wpasJsonSchemaValidator = wpasJsonSchemaValidator;
-        _logger = logger;
     }
 
     public async Task<string> ProcessMessageAsync(IHeaderDictionary headers, string requestBody, CancellationToken cancellationToken)
@@ -218,8 +214,8 @@ public class ReferralService : IReferralService
             var errors = results.Details?
                 .Where(d => !d.IsValid && d.Errors != null)
                 .Select(d => new { d.InstanceLocation, d.Errors });
-            _logger.WpasSchemaValidationFailed(JsonSerializer.Serialize(new { IsValid = false, Errors = errors }, _jsonSerializerOptions));
-            throw new BundleValidationException([new ValidationFailure("", "WPAS payload JSON schema validation failed.")]);
+            var details = JsonSerializer.Serialize(new { IsValid = false, Errors = errors }, _jsonSerializerOptions);
+            throw new WpasSchemaValidationException(details);
         }
     }
 

@@ -8,7 +8,6 @@ using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
@@ -132,9 +131,9 @@ public sealed class ReferralServiceTests
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        await action.Should().ThrowAsync<BundleValidationException>();
+        var exception = await action.Should().ThrowAsync<WpasSchemaValidationException>();
+        exception.Which.ValidationDetails.Should().Contain("InstanceLocation");
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
-        VerifyErrorEventWasLogged(_fixture.Mock<ILogger<ReferralService>>(), "WpasSchemaValidationFailed");
         _fixture.Mock<IEventLogger>().Verify(x => x.Audit(It.Is<IAuditEvent>(e => e is EventCatalogue.MapFhirToWpas)), Times.Once);
     }
 
@@ -572,21 +571,8 @@ public sealed class ReferralServiceTests
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object
             ,
             _fixture.Create<WpasCreateReferralRequestMapper>(),
-            _fixture.Create<WpasJsonSchemaValidator>(),
-            _fixture.Mock<ILogger<ReferralService>>().Object
+            _fixture.Create<WpasJsonSchemaValidator>()
         );
-    }
-
-    private static void VerifyErrorEventWasLogged<T>(Mock<ILogger<T>> logger, string eventName)
-    {
-        logger.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.Is<EventId>(e => string.Equals(e.Name, eventName, StringComparison.Ordinal)),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
     }
 
     private static Bundle CreateMessageBundle(string reasonCode, RequestStatus? serviceRequestStatus = RequestStatus.Active)
