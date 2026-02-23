@@ -75,7 +75,7 @@ jobs:
           retention-days: 5
 
       - name: "Publish Test Results"
-        uses: EnricoMi/publish-unit-test-result-action@v2.22.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.23.0
         if: always() && github.actor != 'dependabot[bot]'
         with:
           trx_files: "${{ github.workspace }}/**/*.trx"
