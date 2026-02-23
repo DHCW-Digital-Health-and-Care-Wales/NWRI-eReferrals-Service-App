@@ -126,7 +126,7 @@ public class ReferralService : IReferralService
         var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
         await ValidateMandatoryDataAsync(bundleModel, _cancelBundleValidator, cancellationToken);
 
-        // TODO: Implement mapping of FHIR Bundle to WPAS cancel referral payload
+        // TODO: Mapping from FHIR Bundle to WPAS to be implemented as part of story 565342
         var wpasCancelReferralRequest = new WpasCancelReferralRequest();
 
         var stopwatch = Stopwatch.StartNew();
