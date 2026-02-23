@@ -23,6 +23,7 @@ using NWRI.eReferralsService.API.Models.WPAS.Responses;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+using NWRI.eReferralsService.Unit.Tests.TestFixtures;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
@@ -215,7 +216,7 @@ public sealed class ReferralServiceTests
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        var expectedReferralId = "140:12345678";
+        var expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
         _fixture.Mock<IWpasApiClient>()
             .Setup(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new WpasCreateReferralResponse

@@ -11,6 +11,11 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
     private const string OccurrencePeriod = "occurrencePeriod";
     private const string EventCoding = "eventCoding";
 
+    private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
+
+    private const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";
+    private const string SenderOrganisationName = "Sender Organization";
+
     public BundleCreateReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
@@ -202,6 +207,10 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)));
 
+                patient.RuleFor(x => x.Identifier)
+                    .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase)))
+                    .WithMessage("Patient NHS number identifier is required");
+
                 patient.RuleFor(x => x.Name)
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Name)));
@@ -218,5 +227,33 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
                     .NotEmpty()
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Address)));
             });
+
+        RuleFor(x => x.Conditions!)
+            .NotEmpty()
+            .WithMessage(MissingBundleEntity(nameof(Condition)));
+
+        RuleForEach(x => x.Conditions!)
+            .ChildRules(condition =>
+            {
+                condition.RuleFor(x => x.Code)
+                    .NotNull()
+                    .WithMessage(MissingEntityField<Condition>(nameof(Condition.Code)));
+
+                condition.RuleFor(x => x)
+                    .Must(c => c.Code?.Coding?.Any(coding => !string.IsNullOrWhiteSpace(coding.Display)) == true)
+                    .WithMessage(MissingEntityField<Condition>(nameof(Condition.Code)));
+            });
+
+        RuleFor(x => x.Organizations!)
+            .NotEmpty()
+            .WithMessage(MissingBundleEntity(nameof(Organization)));
+
+        RuleFor(x => x.Organizations!)
+            .Must(orgs => orgs is not null && orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName)))
+            .WithMessage($"Organization with name '{ReceivingPerformingOrganisationName}' is required");
+
+        RuleFor(x => x.Organizations!)
+            .Must(orgs => orgs is not null && orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName)))
+            .WithMessage($"Organization with name '{SenderOrganisationName}' is required");
     }
 }

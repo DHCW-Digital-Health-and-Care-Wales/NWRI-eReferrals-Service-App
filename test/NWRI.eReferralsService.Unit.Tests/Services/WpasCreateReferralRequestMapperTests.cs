@@ -4,20 +4,24 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Services;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class WpasCreateReferralRequestMapperTests
 {
-    [Fact]
-    public void MapShouldProduceSchemaValidPayloadFromExampleBundle()
+    private static BundleCreateReferralModel CreateValidModelFromExampleBundle()
     {
         var bundleJson = File.ReadAllText("TestData/example-bundle.json");
         var options = new JsonSerializerOptions().ForFhir(ModelInfo.ModelInspector);
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
-        var model = BundleCreateReferralModel.FromBundle(bundle);
+        return BundleCreateReferralModel.FromBundle(bundle);
+    }
+
+    [Fact]
+    public void MapShouldProduceSchemaValidPayloadFromExampleBundle()
+    {
+        var model = CreateValidModelFromExampleBundle();
 
         var mapper = new WpasCreateReferralRequestMapper();
         var payload = mapper.Map(model);
@@ -39,5 +43,106 @@ public class WpasCreateReferralRequestMapperTests
         payload.ReferralDetails.ReferrerPriorityType.Should().Be("2");
         payload.ReferralDetails.ReasonForReferral.Should().Be("Glaucoma");
         payload.ReferralDetails.ReferralIdentifier.Length.Should().BeLessOrEqualTo(12);
+    }
+
+    [Fact]
+    public void MapShouldHandleReasonForReferralDisplayShorterThan8Chars()
+    {
+        var bundleJson = File.ReadAllText("TestData/example-bundle.json");
+        var options = new JsonSerializerOptions().ForFhir(ModelInfo.ModelInspector);
+        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
+
+        var condition = bundle.Entry
+            .Select(e => e.Resource)
+            .OfType<Condition>()
+            .First();
+
+        condition.Code!.Coding.First().Display = "Dry eye";
+
+        var model = BundleCreateReferralModel.FromBundle(bundle);
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var payload = mapper.Map(model);
+
+        payload.ReferralDetails.ReasonForReferral.Should().Be("Dry eye");
+    }
+
+    [Fact]
+    public void MapShouldThrowWhenConditionsMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Conditions = [];
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var act = () => mapper.Map(model);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MapShouldThrowWhenReceivingPerformingOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Receiving/performing Organization"))
+            .ToList();
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var act = () => mapper.Map(model);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MapShouldThrowWhenSenderOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Sender Organization"))
+            .ToList();
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var act = () => mapper.Map(model);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MapShouldThrowWhenPatientAddressMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Patient!.Address = [];
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var act = () => mapper.Map(model);
+
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MapShouldSetEmptyBirthDateWhenPatientBirthDateMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Patient!.BirthDate = null;
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var payload = mapper.Map(model);
+
+        payload.PatientDetails.BirthDate.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void MapShouldThrowWhenPatientNhsNumberMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Patient!.Identifier = model.Patient.Identifier
+            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var mapper = new WpasCreateReferralRequestMapper();
+        var act = () => mapper.Map(model);
+
+        act.Should().Throw<InvalidOperationException>();
     }
 }

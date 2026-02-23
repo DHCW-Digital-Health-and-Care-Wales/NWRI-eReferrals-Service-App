@@ -130,7 +130,61 @@ public class BundleCreateReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenPatientBirthDateMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Patient!.BirthDate = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.BirthDate is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenConditionsMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Conditions = [];
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "The required FHIR bundle entity 'Condition' is missing");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenReceivingPerformingOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Receiving/performing Organization"))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == "Organization with name 'Receiving/performing Organization' is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenSenderOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Sender Organization"))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == "Organization with name 'Sender Organization' is required");
     }
 
     [Fact]

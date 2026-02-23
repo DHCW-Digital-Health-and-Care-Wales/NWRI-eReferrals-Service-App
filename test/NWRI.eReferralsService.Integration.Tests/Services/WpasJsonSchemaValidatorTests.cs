@@ -3,6 +3,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Validators;
+using NWRI.eReferralsService.Unit.Tests.TestFixtures;
 
 namespace NWRI.eReferralsService.Integration.Tests.Services;
 
@@ -18,46 +19,7 @@ public class WpasJsonSchemaValidatorTests : IClassFixture<WpasJsonSchemaValidato
     [Fact]
     public void ValidateShouldReturnInvalidWhenPayloadViolatesSchema()
     {
-        var payload = new WpasCreateReferralRequest
-        {
-            RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
-            ContractDetails = new ContractDetails
-            {
-                ProviderOrganisationCode = "T"
-            },
-            PatientDetails = new PatientDetails
-            {
-                NhsNumber = "3478526985",
-                NhsNumberStatusIndicator = "01",
-                PatientName = new PatientName
-                {
-                    Surname = "Jones",
-                    FirstName = "Julie"
-                },
-                BirthDate = "19590504",
-                Sex = "F",
-                UsualAddress = new UsualAddress
-                {
-                    NoAndStreet = "22 Brightside Crescent",
-                    Town = "Overtown",
-                    Postcode = "LS10 4YU",
-                    Locality = ""
-                }
-            },
-            ReferralDetails = new ReferralDetails
-            {
-                OutpatientReferralSource = "15",
-                ReferringOrganisationCode = "TP2VC",
-                ServiceTypeRequested = "6",
-                ReferrerCode = "01-99999",
-                AdministrativeCategory = "01",
-                DateOfReferral = "20240820",
-                MainSpecialty = "130",
-                ReferrerPriorityType = "2",
-                ReasonForReferral = "glau-sre",
-                ReferralIdentifier = "140:12345678"
-            }
-        };
+        var payload = WpasCreateReferralRequestBuilder.CreateValid("invalid");
 
         var result = _sut.ValidateWpasCreateReferralRequest(payload);
 
@@ -68,54 +30,10 @@ public class WpasJsonSchemaValidatorTests : IClassFixture<WpasJsonSchemaValidato
     [Fact]
     public void ValidateShouldReturnValidForKnownGoodPayload()
     {
-        var payload = CreateKnownGoodPayload();
+        var payload = WpasCreateReferralRequestBuilder.CreateValid();
         var result = _sut.ValidateWpasCreateReferralRequest(payload);
 
         result.IsValid.Should().BeTrue();
-    }
-
-    private static WpasCreateReferralRequest CreateKnownGoodPayload()
-    {
-        return new WpasCreateReferralRequest
-        {
-            RecordId = "77220d53-3fd2-41d1-b8b3-878e6771ef75",
-            ContractDetails = new ContractDetails
-            {
-                ProviderOrganisationCode = "TP2VC"
-            },
-            PatientDetails = new PatientDetails
-            {
-                NhsNumber = "3478526985",
-                NhsNumberStatusIndicator = "01",
-                PatientName = new PatientName
-                {
-                    Surname = "Jones",
-                    FirstName = "Julie"
-                },
-                BirthDate = "19590504",
-                Sex = "F",
-                UsualAddress = new UsualAddress
-                {
-                    NoAndStreet = "22 Brightside Crescent",
-                    Town = "Overtown",
-                    Postcode = "LS10 4YU",
-                    Locality = ""
-                }
-            },
-            ReferralDetails = new ReferralDetails
-            {
-                OutpatientReferralSource = "15",
-                ReferringOrganisationCode = "TP2VC",
-                ServiceTypeRequested = "6",
-                ReferrerCode = "01-99999",
-                AdministrativeCategory = "01",
-                DateOfReferral = "20240820",
-                MainSpecialty = "130",
-                ReferrerPriorityType = "2",
-                ReasonForReferral = "glau-sre",
-                ReferralIdentifier = "140:12345678"
-            }
-        };
     }
 
     public sealed class SchemaValidatorFixture
