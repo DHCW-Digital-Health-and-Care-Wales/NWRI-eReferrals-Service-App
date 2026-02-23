@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Json.Schema;
-using NWRI.eReferralsService.API.Models.WPAS;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
 
 namespace NWRI.eReferralsService.API.Validators;

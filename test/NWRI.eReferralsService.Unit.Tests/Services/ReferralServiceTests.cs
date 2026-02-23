@@ -16,7 +16,6 @@ using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Models.WPAS;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Models.WPAS.Responses;
 using NWRI.eReferralsService.API.Services;
@@ -560,18 +559,38 @@ public sealed class ReferralServiceTests
 
     private ReferralService CreateReferralService()
     {
+        var eventLogger = _fixture.Mock<IEventLogger>().Object;
+        var wpasApiClient = _fixture.Mock<IWpasApiClient>().Object;
+        var createBundleValidator = _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object;
+        var cancelBundleValidator = _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object;
+        var fhirBundleProfileValidator = _fixture.Mock<IFhirBundleProfileValidator>().Object;
+        var headerValidator = _fixture.Mock<IValidator<HeadersModel>>().Object;
+        var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
+        var wpasCreateReferralRequestMapper = _fixture.Create<WpasCreateReferralRequestMapper>();
+        var wpasJsonSchemaValidator = _fixture.Create<WpasJsonSchemaValidator>();
+
+        var referralValidationService = new ReferralBundleValidationService(
+            createBundleValidator,
+            cancelBundleValidator,
+            fhirBundleProfileValidator,
+            eventLogger
+        );
+
+        var referralWorkflowProcessor = new ReferralWorkflowProcessor(
+            referralValidationService,
+            wpasCreateReferralRequestMapper,
+            wpasJsonSchemaValidator,
+            jsonSerializerOptions,
+            wpasApiClient,
+            eventLogger
+        );
+
         return new ReferralService(
-            _fixture.Mock<IWpasApiClient>().Object,
-            _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object,
-            _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object,
-            _fixture.Mock<IFhirBundleProfileValidator>().Object,
-            _fixture.Mock<IValidator<HeadersModel>>().Object,
-            new JsonSerializerOptions().ForFhirExtended(),
-            _fixture.Mock<IEventLogger>().Object,
-            _fixture.Mock<IRequestFhirHeadersDecoder>().Object
-            ,
-            _fixture.Create<WpasCreateReferralRequestMapper>(),
-            _fixture.Create<WpasJsonSchemaValidator>()
+            headerValidator,
+            jsonSerializerOptions,
+            eventLogger,
+            _fixture.Mock<IRequestFhirHeadersDecoder>().Object,
+            referralWorkflowProcessor
         );
     }
 

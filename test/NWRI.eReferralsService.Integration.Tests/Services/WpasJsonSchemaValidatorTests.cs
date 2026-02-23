@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.TestFixtures;
 

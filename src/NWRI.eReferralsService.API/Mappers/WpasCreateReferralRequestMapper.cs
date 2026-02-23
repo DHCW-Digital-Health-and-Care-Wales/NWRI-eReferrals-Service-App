@@ -1,7 +1,6 @@
 using System.Globalization;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Models.WPAS;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
