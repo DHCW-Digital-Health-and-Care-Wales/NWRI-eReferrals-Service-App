@@ -418,7 +418,7 @@ public class ResponseMiddlewareTests
     public async Task ShouldHandleCapabilityStatementUnavailableException()
     {
         // Arrange
-        const string resourcePath = "Swagger/Examples/metadata-capability-statement-response.json";
+        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
         var cause = new FileNotFoundException("CapabilityStatement JSON file not found", "x");
         var exception = new CapabilityStatementUnavailableException(cause, resourcePath);
 
