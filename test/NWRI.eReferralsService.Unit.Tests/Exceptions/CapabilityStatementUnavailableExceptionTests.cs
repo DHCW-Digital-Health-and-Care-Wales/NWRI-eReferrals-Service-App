@@ -13,7 +13,7 @@ public class CapabilityStatementUnavailableExceptionTests
         // Arrange
         const string expectedMessage = "CapabilityStatement resource is unavailable.";
         const string expectedDiagnostics = $"Proxy server error: {expectedMessage}";
-        var cause = new FileNotFoundException("file not founds");
+        var cause = new FileNotFoundException("file not found", "x");
 
         // Act
         var exception = new CapabilityStatementUnavailableException(cause);
