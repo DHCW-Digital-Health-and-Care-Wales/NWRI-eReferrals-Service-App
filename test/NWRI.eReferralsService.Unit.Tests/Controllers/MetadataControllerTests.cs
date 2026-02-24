@@ -22,26 +22,6 @@ public class MetadataControllerTests
     }
 
     [Fact]
-    public async Task GetMetadataShouldCallGetCapabilityStatementAsync()
-    {
-        // Arrange
-        var outputJson = _fixture.Create<string>();
-
-        var ct = new CancellationTokenSource().Token;
-
-        _fixture.Mock<ICapabilityStatementService>()
-            .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(outputJson);
-
-        // Act
-        await _sut.GetMetadata(ct);
-
-        // Assert
-        _fixture.Mock<ICapabilityStatementService>()
-            .Verify(x => x.GetCapabilityStatementAsync(ct), Times.Once);
-    }
-
-    [Fact]
     public async Task GetMetadataShouldReturn200WithFhirContentTypeAndJson()
     {
         // Arrange
@@ -62,7 +42,7 @@ public class MetadataControllerTests
     }
 
     [Fact]
-    public async Task GetMetadataShouldPropagateExceptionsFromProvider()
+    public async Task GetMetadataShouldPropagateExceptionsFromService()
     {
         // Arrange
         var ex = new FileNotFoundException(_fixture.Create<string>());

@@ -14,18 +14,17 @@ public class ProxyServerErrorTests
     [Fact]
     public void ShouldCorrectlyCreateProxyServerError()
     {
-        //Arrange
-        var exceptionMessage = _fixture.Create<string>();
-        var expectedDetailsMessage = $"Proxy server error: {exceptionMessage}";
+        // Arrange
+        var diagnosticsMessage = _fixture.Create<string>();
         const string expectedDisplayMessage = "500: The Proxy encountered an internal error while processing the request.";
 
         // Act
-        var error = new ProxyServerError(exceptionMessage);
+        var error = new ProxyServerError(diagnosticsMessage);
 
         // Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ProxyServerError);
         error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
-        error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
+        error.DiagnosticsMessage.Should().Be(diagnosticsMessage);
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

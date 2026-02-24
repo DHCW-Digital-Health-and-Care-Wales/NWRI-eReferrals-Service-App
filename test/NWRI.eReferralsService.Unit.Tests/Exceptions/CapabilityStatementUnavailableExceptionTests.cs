@@ -11,12 +11,13 @@ public class CapabilityStatementUnavailableExceptionTests
     public void ShouldCorrectlyCreateCapabilityStatementUnavailableException()
     {
         // Arrange
+        const string resourcePath = "Swagger/Examples/metadata-capability-statement-response.json";
         const string expectedMessage = "CapabilityStatement resource is unavailable.";
-        const string expectedDiagnostics = $"Proxy server error: {expectedMessage}";
+        var expectedDiagnostics = $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'.";
         var cause = new FileNotFoundException("file not found", "x");
 
         // Act
-        var exception = new CapabilityStatementUnavailableException(cause);
+        var exception = new CapabilityStatementUnavailableException(cause, resourcePath);
 
         // Assert
         exception.Message.Should().Be(expectedMessage);

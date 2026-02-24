@@ -418,8 +418,9 @@ public class ResponseMiddlewareTests
     public async Task ShouldHandleCapabilityStatementUnavailableException()
     {
         // Arrange
+        const string resourcePath = "Swagger/Examples/metadata-capability-statement-response.json";
         var cause = new FileNotFoundException("CapabilityStatement JSON file not found", "x");
-        var exception = new CapabilityStatementUnavailableException(cause);
+        var exception = new CapabilityStatementUnavailableException(cause, resourcePath);
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();
@@ -458,14 +459,16 @@ public class ResponseMiddlewareTests
         operationOutcome.Issue.Should().AllSatisfy(issue =>
         {
             issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
-
             issue.Code.Should().Be(OperationOutcome.IssueType.Exception);
 
             issue.Details.Should().NotBeNull();
             issue.Details.Coding.Should().NotBeNullOrEmpty();
             issue.Details.Coding.Should().Contain(c =>
-                c.System == "https://fhir.nhs.uk/CodeSystem/http-error-codes" &&
-                c.Code == "PROXY_SERVER_ERROR");
+                c.System == FhirConstants.HttpErrorCodesSystem &&
+                c.Code == FhirHttpErrorCodes.ProxyServerError);
+
+            issue.Diagnostics.Should().NotBeNullOrWhiteSpace();
+            issue.Diagnostics.Should().Contain("CapabilityStatement");
         });
     }
 

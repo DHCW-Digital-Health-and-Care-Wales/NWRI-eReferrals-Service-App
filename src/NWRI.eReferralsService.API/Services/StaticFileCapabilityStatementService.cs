@@ -21,7 +21,7 @@ public class StaticFileCapabilityStatementService : ICapabilityStatementService
         if (!fileInfo.Exists)
         {
             var ex = new FileNotFoundException("CapabilityStatement JSON file not found", fileInfo.PhysicalPath);
-            throw new CapabilityStatementUnavailableException(ex);
+            throw new CapabilityStatementUnavailableException(ex, ResourcePath);
         }
 
         await using var stream = fileInfo.CreateReadStream();

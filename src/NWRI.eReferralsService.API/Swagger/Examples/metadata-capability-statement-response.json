@@ -87,7 +87,6 @@
           "versioning": "no-version"
         }
       ],
-
       "operation": [
         {
           "name": "$process-message",
