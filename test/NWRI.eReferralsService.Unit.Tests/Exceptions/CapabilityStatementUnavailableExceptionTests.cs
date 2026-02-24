@@ -11,7 +11,7 @@ public class CapabilityStatementUnavailableExceptionTests
     public void ShouldCorrectlyCreateCapabilityStatementUnavailableException()
     {
         // Arrange
-        const string resourcePath = "Swagger/Examples/metadata-capability-statement-response.json";
+        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
         const string expectedMessage = "CapabilityStatement resource is unavailable.";
         var expectedDiagnostics = $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'.";
         var cause = new FileNotFoundException("file not found", "x");

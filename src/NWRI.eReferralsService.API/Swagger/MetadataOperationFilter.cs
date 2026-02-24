@@ -33,7 +33,7 @@ public sealed class MetadataOperationFilter : IOperationFilter
         {
             ["200"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "OK",
-                "Swagger/Examples/metadata-capability-statement-response.json"),
+                "Resources/Fhir/metadata-capability-statement-response.json"),
             ["429"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Too many requests",
                 "Swagger/Examples/common-too-many-requests.json"),
