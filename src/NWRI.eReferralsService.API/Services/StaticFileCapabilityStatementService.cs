@@ -1,17 +1,15 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.FileProviders;
+using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public class StaticFileCapabilityStatementService : ICapabilityStatementService, IDisposable
+public class StaticFileCapabilityStatementService : ICapabilityStatementService
 {
     private const string ResourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
-
+    private readonly ConcurrentDictionary<string, string> _cache = new();
     private readonly IFileProvider _files;
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
-
-    private string? _cached;
-    private bool _disposed;
 
     public StaticFileCapabilityStatementService(IFileProvider files)
     {
@@ -20,45 +18,38 @@ public class StaticFileCapabilityStatementService : ICapabilityStatementService,
 
     public async Task<string> GetCapabilityStatementAsync(CancellationToken cancellationToken)
     {
-        if (_cached is not null)
+        if (_cache.TryGetValue(ResourcePath, out var cached))
         {
-            return _cached;
+            return cached;
         }
 
-        await _semaphore.WaitAsync(cancellationToken);
-        try
-        {
-            if (_cached is not null)
-            {
-                return _cached;
-            }
+        var result = await LoadResourceAsync(ResourcePath, cancellationToken);
+        _cache.TryAdd(ResourcePath, result);
 
-            var fileInfo = _files.GetFileInfo(ResourcePath);
-            if (!fileInfo.Exists)
-            {
-                var ex = new FileNotFoundException("CapabilityStatement JSON file not found", fileInfo.PhysicalPath);
-
-                throw new CapabilityStatementUnavailableException(ex, ResourcePath);
-            }
-
-            await using var stream = fileInfo.CreateReadStream();
-            using var reader = new StreamReader(stream);
-
-            _cached = await reader.ReadToEndAsync(cancellationToken);
-            return _cached;
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        return result;
     }
 
-    public void Dispose()
+    private async Task<string> LoadResourceAsync(string resourcePath, CancellationToken cancellationToken)
     {
-        if (_disposed) return;
-        _disposed = true;
+        var fileInfo = _files.GetFileInfo(resourcePath);
 
-        _semaphore.Dispose();
-        GC.SuppressFinalize(this);
+        if (!fileInfo.Exists)
+        {
+            throw new CapabilityStatementUnavailableException(
+                new CapabilityStatementNotFoundError(resourcePath,
+                    "File does not exist"));
+        }
+
+        try
+        {
+            await using var stream = fileInfo.CreateReadStream();
+            using var reader = new StreamReader(stream);
+            return await reader.ReadToEndAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            throw new CapabilityStatementUnavailableException(
+                new CapabilityStatementLoadError(resourcePath, ex.Message));
+        }
     }
 }

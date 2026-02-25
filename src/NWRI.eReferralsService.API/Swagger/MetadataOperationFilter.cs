@@ -9,20 +9,26 @@ namespace NWRI.eReferralsService.API.Swagger;
 [ExcludeFromCodeCoverage]
 public sealed class MetadataOperationFilter : IOperationFilter
 {
+    private static readonly string[] OptionalHeaders =
+    [
+        RequestHeaderKeys.TargetIdentifier,
+        RequestHeaderKeys.RequestingPractitioner
+    ];
+
+    private static readonly string[] RequiredHeaders =
+        RequestHeaderKeys.GetAllExcept(
+            [
+                ..OptionalHeaders,
+                RequestHeaderKeys.UseContext
+            ])
+        .ToArray();
+
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         if (context.MethodInfo.GetCustomAttribute<SwaggerGetMetadataRequestAttribute>() is not null)
         {
-            SwaggerHelpers.AddHeaders(
-                operation,
-                RequestHeaderKeys.GetAllExcept(
-                    RequestHeaderKeys.TargetIdentifier,
-                    RequestHeaderKeys.RequestingPractitioner,
-                    RequestHeaderKeys.UseContext),
-                true);
-
-            SwaggerHelpers.AddHeaders(operation, [RequestHeaderKeys.TargetIdentifier, RequestHeaderKeys.RequestingPractitioner], false);
-
+            SwaggerHelpers.AddHeaders(operation, RequiredHeaders, true);
+            SwaggerHelpers.AddHeaders(operation, OptionalHeaders, false);
             AddResponses(operation);
         }
     }

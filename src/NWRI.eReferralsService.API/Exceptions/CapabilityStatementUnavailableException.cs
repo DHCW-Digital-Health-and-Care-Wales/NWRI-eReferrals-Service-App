@@ -4,33 +4,11 @@ namespace NWRI.eReferralsService.API.Exceptions;
 
 public class CapabilityStatementUnavailableException : BaseFhirException
 {
-    private const string ErrorMessage = "CapabilityStatement resource is unavailable.";
-
-    public CapabilityStatementUnavailableException(Exception cause, string resourcePath)
+    public CapabilityStatementUnavailableException(BaseFhirHttpError error)
     {
-        Cause = cause;
-
-        Errors =
-        [
-            new ProxyServerError(BuildDiagnostics(cause, resourcePath))
-        ];
+        Errors = [error];
     }
-
-    public Exception Cause { get; }
 
     public override IEnumerable<BaseFhirHttpError> Errors { get; }
-
-    public override string Message => ErrorMessage;
-
-    private static string BuildDiagnostics(Exception cause, string resourcePath)
-    {
-        return cause switch
-        {
-            FileNotFoundException =>
-                $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'.",
-
-            _ =>
-                $"CapabilityStatement JSON resource could not be loaded. ResourcePath='{resourcePath}'."
-        };
-    }
+    public override string Message => Errors.First().DiagnosticsMessage;
 }

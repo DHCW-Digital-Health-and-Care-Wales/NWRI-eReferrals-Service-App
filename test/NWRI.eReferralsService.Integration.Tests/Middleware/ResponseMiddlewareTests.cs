@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
@@ -419,12 +420,11 @@ public class ResponseMiddlewareTests
     {
         // Arrange
         const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
-        var cause = new FileNotFoundException("CapabilityStatement JSON file not found", "x");
-        var exception = new CapabilityStatementUnavailableException(cause, resourcePath);
+        var error = new CapabilityStatementNotFoundError(resourcePath, "File does not exist.");
+        var exception = new CapabilityStatementUnavailableException(error);
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();
-
         var host = StartHostWithException(exception);
 
         // Act
@@ -436,17 +436,14 @@ public class ResponseMiddlewareTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-
         response.Headers.GetValues("X-Operation-Id").Should().NotBeNullOrEmpty();
         response.Headers.GetValues(RequestHeaderKeys.RequestId).Should().Contain(requestId);
         response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should().Contain(correlationId);
-
         response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
             .NotBeNull()
             .And.Contain(FhirConstants.FhirMediaType);
 
         var raw = await response.Content.ReadAsStringAsync();
-
         Action parse = () => JsonDocument.Parse(raw);
         parse.Should().NotThrow(raw);
 
@@ -455,20 +452,18 @@ public class ResponseMiddlewareTests
             new JsonSerializerOptions().ForFhirExtended())!;
 
         operationOutcome.Issue.Should().NotBeNullOrEmpty();
-
         operationOutcome.Issue.Should().AllSatisfy(issue =>
         {
             issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
             issue.Code.Should().Be(OperationOutcome.IssueType.Exception);
-
             issue.Details.Should().NotBeNull();
             issue.Details.Coding.Should().NotBeNullOrEmpty();
             issue.Details.Coding.Should().Contain(c =>
                 c.System == FhirConstants.HttpErrorCodesSystem &&
                 c.Code == FhirHttpErrorCodes.ProxyServerError);
-
             issue.Diagnostics.Should().NotBeNullOrWhiteSpace();
             issue.Diagnostics.Should().Contain("CapabilityStatement");
+            issue.Diagnostics.Should().Contain(resourcePath);
         });
     }
 

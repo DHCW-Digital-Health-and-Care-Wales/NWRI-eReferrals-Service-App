@@ -1,5 +1,4 @@
 using FluentAssertions;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 
@@ -8,26 +7,42 @@ namespace NWRI.eReferralsService.Unit.Tests.Exceptions;
 public class CapabilityStatementUnavailableExceptionTests
 {
     [Fact]
-    public void ShouldCorrectlyCreateCapabilityStatementUnavailableException()
+    public void ShouldCreateWithNotFoundError()
     {
         // Arrange
         const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
-        const string expectedMessage = "CapabilityStatement resource is unavailable.";
-        var expectedDiagnostics = $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'.";
-        var cause = new FileNotFoundException("file not found", "x");
+        const string cause = "File does not exist.";
+        var expectedDiagnostics =
+            $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'. Cause='{cause}'.";
+        var error = new CapabilityStatementNotFoundError(resourcePath, cause);
 
         // Act
-        var exception = new CapabilityStatementUnavailableException(cause, resourcePath);
+        var exception = new CapabilityStatementUnavailableException(error);
 
         // Assert
-        exception.Message.Should().Be(expectedMessage);
-        exception.Cause.Should().BeSameAs(cause);
+        exception.Message.Should().Be(expectedDiagnostics);
+        exception.Errors.Should().ContainSingle()
+            .Which.Should().BeOfType<CapabilityStatementNotFoundError>()
+            .Which.DiagnosticsMessage.Should().Be(expectedDiagnostics);
+    }
 
-        exception.Errors.Should().NotBeNull();
-        exception.Errors.Should().HaveCount(1);
+    [Fact]
+    public void ShouldCreateWithLoadError()
+    {
+        // Arrange
+        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+        const string cause = "disk read failure";
+        var expectedDiagnostics =
+            $"CapabilityStatement JSON resource could not be loaded. ResourcePath='{resourcePath}'. Cause='{cause}'.";
+        var error = new CapabilityStatementLoadError(resourcePath, cause);
 
-        var error = exception.Errors.Single().Should().BeOfType<ProxyServerError>().Subject;
-        error.Code.Should().Be(FhirHttpErrorCodes.ProxyServerError);
-        error.DiagnosticsMessage.Should().Be(expectedDiagnostics);
+        // Act
+        var exception = new CapabilityStatementUnavailableException(error);
+
+        // Assert
+        exception.Message.Should().Be(expectedDiagnostics);
+        exception.Errors.Should().ContainSingle()
+            .Which.Should().BeOfType<CapabilityStatementLoadError>()
+            .Which.DiagnosticsMessage.Should().Be(expectedDiagnostics);
     }
 }

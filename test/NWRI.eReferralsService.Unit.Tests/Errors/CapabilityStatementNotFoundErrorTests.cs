@@ -7,24 +7,27 @@ using NWRI.eReferralsService.Unit.Tests.Extensions;
 
 namespace NWRI.eReferralsService.Unit.Tests.Errors;
 
-public class ProxyServerErrorTests
+public class CapabilityStatementNotFoundErrorTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
     [Fact]
-    public void ShouldCorrectlyCreateProxyServerError()
+    public void ShouldCorrectlyCreateCapabilityStatementNotFoundError()
     {
         // Arrange
-        var diagnosticsMessage = _fixture.Create<string>();
+        var resourcePath = _fixture.Create<string>();
+        var cause = _fixture.Create<string>();
+        var expectedDiagnostics =
+            $"CapabilityStatement JSON resource was not found. ResourcePath='{resourcePath}'. Cause='{cause}'.";
         const string expectedDisplayMessage = "500: The Proxy encountered an internal error while processing the request.";
 
         // Act
-        var error = new ProxyServerError(diagnosticsMessage);
+        var error = new CapabilityStatementNotFoundError(resourcePath, cause);
 
         // Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ProxyServerError);
         error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
-        error.DiagnosticsMessage.Should().Be(diagnosticsMessage);
+        error.DiagnosticsMessage.Should().Be(expectedDiagnostics);
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

@@ -1,114 +1,149 @@
 using System.Text;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.FileProviders;
 using Moq;
+using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Services;
+using NWRI.eReferralsService.Unit.Tests.Extensions;
+using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class StaticFileCapabilityStatementServiceTests
 {
-    private const string ResourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+    private const string ExpectedResourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+    private const string ValidJsonContent = """{"resourceType":"CapabilityStatement","status":"active"}""";
+
+    private readonly IFixture _fixture = new Fixture().WithCustomizations();
+    private readonly Mock<IFileProvider> _fileProviderMock;
+
+    public StaticFileCapabilityStatementServiceTests()
+    {
+        _fileProviderMock = _fixture.Mock<IFileProvider>();
+    }
+
+    private StaticFileCapabilityStatementService CreateSut()
+    {
+        return new(_fileProviderMock.Object);
+    }
 
     [Fact]
-    public async Task GetCapabilityStatementAsyncShouldReturnJsonWhenFileExists()
+    public async Task ShouldReturnContentWhenFileExists()
     {
         // Arrange
-        var json = """{"resourceType":"CapabilityStatement"}""";
-        var fileInfo = new TestFileInfo
-        {
-            Exists = true,
-            PhysicalPath = @"C:\fake\metadata-capability-statement-response.json",
-            StreamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(json))
-        };
-
-        var (sut, fileProviderMock) = CreateSut(fileInfo);
+        SetupFileProvider(exists: true, content: ValidJsonContent);
+        var sut = CreateSut();
 
         // Act
         var result = await sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        result.Should().Be(json);
-        fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
-        fileInfo.CreateReadStreamCallCount.Should().Be(1);
+        result.Should().Be(ValidJsonContent);
     }
 
     [Fact]
-    public async Task GetCapabilityStatementAsyncShouldThrowWhenFileMissing()
+    public async Task ShouldThrowNotFoundErrorWhenFileDoesNotExist()
     {
         // Arrange
-        var fileInfo = new TestFileInfo
-        {
-            Exists = false,
-            PhysicalPath = @"C:\missing.json"
-        };
-
-        var (sut, fileProviderMock) = CreateSut(fileInfo);
+        SetupFileProvider(exists: false);
+        var sut = CreateSut();
 
         // Act
-        var act = async () => await sut.GetCapabilityStatementAsync(CancellationToken.None);
+        var act = () => sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        var ex = await act.Should().ThrowAsync<CapabilityStatementUnavailableException>();
-        fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
+        var exception = await act.Should()
+            .ThrowAsync<CapabilityStatementUnavailableException>();
 
-        ex.Which.Cause.Should().BeOfType<FileNotFoundException>();
-        ex.Which.Cause.Message.Should().Contain("CapabilityStatement JSON file not found");
+        exception.Which.Errors.Should().ContainSingle()
+            .Which.Should().BeOfType<CapabilityStatementNotFoundError>()
+            .Which.DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
     }
 
     [Fact]
-    public async Task GetCapabilityStatementAsyncShouldCacheResult()
+    public async Task ShouldThrowLoadErrorWhenStreamFails()
     {
         // Arrange
-        var json = """{"resourceType":"CapabilityStatement"}""";
-        var fileInfo = new TestFileInfo
-        {
-            Exists = true,
-            PhysicalPath = @"C:\fake\metadata-capability-statement-response.json",
-            StreamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(json))
-        };
+        var fileInfoMock = new Mock<IFileInfo>();
+        fileInfoMock.Setup(f => f.Exists).Returns(true);
+        fileInfoMock.Setup(f => f.CreateReadStream()).Throws(new IOException("disk read failure"));
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
 
-        var (sut, fileProviderMock) = CreateSut(fileInfo);
+        var sut = CreateSut();
+
+        // Act
+        var act = () => sut.GetCapabilityStatementAsync(CancellationToken.None);
+
+        // Assert
+        var exception = await act.Should()
+            .ThrowAsync<CapabilityStatementUnavailableException>();
+
+        exception.Which.Errors.Should().ContainSingle()
+            .Which.Should().BeOfType<CapabilityStatementLoadError>()
+            .Which.DiagnosticsMessage.Should().Contain("disk read failure");
+    }
+
+    [Fact]
+    public async Task ShouldReturnCachedResultOnSubsequentCalls()
+    {
+        // Arrange
+        SetupFileProvider(exists: true, content: ValidJsonContent);
+        var sut = CreateSut();
 
         // Act
         var first = await sut.GetCapabilityStatementAsync(CancellationToken.None);
         var second = await sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        first.Should().Be(json);
-        second.Should().Be(json);
-        fileProviderMock.Verify(fp => fp.GetFileInfo(ResourcePath), Times.Once);
-        fileInfo.CreateReadStreamCallCount.Should().Be(1);
+        first.Should().Be(ValidJsonContent);
+        second.Should().Be(ValidJsonContent);
+        _fileProviderMock.Verify(fp => fp.GetFileInfo(ExpectedResourcePath), Times.Once);
     }
 
-    private static (StaticFileCapabilityStatementService Sut, Mock<IFileProvider> FileProviderMock) CreateSut(IFileInfo fileInfo)
+    [Fact]
+    public async Task ShouldReturnSameResultUnderConcurrentAccess()
     {
-        var fileProviderMock = new Mock<IFileProvider>();
-        fileProviderMock.Setup(fp => fp.GetFileInfo(ResourcePath)).Returns(fileInfo);
+        // Arrange
+        var barrier = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        var sut = new StaticFileCapabilityStatementService(fileProviderMock.Object);
-
-        return (sut, fileProviderMock);
-    }
-
-    private sealed class TestFileInfo : IFileInfo
-    {
-        public bool Exists { get; set; }
-        public long Length => 0;
-        public string? PhysicalPath { get; set; }
-        public string Name => "metadata-capability-statement-response.json";
-        public DateTimeOffset LastModified => DateTimeOffset.UtcNow;
-        public bool IsDirectory => false;
-
-        public Func<Stream> StreamFactory { get; set; } = () => new MemoryStream(Array.Empty<byte>());
-
-        public int CreateReadStreamCallCount { get; private set; }
-
-        public Stream CreateReadStream()
+        var fileInfoMock = new Mock<IFileInfo>();
+        fileInfoMock.Setup(f => f.Exists).Returns(true);
+        fileInfoMock.Setup(f => f.CreateReadStream()).Returns(() =>
         {
-            CreateReadStreamCallCount++;
-            return StreamFactory();
+            barrier.Task.GetAwaiter().GetResult();
+            return new MemoryStream(Encoding.UTF8.GetBytes(ValidJsonContent));
+        });
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
+
+        var sut = CreateSut();
+        const int concurrentCalls = 10;
+
+        // Act
+        var tasks = Enumerable.Range(0, concurrentCalls)
+            .Select(_ => Task.Run(() => sut.GetCapabilityStatementAsync(CancellationToken.None)))
+            .ToArray();
+
+        barrier.SetResult();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        results.Should().AllBe(ValidJsonContent);
+    }
+
+    private void SetupFileProvider(bool exists, string content = "")
+    {
+        var fileInfoMock = new Mock<IFileInfo>();
+        fileInfoMock.Setup(f => f.Exists).Returns(exists);
+        fileInfoMock.Setup(f => f.PhysicalPath).Returns($"/app/{ExpectedResourcePath}");
+
+        if (exists)
+        {
+            fileInfoMock.Setup(f => f.CreateReadStream())
+                .Returns(() => new MemoryStream(Encoding.UTF8.GetBytes(content)));
         }
+
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
     }
 }

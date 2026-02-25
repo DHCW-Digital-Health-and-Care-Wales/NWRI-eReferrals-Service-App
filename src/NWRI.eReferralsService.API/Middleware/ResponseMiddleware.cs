@@ -135,7 +135,7 @@ public class ResponseMiddleware
                 break;
 
             case CapabilityStatementUnavailableException ex:
-                _logger.CapabilityStatementJsonNotFound(ex);
+                _logger.CapabilityStatementUnavailable(ex);
                 _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), ex);
 
                 statusCode = HttpStatusCode.InternalServerError;
