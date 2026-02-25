@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace NWRI.eReferralsService.API.Swagger;
