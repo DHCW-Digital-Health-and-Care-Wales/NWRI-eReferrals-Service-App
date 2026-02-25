@@ -3,7 +3,7 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
-using NWRI.eReferralsService.API.Swagger;
+using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Controllers;
 
