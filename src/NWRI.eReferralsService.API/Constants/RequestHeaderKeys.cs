@@ -57,9 +57,4 @@ public static class RequestHeaderKeys
     {
         return HeaderExamplesDictionary.GetValueOrDefault(headerName, string.Empty);
     }
-
-    public static IEnumerable<string> GetAllExcept(params string[] excluded)
-    {
-        return GetAll().Except(excluded);
-    }
 }

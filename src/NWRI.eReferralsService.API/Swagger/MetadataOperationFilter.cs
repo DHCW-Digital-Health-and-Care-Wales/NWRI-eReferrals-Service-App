@@ -17,11 +17,8 @@ public sealed class MetadataOperationFilter : IOperationFilter
     ];
 
     private static readonly string[] RequiredHeaders =
-        RequestHeaderKeys.GetAllExcept(
-            [
-                ..OptionalHeaders,
-                RequestHeaderKeys.UseContext
-            ])
+        RequestHeaderKeys.GetAll()
+        .Except([.. OptionalHeaders, RequestHeaderKeys.UseContext])
         .ToArray();
 
     public void Apply(OpenApiOperation operation, OperationFilterContext context)

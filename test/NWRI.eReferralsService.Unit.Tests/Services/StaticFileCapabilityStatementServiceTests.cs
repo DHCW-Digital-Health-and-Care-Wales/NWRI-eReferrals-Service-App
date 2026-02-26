@@ -3,7 +3,6 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.FileProviders;
 using Moq;
-using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
@@ -26,7 +25,7 @@ public class StaticFileCapabilityStatementServiceTests
 
     private StaticFileCapabilityStatementService CreateSut()
     {
-        return new(_fileProviderMock.Object);
+        return new StaticFileCapabilityStatementService(_fileProviderMock.Object);
     }
 
     [Fact]
@@ -44,7 +43,7 @@ public class StaticFileCapabilityStatementServiceTests
     }
 
     [Fact]
-    public async Task ShouldThrowNotFoundErrorWhenFileDoesNotExist()
+    public async Task ShouldThrowWhenFileDoesNotExist()
     {
         // Arrange
         SetupFileProvider(exists: false);
@@ -54,21 +53,22 @@ public class StaticFileCapabilityStatementServiceTests
         var act = () => sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        var exception = await act.Should()
-            .ThrowAsync<CapabilityStatementUnavailableException>();
+        var ex = await act.Should().ThrowAsync<CapabilityStatementUnavailableException>();
 
-        exception.Which.Errors.Should().ContainSingle()
-            .Which.Should().BeOfType<CapabilityStatementNotFoundError>()
-            .Which.DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
+        ex.Which.Message.Should().Contain("CapabilityStatement");
+        ex.Which.Errors.Should().ContainSingle();
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain("File does not exist");
     }
 
     [Fact]
-    public async Task ShouldThrowLoadErrorWhenStreamFails()
+    public async Task ShouldThrowWhenStreamFails()
     {
         // Arrange
         var fileInfoMock = new Mock<IFileInfo>();
         fileInfoMock.Setup(f => f.Exists).Returns(true);
         fileInfoMock.Setup(f => f.CreateReadStream()).Throws(new IOException("disk read failure"));
+
         _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
 
         var sut = CreateSut();
@@ -77,12 +77,11 @@ public class StaticFileCapabilityStatementServiceTests
         var act = () => sut.GetCapabilityStatementAsync(CancellationToken.None);
 
         // Assert
-        var exception = await act.Should()
-            .ThrowAsync<CapabilityStatementUnavailableException>();
+        var ex = await act.Should().ThrowAsync<CapabilityStatementUnavailableException>();
 
-        exception.Which.Errors.Should().ContainSingle()
-            .Which.Should().BeOfType<CapabilityStatementLoadError>()
-            .Which.DiagnosticsMessage.Should().Contain("disk read failure");
+        ex.Which.Errors.Should().ContainSingle();
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain("disk read failure");
     }
 
     [Fact]
@@ -99,6 +98,7 @@ public class StaticFileCapabilityStatementServiceTests
         // Assert
         first.Should().Be(ValidJsonContent);
         second.Should().Be(ValidJsonContent);
+
         _fileProviderMock.Verify(fp => fp.GetFileInfo(ExpectedResourcePath), Times.Once);
     }
 
@@ -115,6 +115,7 @@ public class StaticFileCapabilityStatementServiceTests
             barrier.Task.GetAwaiter().GetResult();
             return new MemoryStream(Encoding.UTF8.GetBytes(ValidJsonContent));
         });
+
         _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
 
         var sut = CreateSut();
@@ -129,14 +130,13 @@ public class StaticFileCapabilityStatementServiceTests
         var results = await Task.WhenAll(tasks);
 
         // Assert
-        results.Should().AllBe(ValidJsonContent);
+        results.Should().AllBeEquivalentTo(ValidJsonContent);
     }
 
     private void SetupFileProvider(bool exists, string content = "")
     {
         var fileInfoMock = new Mock<IFileInfo>();
         fileInfoMock.Setup(f => f.Exists).Returns(exists);
-        fileInfoMock.Setup(f => f.PhysicalPath).Returns($"/app/{ExpectedResourcePath}");
 
         if (exists)
         {

@@ -3,11 +3,11 @@ using NWRI.eReferralsService.API.Constants;
 
 namespace NWRI.eReferralsService.API.Errors;
 
-public class CapabilityStatementLoadError : BaseFhirHttpError
+public sealed class CapabilityStatementError : BaseFhirHttpError
 {
-    public CapabilityStatementLoadError(string resourcePath, string cause)
+    public CapabilityStatementError(string resourcePath, string cause)
     {
-        DiagnosticsMessage = $"CapabilityStatement JSON resource could not be loaded. ResourcePath='{resourcePath}'. Cause='{cause}'.";
+        DiagnosticsMessage = $"CapabilityStatement resource unavailable. ResourcePath='{resourcePath}'. Cause='{cause}'.";
     }
 
     public override string Code => FhirHttpErrorCodes.ProxyServerError;

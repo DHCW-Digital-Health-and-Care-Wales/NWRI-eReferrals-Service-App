@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.FileProviders;
-using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 
 namespace NWRI.eReferralsService.API.Services;
@@ -35,9 +34,7 @@ public class StaticFileCapabilityStatementService : ICapabilityStatementService
 
         if (!fileInfo.Exists)
         {
-            throw new CapabilityStatementUnavailableException(
-                new CapabilityStatementNotFoundError(resourcePath,
-                    "File does not exist"));
+            throw new CapabilityStatementUnavailableException(resourcePath, "File does not exist");
         }
 
         try
@@ -48,8 +45,7 @@ public class StaticFileCapabilityStatementService : ICapabilityStatementService
         }
         catch (Exception ex)
         {
-            throw new CapabilityStatementUnavailableException(
-                new CapabilityStatementLoadError(resourcePath, ex.Message));
+            throw new CapabilityStatementUnavailableException(resourcePath, ex.Message);
         }
     }
 }

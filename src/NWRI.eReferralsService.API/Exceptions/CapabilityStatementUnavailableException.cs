@@ -2,11 +2,11 @@ using NWRI.eReferralsService.API.Errors;
 
 namespace NWRI.eReferralsService.API.Exceptions;
 
-public class CapabilityStatementUnavailableException : BaseFhirException
+public sealed class CapabilityStatementUnavailableException : BaseFhirException
 {
-    public CapabilityStatementUnavailableException(BaseFhirHttpError error)
+    public CapabilityStatementUnavailableException(string resourcePath, string cause)
     {
-        Errors = [error];
+        Errors = [new CapabilityStatementError(resourcePath, cause)];
     }
 
     public override IEnumerable<BaseFhirHttpError> Errors { get; }
