@@ -2,6 +2,7 @@ using System.Globalization;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Mappers;
@@ -14,8 +15,6 @@ public sealed class WpasCreateReferralRequestMapper
     private const string ServiceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
     private const string BarsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
 
-    private const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";
-    private const string SenderOrganisationName = "Sender Organization";
     private const string UrgentReferrerPriorityType = "2";
     private const string OphthalmologyMainSpecialtyCode = "130";
 

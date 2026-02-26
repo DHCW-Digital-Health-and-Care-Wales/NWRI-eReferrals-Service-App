@@ -4,6 +4,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
@@ -89,7 +90,7 @@ public class WpasCreateReferralRequestMapperTests
     {
         var model = CreateValidModelFromExampleBundle();
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Receiving/performing Organization"))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
             .ToList();
 
         var mapper = new WpasCreateReferralRequestMapper();
@@ -103,7 +104,7 @@ public class WpasCreateReferralRequestMapperTests
     {
         var model = CreateValidModelFromExampleBundle();
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Sender Organization"))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
             .ToList();
 
         var mapper = new WpasCreateReferralRequestMapper();

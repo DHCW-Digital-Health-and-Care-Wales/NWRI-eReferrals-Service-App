@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
@@ -163,13 +164,13 @@ public class BundleCreateReferralModelValidatorTests
         var model = CreateValidModelFromExampleBundle();
 
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Receiving/performing Organization"))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
             .ToList();
 
         var result = _sut.TestValidate(model);
 
         result.Errors.Should().Contain(e =>
-            e.ErrorMessage == "Organization with name 'Receiving/performing Organization' is required");
+            e.ErrorMessage == $"Organization with name '{ReceivingPerformingOrganisationName}' is required");
     }
 
     [Fact]
@@ -178,13 +179,13 @@ public class BundleCreateReferralModelValidatorTests
         var model = CreateValidModelFromExampleBundle();
 
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, "Sender Organization"))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
             .ToList();
 
         var result = _sut.TestValidate(model);
 
         result.Errors.Should().Contain(e =>
-            e.ErrorMessage == "Organization with name 'Sender Organization' is required");
+            e.ErrorMessage == $"Organization with name '{SenderOrganisationName}' is required");
     }
 
     [Fact]

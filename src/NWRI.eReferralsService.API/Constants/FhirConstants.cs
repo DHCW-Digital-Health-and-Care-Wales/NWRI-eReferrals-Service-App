@@ -10,4 +10,6 @@ public static class FhirConstants
     public const string BarsMessageReasonUpdate = "update";
     public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
     public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
+    public const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";
+    public const string SenderOrganisationName = "Sender Organization";
 }

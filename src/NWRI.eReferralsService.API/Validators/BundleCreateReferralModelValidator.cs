@@ -2,6 +2,7 @@ using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Models;
 using static NWRI.eReferralsService.API.Constants.ValidationMessages;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Validators;
@@ -12,9 +13,6 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
     private const string EventCoding = "eventCoding";
 
     private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
-
-    private const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";
-    private const string SenderOrganisationName = "Sender Organization";
 
     public BundleCreateReferralModelValidator()
     {
