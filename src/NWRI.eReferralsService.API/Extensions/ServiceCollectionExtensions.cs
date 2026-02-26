@@ -3,6 +3,7 @@ using System.Net;
 using Azure.Identity;
 using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
@@ -60,7 +61,9 @@ public static class ServiceCollectionExtensions
 
     public static void AddServices(this IServiceCollection services)
     {
+        services.AddSingleton<IFileProvider>(sp => sp.GetRequiredService<IWebHostEnvironment>().ContentRootFileProvider);
         services.AddScoped<IReferralService, ReferralService>();
+        services.AddSingleton<ICapabilityStatementService, StaticFileCapabilityStatementService>();
     }
 
     public static void AddCustomHealthChecks(this IServiceCollection services)

@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Middleware;
@@ -411,6 +412,58 @@ public class ResponseMiddlewareTests
             issue.Details.Coding.Should().Contain(c =>
                 c.System == "https://fhir.nhs.uk/CodeSystem/http-error-codes" &&
                 c.Code == "PROXY_NOT_IMPLEMENTED");
+        });
+    }
+
+    [Fact]
+    public async Task ShouldHandleCapabilityStatementUnavailableException()
+    {
+        // Arrange
+        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+        var cause = "File does not exist.";
+        var exception = new CapabilityStatementUnavailableException(resourcePath, cause);
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+        var host = StartHostWithException(exception);
+
+        // Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.Headers.GetValues("X-Operation-Id").Should().NotBeNullOrEmpty();
+        response.Headers.GetValues(RequestHeaderKeys.RequestId).Should().Contain(requestId);
+        response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should().Contain(correlationId);
+        response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
+            .NotBeNull()
+            .And.Contain(FhirConstants.FhirMediaType);
+
+        var raw = await response.Content.ReadAsStringAsync();
+        Action parse = () => JsonDocument.Parse(raw);
+        parse.Should().NotThrow(raw);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(
+            raw,
+            new JsonSerializerOptions().ForFhirExtended())!;
+
+        operationOutcome.Issue.Should().NotBeNullOrEmpty();
+        operationOutcome.Issue.Should().AllSatisfy(issue =>
+        {
+            issue.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            issue.Code.Should().Be(OperationOutcome.IssueType.Exception);
+            issue.Details.Should().NotBeNull();
+            issue.Details.Coding.Should().NotBeNullOrEmpty();
+            issue.Details.Coding.Should().Contain(c =>
+                c.System == FhirConstants.HttpErrorCodesSystem &&
+                c.Code == FhirHttpErrorCodes.ProxyServerError);
+            issue.Diagnostics.Should().NotBeNullOrWhiteSpace();
+            issue.Diagnostics.Should().Contain("CapabilityStatement");
+            issue.Diagnostics.Should().Contain(resourcePath);
         });
     }
 

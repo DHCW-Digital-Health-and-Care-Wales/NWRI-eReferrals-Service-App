@@ -43,4 +43,7 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to decode base64 string.")]
     public static partial void Base64DecodingFailure(this ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "CapabilityStatement resource is unavailable.")]
+    public static partial void CapabilityStatementUnavailable(this ILogger logger, CapabilityStatementUnavailableException exception);
 }
