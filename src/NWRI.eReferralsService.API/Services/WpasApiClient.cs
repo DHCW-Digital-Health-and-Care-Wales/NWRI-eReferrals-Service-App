@@ -61,7 +61,6 @@ public sealed class WpasApiClient : IWpasApiClient
             }
             catch (JsonException exception)
             {
-                _logger.WpasResponseDeserializationFailed(exception, typeof(TResponse).Name);
                 throw new ProxyServerException(exception.Message);
             }
         }

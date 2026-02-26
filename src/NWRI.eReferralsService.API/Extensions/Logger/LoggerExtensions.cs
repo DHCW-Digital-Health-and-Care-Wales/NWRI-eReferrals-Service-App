@@ -46,7 +46,4 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to decode base64 string.")]
     public static partial void Base64DecodingFailure(this ILogger logger, Exception exception);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to deserialize WPAS response to {responseType}.")]
-    public static partial void WpasResponseDeserializationFailed(this ILogger logger, Exception exception, string responseType);
 }
