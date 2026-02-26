@@ -40,9 +40,10 @@ public class ReferralWorkflowProcessor
 
     public async Task<WpasCreateReferralResponse> ProcessCreateAsync(Bundle bundle, CancellationToken cancellationToken)
     {
-        await _referralBundleValidationService.ValidateCreateAsync(bundle, cancellationToken);
+        await _referralBundleValidationService.ValidateFhirProfileAsync(bundle, cancellationToken);
 
         var bundleModel = BundleCreateReferralModel.FromBundle(bundle);
+        await _referralBundleValidationService.ValidateMandatoryDataAsync(bundleModel, cancellationToken);
 
         var wpasCreateReferralRequest = MapToWpasCreateReferralRequest(bundleModel);
         _eventLogger.Audit(new EventCatalogue.MapFhirToWpas());
@@ -60,7 +61,10 @@ public class ReferralWorkflowProcessor
 
     public async Task<WpasCancelReferralResponse> ProcessCancelAsync(Bundle bundle, CancellationToken cancellationToken)
     {
-        await _referralBundleValidationService.ValidateCancelAsync(bundle, cancellationToken);
+        await _referralBundleValidationService.ValidateFhirProfileAsync(bundle, cancellationToken);
+
+        var bundleModel = BundleCancelReferralModel.FromBundle(bundle);
+        await _referralBundleValidationService.ValidateMandatoryDataAsync(bundleModel, cancellationToken);
 
         // TODO: Mapping from FHIR Bundle to WPAS to be implemented as part of story 565342
         var wpasCancelReferralRequest = new WpasCancelReferralRequest();
