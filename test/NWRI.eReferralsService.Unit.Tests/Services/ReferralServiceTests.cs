@@ -27,7 +27,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public sealed class ReferralServiceTests
+public class ReferralServiceTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();

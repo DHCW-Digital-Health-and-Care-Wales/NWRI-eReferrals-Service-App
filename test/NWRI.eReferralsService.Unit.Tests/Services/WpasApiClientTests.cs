@@ -20,7 +20,7 @@ using RichardSzalay.MockHttp;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public sealed class WpasApiClientTests
+public class WpasApiClientTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
     private readonly WpasApiConfig _wpasApiConfig;
@@ -157,5 +157,31 @@ public sealed class WpasApiClientTests
         exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 
+    [Fact]
+    public async Task CreateReferralAsyncShouldThrowWhenSuccessStatusButResponseJsonIsInvalid()
+    {
+        // Arrange
+        var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
+        var invalidJson = "{ this is not valid json";
 
+        using var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
+            .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, invalidJson);
+
+        using var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
+
+        var logger = Mock.Of<ILogger<WpasApiClient>>();
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+
+        // Act
+        var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
+
+        // Assert
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
+        exception[0].StatusCode.Should().Be(HttpStatusCode.OK);
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+
+        mockHttp.VerifyNoOutstandingExpectation();
+    }
 }
