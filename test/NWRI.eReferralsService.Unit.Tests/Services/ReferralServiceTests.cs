@@ -219,7 +219,12 @@ public class ReferralServiceTests
             .Setup(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new WpasCreateReferralResponse
             {
-                ReferralId = expectedReferralId
+                ReferralId = expectedReferralId,
+                System = _fixture.Create<string>(),
+                AssigningAuthority = _fixture.Create<string>(),
+                OrganisationCode = _fixture.Create<string>(),
+                OrganisationName = _fixture.Create<string>(),
+                ReferralCreationTimestamp = _fixture.Create<string>()
             });
 
         var sut = CreateReferralService();
@@ -606,7 +611,7 @@ public class ReferralServiceTests
         const string barsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
         const string nhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
         const string nhsNumberVerificationStatusSystem =
-            "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus";
+            "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland";
 
         const string serviceRequestId = "sr-1";
         var messageHeader = new MessageHeader

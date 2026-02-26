@@ -44,7 +44,7 @@ public class WpasApiClientTests
         var request = WpasCreateReferralRequestBuilder.CreateValid();
         var expectedRequestJson = JsonSerializer.Serialize(request);
         var expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
-        var expectedResponseJson = $@"{{""System"":""Welsh PAS"",""ReferralId"":""{expectedReferralId}""}}";
+        var expectedResponseJson = $@"{{""System"":""Welsh PAS"",""AssigningAuthority"":""some-authority"",""OrganisationCode"":""A1234"",""OrganisationName"":""Some Organisation"",""ReferralCreationTimestamp"":""2026-02-26T10:00:00Z"",""ReferralId"":""{expectedReferralId}""}}";
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")

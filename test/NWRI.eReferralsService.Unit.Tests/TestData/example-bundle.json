@@ -300,7 +300,7 @@
                     {
                       "code": "01",
                       "display": "Number present and verified",
-                      "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus"
+                      "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland"
                     }
                   ]
                 }

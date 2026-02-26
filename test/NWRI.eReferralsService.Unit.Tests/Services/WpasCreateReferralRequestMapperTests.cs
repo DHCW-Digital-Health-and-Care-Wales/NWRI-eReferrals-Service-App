@@ -29,7 +29,7 @@ public class WpasCreateReferralRequestMapperTests
 
         payload.ContractDetails.ProviderOrganisationCode.Should().Be("7A4BV");
         payload.ReferralDetails.ReferringOrganisationCode.Should().Be("7A4BV");
-        payload.ReferralDetails.OutpatientReferralSource.Should().Be("TP2VC");
+        payload.ReferralDetails.OutpatientReferralSource.Should().Be("TP");
         payload.PatientDetails.NhsNumber.Should().Be("3478526985");
         payload.PatientDetails.NhsNumberStatusIndicator.Should().Be("01");
         payload.PatientDetails.PatientName.Surname.Should().Be("Jones");
