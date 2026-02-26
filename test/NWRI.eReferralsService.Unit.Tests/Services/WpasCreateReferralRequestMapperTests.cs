@@ -45,8 +45,12 @@ public class WpasCreateReferralRequestMapperTests
         payload.ReferralDetails.ReferralIdentifier.Length.Should().BeLessOrEqualTo(12);
     }
 
-    [Fact]
-    public void MapShouldHandleReasonForReferralDisplayShorterThan8Chars()
+    [Theory]
+    [InlineData("Dry eye", "Dry eye ")]
+    [InlineData("Glaucoma", "Glaucoma")]
+    [InlineData("Glaucoma suspect", "Glaucoma")]
+    [InlineData("   Dry eye   ", "Dry eye ")]
+    public void MapShouldFormatReasonForReferralAsFixedWidthLeftJustified(string inputDisplay, string expected)
     {
         var bundleJson = File.ReadAllText("TestData/example-bundle.json");
         var options = new JsonSerializerOptions().ForFhir(ModelInfo.ModelInspector);
@@ -57,14 +61,15 @@ public class WpasCreateReferralRequestMapperTests
             .OfType<Condition>()
             .First();
 
-        condition.Code!.Coding.First().Display = "Dry eye";
+        condition.Code!.Coding.First().Display = inputDisplay;
 
         var model = BundleCreateReferralModel.FromBundle(bundle);
 
         var mapper = new WpasCreateReferralRequestMapper();
         var payload = mapper.Map(model);
 
-        payload.ReferralDetails.ReasonForReferral.Should().Be("Dry eye");
+        payload.ReferralDetails.ReasonForReferral.Should().Be(expected);
+        payload.ReferralDetails.ReasonForReferral.Length.Should().Be(8);
     }
 
     [Fact]

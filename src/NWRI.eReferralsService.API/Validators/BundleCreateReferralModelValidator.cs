@@ -240,7 +240,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
                     .WithMessage(MissingEntityField<Condition>(nameof(Condition.Code)));
 
                 condition.RuleFor(x => x)
-                    .Must(c => c.Code?.Coding?.Any(coding => !string.IsNullOrWhiteSpace(coding.Display)) == true)
+                    .Must(c => c.Code?.Coding.Any(coding => !string.IsNullOrWhiteSpace(coding.Display)) == true)
                     .WithMessage(MissingEntityField<Condition>(nameof(Condition.Code)));
             });
 

@@ -87,17 +87,19 @@ public sealed class WpasCreateReferralRequestMapper
                 DateOfReferral = WpasDate(createReferralModel.ServiceRequest?.AuthoredOn),
                 MainSpecialty = OphthalmologyMainSpecialtyCode,
                 ReferrerPriorityType = UrgentReferrerPriorityType,
-                ReasonForReferral = Truncate(
+                ReasonForReferral = FormatFixedWidthLeftJustified(
                     createReferralModel.Conditions!.First().Code!.Coding.First().Display!, 8),
                 ReferralIdentifier = encounterId
             }
         };
     }
 
-    private static string Truncate(string value, int maxLength)
+    private static string FormatFixedWidthLeftJustified(string value, int length)
     {
         value = value.Trim();
-        return value[..Math.Min(maxLength, value.Length)];
+        return value.Length > length
+            ? value[..length]
+            : value.PadRight(length, ' ');
     }
 
     private static string WpasDate(string? value) =>

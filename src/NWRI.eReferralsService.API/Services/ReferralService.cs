@@ -53,7 +53,7 @@ public class ReferralService : IReferralService
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
 
         var workflowAction = DetermineReferralWorkflowAction(bundle);
-        WpasReferralResponse? response = workflowAction switch
+        WpasReferralResponse response = workflowAction switch
         {
             ReferralWorkflowAction.Create => await _referralWorkflowProcessor.ProcessCreateAsync(bundle, cancellationToken),
             ReferralWorkflowAction.Cancel => await _referralWorkflowProcessor.ProcessCancelAsync(bundle, cancellationToken),
@@ -65,7 +65,7 @@ public class ReferralService : IReferralService
         var sourceSystem = _requestFhirHeadersDecoder.GetDecodedSourceSystem(headersModel.RequestingSoftware);
         var userRole = _requestFhirHeadersDecoder.GetDecodedUserRole(headersModel.RequestingPractitioner);
 
-        _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response?.ReferralId,
+        _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
         // TODO: To be implemented as part of story 565927, for now returning empty string to return 200 OK with empty body to the sender system
