@@ -1,13 +1,13 @@
-using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Constants;
-using NWRI.eReferralsService.API.EventLogging;
-using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
+using NWRI.eReferralsService.API.Extensions.Logger;
+using NWRI.eReferralsService.API.Models.WPAS.Requests;
+using NWRI.eReferralsService.API.Models.WPAS.Responses;
 
 namespace NWRI.eReferralsService.API.Services;
 
@@ -15,40 +15,54 @@ public sealed class WpasApiClient : IWpasApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly WpasApiConfig _wpasApiConfig;
-    private readonly IEventLogger _eventLogger;
+    private readonly ILogger<WpasApiClient> _logger;
 
-    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, IEventLogger eventLogger)
+    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, ILogger<WpasApiClient> logger)
     {
         _httpClient = httpClient;
         _wpasApiConfig = wpasApiOptions.Value;
-        _eventLogger = eventLogger;
+        _logger = logger;
     }
 
-    public Task<string> CreateReferralAsync(string requestBody, CancellationToken cancellationToken)
+    public async Task<WpasCreateReferralResponse> CreateReferralAsync(WpasCreateReferralRequest request, CancellationToken cancellationToken)
     {
-        return PostAsync(_wpasApiConfig.CreateReferralEndpoint, requestBody, cancellationToken);
+        return await PostAsync<WpasCreateReferralRequest, WpasCreateReferralResponse>(_wpasApiConfig.CreateReferralEndpoint, request, cancellationToken);
     }
 
-    public Task<string> CancelReferralAsync(string requestBody, CancellationToken cancellationToken)
+    public async Task<WpasCancelReferralResponse> CancelReferralAsync(WpasCancelReferralRequest request, CancellationToken cancellationToken)
     {
-        return PostAsync(_wpasApiConfig.CancelReferralEndpoint, requestBody, cancellationToken);
+        return await PostAsync<WpasCancelReferralRequest, WpasCancelReferralResponse>(_wpasApiConfig.CancelReferralEndpoint, request, cancellationToken);
     }
 
-    private async Task<string> PostAsync(string endpoint, string requestBody, CancellationToken cancellationToken)
+    private async Task<TResponse> PostAsync<TRequest, TResponse>(
+        string endpoint,
+        TRequest requestBody,
+        CancellationToken cancellationToken)
+        where TRequest : class
+        where TResponse : WpasReferralResponse
     {
-        var stopwatch = Stopwatch.StartNew();
+        var requestBodyJson = JsonSerializer.Serialize(requestBody);
+        using var content = new StringContent(
+            requestBodyJson,
+            new MediaTypeHeaderValue(MediaTypeNames.Application.Json));
+
         using var response = await _httpClient.PostAsync(
             endpoint,
-            new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)),
+            content,
             cancellationToken);
-        stopwatch.Stop();
 
         if (response.IsSuccessStatusCode)
         {
-            // TODO: Extract WPAS referral ID from the response and pass it to the event
-            _eventLogger.Audit(new EventCatalogue.DataSuccessfullyCommittedToWpas(stopwatch.ElapsedMilliseconds, null));
-
-            return await response.Content.ReadAsStringAsync(cancellationToken);
+            try
+            {
+                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                var deserializedResponse = await JsonSerializer.DeserializeAsync<TResponse>(stream, cancellationToken: cancellationToken);
+                return deserializedResponse ?? throw new JsonException($"Deserialization of response to {typeof(TResponse).Name} resulted in null.");
+            }
+            catch (JsonException exception)
+            {
+                throw new ProxyServerException(exception.Message);
+            }
         }
 
         throw await GetNotSuccessfulApiCallExceptionAsync(response);

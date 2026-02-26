@@ -10,7 +10,6 @@ using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger;
-using NWRI.eReferralsService.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +23,6 @@ builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResili
 
 builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
-builder.Services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
 builder.Services.AddSingleton<FhirBase64Decoder>();
 builder.Services.AddSingleton<IRequestFhirHeadersDecoder, RequestFhirHeadersDecoder>();
@@ -48,6 +46,7 @@ builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), bui
 
 builder.Services.AddHttpClients();
 builder.Services.AddValidators();
+builder.Services.AddMappers();
 builder.Services.AddServices();
 
 builder.Services.AddCustomHealthChecks();

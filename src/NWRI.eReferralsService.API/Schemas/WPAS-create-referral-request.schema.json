@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wales.nhs.uk/schemas/dscn/approved/dscn-2024-11-AMD.json",
+  "title": "Planned Care Referral Data Set",
+  "description": "The Planned Care Referral (PCR) Data Set captures all referrals received by NHS Wales provider organisations for the following service requests: Request for Advice, Request for Investigation, Request for Treatment",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "RecordId": {
+      "description": "This is the field to identify the type of record being submitted.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/recordid.htm",
+      "type": "string",
+      "maxLength": 36
+    },
+    "ContractDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ProviderOrganisationCode": {
+          "description": "The provider code that identifies the health care provider who is responsible for managing the treatment of the patient.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/organisationcodecodeofprovider.htm",
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 5
+        }
+      },
+      "required": ["ProviderOrganisationCode"]
+    },
+    "PatientDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "LocalPatientIdentifier": {
+          "description": "This is the case record number. It is a unique identifier for a patient within a health care provider.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/localpatientidentifier.htm",
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10
+        },
+        "NhsNumber": {
+          "description": "The NHS number is the primary identifier of a person, and is a unique identifier for a patient within the NHS in Wales.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/nhsnumber.htm",
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10
+        },
+        "NhsNumberStatusIndicator": {
+          "description": "The status indicator provides information about the potential accuracy and reliability of the NHS number, as recorded within the Welsh Demographics Service.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/nhsnumberstatusindicator.htm",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        },
+        "GpPracticeCode": {
+          "description": "The code of the patient's registered General Practitioner (GP) Practice.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/codeofregisteredgppractice.htm",
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 6
+        },
+        "EthnicGroup": {
+          "description": "This is the ethnic group of the patient, as selected by the patient.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/ethnicgroup.htm",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        },
+        "PatientName": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The patient's official name.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/patientsname.htm",
+          "properties": {
+            "Surname": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 35
+            },
+            "FirstName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 35
+            }
+          },
+          "required": ["Surname", "FirstName"]
+        },
+        "BirthDate": {
+          "description": "Date of birth of patient in the format ccyyMMdd.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/ethnicgroup.htm",
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 8
+        },
+        "Sex": {
+          "description": "The biological sex of person.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/sex.htm",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "UsualAddress": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The patient's usual address.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/patientsusualaddress.htm",
+          "properties": {
+            "NoAndStreet": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "Locality": {
+              "type": "string",
+              "maxLength": 35
+            },
+            "Town": {
+              "type": "string",
+              "maxLength": 35
+            },
+            "Postcode": {
+              "type": "string",
+              "maxLength": 8
+            }
+          },
+          "required": ["NoAndStreet", "Town", "Postcode"]
+        }
+      },
+      "required": ["NhsNumber", "NhsNumberStatusIndicator", "PatientName", "BirthDate", "Sex", "UsualAddress"]
+    },
+    "ReferralDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "OutpatientReferralSource": {
+          "description": "This is a classification which is used to identify the source of referral of each Outpatient Episode or Outpatient Referral.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/sourceofreferraloutpatients.htm",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        },
+        "ReferringOrganisationCode": {
+          "description": "The code of the referring organisation.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referringorganisationcode.htm",
+          "type": "string",
+          "maxLength": 6
+        },
+        "ServiceTypeRequested": {
+          "description": "The terms of reference for the referral request.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/servicetyperequested.htm",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "ReferrerCode": {
+          "description": "The nationally recognised registry code of the person making the referral.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referrercode.htm",
+          "type": "string",
+          "maxLength": 9
+        },
+        "AdministrativeCategory": {
+          "description": "This is to indicate whether the patient is treated as an NHS, private or amenity patient etc.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/administrativecategory.htm",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        },
+        "DateOfReferral": {
+          "description": "The date on which the patient was told about the referral, in the format ccyyMMdd.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/dateofpatientreferral.htm",
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 8
+        },
+        "MainSpecialty": {
+          "description": "The code identifying each Main Specialty designated by Royal Colleges.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/mainspecialtyconsultant.htm",
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "ReferrerPriorityType": {
+          "description": "This is the Referrer's assessment of the priority of a request for services.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referrerprioritytype.htm",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "ReasonForReferral": {
+          "description": "The reason(s) for the patient requiring involvement with care professionals. These may include any problem, issue or event affecting the patient's health and/ or well being.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/reasonforreferral.htm",
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 8
+        },
+        "ReferralIdentifier": {
+          "description": "The unique identifier for this referral as recorded within the source/sender system.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referralidentifier.htm",
+          "type": "string",
+          "maxLength": 12
+        }
+      },
+      "required": [
+        "OutpatientReferralSource",
+        "ReferringOrganisationCode",
+        "ServiceTypeRequested",
+        "ReferrerCode",
+        "AdministrativeCategory",
+        "DateOfReferral",
+        "MainSpecialty",
+        "ReferrerPriorityType",
+        "ReasonForReferral",
+        "ReferralIdentifier"
+      ]
+    }
+  },
+  "required": ["RecordId", "ContractDetails", "PatientDetails", "ReferralDetails"]
+}

@@ -266,7 +266,7 @@ public class HeadersModelValidatorTests
     {
         //Arrange
         var model = _fixture.Build<HeadersModel>()
-            .With(x => x.RequestId, Guid.NewGuid().ToString)
+            .With(x => x.RequestId, Guid.NewGuid().ToString())
             .Create();
 
         //Act
@@ -316,7 +316,7 @@ public class HeadersModelValidatorTests
     {
         //Arrange
         var model = _fixture.Build<HeadersModel>()
-            .With(x => x.CorrelationId, Guid.NewGuid().ToString)
+            .With(x => x.CorrelationId, Guid.NewGuid().ToString())
             .Create();
 
         //Act

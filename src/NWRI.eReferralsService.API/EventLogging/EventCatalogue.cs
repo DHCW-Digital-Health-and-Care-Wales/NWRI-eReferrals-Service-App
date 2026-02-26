@@ -28,6 +28,9 @@ public static class EventCatalogue
     [Description("VAL_MANDATORY_FIELDS_OK")]
     public record MandatoryFieldsValidated : IAuditEvent;
 
+    [Description("MAP_FHIR_TO_WPAS")]
+    public record MapFhirToWpas : IAuditEvent;
+
     [Description("INT_WPAS_SUCCESS")]
     public record DataSuccessfullyCommittedToWpas(
         long ExecutionTimeMs,
@@ -55,6 +58,12 @@ public static class EventCatalogue
     [Description("ERR_INT_WPAS_CONNECTION_FAIL")]
     public record IntWpasConnectionFailError : IErrorEvent;
 
+    [Description("ERR_INT_WPAS_RESPONSE_ERROR")]
+    public record IntWpasResponseError : IErrorEvent;
+
     [Description("ERR_INTERNAL_HANDLER")]
     public record InternalHandlerError : IErrorEvent;
+
+    [Description("ERR_MAP_FHIR_TO_WPAS")]
+    public record MapFhirToWpasFailed : IErrorEvent;
 }

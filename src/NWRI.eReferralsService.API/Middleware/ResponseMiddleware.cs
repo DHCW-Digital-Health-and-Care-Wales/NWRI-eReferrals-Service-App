@@ -134,6 +134,14 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(proxyNotImplementedException);
                 break;
 
+            case ProxyServerException proxyServerException:
+                _logger.WpasResponseError(proxyServerException);
+                _eventLogger.LogError(new EventCatalogue.IntWpasResponseError(), proxyServerException);
+
+                statusCode = HttpStatusCode.InternalServerError;
+                body = OperationOutcomeCreator.CreateOperationOutcome(proxyServerException);
+                break;
+
             default:
                 _logger.UnexpectedError(exception);
                 _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), exception);
