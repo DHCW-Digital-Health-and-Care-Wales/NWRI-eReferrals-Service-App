@@ -178,9 +178,12 @@ public class WpasApiClientTests
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
 
         // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(HttpStatusCode.OK);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+        var exception = (await action.Should().ThrowAsync<ProxyServerException>()).Subject.ToList();
+        exception[0].Errors.Should().AllSatisfy(e =>
+        {
+            e.Should().BeOfType<ProxyServerError>();
+            e.Code.Should().Be("PROXY_SERVER_ERROR");
+        });
 
         mockHttp.VerifyNoOutstandingExpectation();
     }

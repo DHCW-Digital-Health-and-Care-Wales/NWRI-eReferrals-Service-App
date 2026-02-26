@@ -58,6 +58,9 @@ public static class EventCatalogue
     [Description("ERR_INT_WPAS_CONNECTION_FAIL")]
     public record IntWpasConnectionFailError : IErrorEvent;
 
+    [Description("ERR_INT_WPAS_RESPONSE_ERROR")]
+    public record IntWpasResponseError : IErrorEvent;
+
     [Description("ERR_INTERNAL_HANDLER")]
     public record InternalHandlerError : IErrorEvent;
 
