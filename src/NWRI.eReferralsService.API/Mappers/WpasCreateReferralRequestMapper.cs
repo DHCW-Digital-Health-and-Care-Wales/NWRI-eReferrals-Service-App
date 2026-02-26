@@ -11,7 +11,7 @@ public sealed class WpasCreateReferralRequestMapper
 {
     private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
     private const string NhsNumberVerificationStatusSystem =
-        "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus";
+        "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland";
     private const string ServiceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
     private const string BarsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
 
@@ -20,7 +20,7 @@ public sealed class WpasCreateReferralRequestMapper
 
     public WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel)
     {
-        var encounterId = createReferralModel.Encounter?.Identifier.First().Value!;
+        var encounterId = FormatFixedWidthLeftJustified(createReferralModel.Encounter?.Identifier.First().Value!, 12);
         var receiverOrganisationId = createReferralModel.Organizations?
             .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, ReceivingPerformingOrganisationName))
             .Identifier.First().Value!;
@@ -70,19 +70,19 @@ public sealed class WpasCreateReferralRequestMapper
             },
             ReferralDetails = new ReferralDetails
             {
-                OutpatientReferralSource = senderOrganisationId,
+                OutpatientReferralSource = FormatFixedWidthLeftJustified(senderOrganisationId, 2),
                 ReferringOrganisationCode = receiverOrganisationId,
                 ServiceTypeRequested = createReferralModel.ServiceRequest?.Category
                                            .SelectMany(c => c.Coding)
                                            .First(c => string.Equals(c.System, ServiceRequestCategorySystem, StringComparison.OrdinalIgnoreCase))
-                                           .Code!,
+                                           .Code![0].ToString()!,
                 ReferrerCode = createReferralModel.Practitioners?.First()
                     .Identifier.First()
                     .Value!,
-                AdministrativeCategory = createReferralModel.ServiceRequest?.Category
+                AdministrativeCategory = FormatFixedWidthLeftJustified(createReferralModel.ServiceRequest?.Category
                                              .SelectMany(c => c.Coding)
                                              .First(c => string.Equals(c.System, BarsUseCaseCategorySystem, StringComparison.OrdinalIgnoreCase))
-                                             .Code!,
+                                             .Code!, 2),
                 DateOfReferral = WpasDate(createReferralModel.ServiceRequest?.AuthoredOn),
                 MainSpecialty = OphthalmologyMainSpecialtyCode,
                 ReferrerPriorityType = UrgentReferrerPriorityType,
