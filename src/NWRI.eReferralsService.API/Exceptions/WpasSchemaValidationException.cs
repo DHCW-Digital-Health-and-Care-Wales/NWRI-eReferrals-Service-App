@@ -5,7 +5,7 @@ namespace NWRI.eReferralsService.API.Exceptions;
 public class WpasSchemaValidationException : BundleValidationException
 {
     public WpasSchemaValidationException(string validationDetails)
-        : base([new ValidationFailure("", "WPAS payload JSON schema validation failed.")])
+        : base([new ValidationFailure("WpasPayload", "WPAS payload JSON schema validation failed.")])
     {
         ValidationDetails = validationDetails;
     }
