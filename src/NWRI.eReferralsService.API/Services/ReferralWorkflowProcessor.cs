@@ -13,7 +13,7 @@ using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.API.Services;
 
-public class ReferralWorkflowProcessor
+public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
 {
     private readonly ReferralBundleValidationService _referralBundleValidationService;
     private readonly WpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;

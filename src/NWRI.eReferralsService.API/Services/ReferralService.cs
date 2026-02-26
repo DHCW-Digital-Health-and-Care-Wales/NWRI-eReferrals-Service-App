@@ -27,13 +27,13 @@ public class ReferralService : IReferralService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
-    private readonly ReferralWorkflowProcessor _referralWorkflowProcessor;
+    private readonly IReferralWorkflowProcessor _referralWorkflowProcessor;
 
     public ReferralService(IValidator<HeadersModel> headerValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
-        ReferralWorkflowProcessor referralWorkflowProcessor)
+        IReferralWorkflowProcessor referralWorkflowProcessor)
     {
         _headerValidator = headerValidator;
         _jsonSerializerOptions = jsonSerializerOptions;

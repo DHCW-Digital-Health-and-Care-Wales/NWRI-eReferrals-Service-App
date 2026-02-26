@@ -69,7 +69,7 @@ public static class ServiceCollectionExtensions
     public static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<ReferralBundleValidationService>();
-        services.AddScoped<ReferralWorkflowProcessor>();
+        services.AddScoped<IReferralWorkflowProcessor, ReferralWorkflowProcessor>();
         services.AddScoped<IReferralService, ReferralService>();
     }
 
