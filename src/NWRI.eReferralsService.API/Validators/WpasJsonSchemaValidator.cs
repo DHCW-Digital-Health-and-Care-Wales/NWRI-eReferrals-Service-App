@@ -8,6 +8,7 @@ namespace NWRI.eReferralsService.API.Validators;
 public class WpasJsonSchemaValidator
 {
     private const string WpasCreateReferralRequestJsonSchemaPath = "Schemas/WPAS-create-referral-request.schema.json";
+    private static readonly EvaluationOptions ListEvaluationOptions = new() { OutputFormat = OutputFormat.List };
 
     private readonly ConcurrentDictionary<string, Lazy<JsonSchema>> _schemaCache = new();
     private readonly IHostEnvironment _hostEnvironment;
@@ -15,6 +16,12 @@ public class WpasJsonSchemaValidator
     public WpasJsonSchemaValidator(IHostEnvironment hostEnvironment)
     {
         _hostEnvironment = hostEnvironment;
+
+        var schemaPath = Path.Combine(_hostEnvironment.ContentRootPath, WpasCreateReferralRequestJsonSchemaPath);
+        if (!File.Exists(schemaPath))
+        {
+            throw new InvalidOperationException($"WPAS JSON schema file not found at '{schemaPath}'.");
+        }
     }
 
     public EvaluationResults ValidateWpasCreateReferralRequest(WpasCreateReferralRequest wpasCreateReferralRequest)
@@ -33,6 +40,6 @@ public class WpasJsonSchemaValidator
                 () => JsonSchema.FromFile(path),
                 LazyThreadSafetyMode.ExecutionAndPublication)).Value;
 
-        return schema.Evaluate(jsonElement, new EvaluationOptions { OutputFormat = OutputFormat.List });
+        return schema.Evaluate(jsonElement, ListEvaluationOptions);
     }
 }
