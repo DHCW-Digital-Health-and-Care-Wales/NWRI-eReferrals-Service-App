@@ -14,5 +14,5 @@ public sealed class ProxyServerError : BaseFhirHttpError
 
     public override string Code => FhirHttpErrorCodes.ProxyServerError;
     public override string DiagnosticsMessage => $"Proxy error: {_errorMessage}";
-    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
+    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Exception;
 }

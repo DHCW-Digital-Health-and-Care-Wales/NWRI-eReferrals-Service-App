@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Exceptions;
-using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
 using NWRI.eReferralsService.API.Models.WPAS.Responses;
 
@@ -15,13 +14,11 @@ public sealed class WpasApiClient : IWpasApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly WpasApiConfig _wpasApiConfig;
-    private readonly ILogger<WpasApiClient> _logger;
 
     public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, ILogger<WpasApiClient> logger)
     {
         _httpClient = httpClient;
         _wpasApiConfig = wpasApiOptions.Value;
-        _logger = logger;
     }
 
     public async Task<WpasCreateReferralResponse> CreateReferralAsync(WpasCreateReferralRequest request, CancellationToken cancellationToken)
@@ -65,12 +62,12 @@ public sealed class WpasApiClient : IWpasApiClient
             }
         }
 
-        throw await GetNotSuccessfulApiCallExceptionAsync(response);
+        throw await GetNotSuccessfulApiCallExceptionAsync(response, cancellationToken);
     }
 
-    private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response)
+    private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         try
         {
