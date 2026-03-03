@@ -568,23 +568,18 @@ public class ReferralServiceTests
         var wpasApiClient = _fixture.Mock<IWpasApiClient>().Object;
         var fhirBundleProfileValidator = _fixture.Mock<IFhirBundleProfileValidator>().Object;
         var headerValidator = _fixture.Mock<IValidator<HeadersModel>>().Object;
+        var createBundleValidator = _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object;
+        var cancelBundleValidator = _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object;
         var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
         var wpasCreateReferralRequestMapper = _fixture.Create<WpasCreateReferralRequestMapper>();
         var wpasJsonSchemaValidator = SharedSchemaValidator.Value;
 
-        var serviceProvider = _fixture.Mock<IServiceProvider>();
-        serviceProvider
-            .Setup(x => x.GetService(typeof(IValidator<BundleCreateReferralModel>)))
-            .Returns(_fixture.Mock<IValidator<BundleCreateReferralModel>>().Object);
-        serviceProvider
-            .Setup(x => x.GetService(typeof(IValidator<BundleCancelReferralModel>)))
-            .Returns(_fixture.Mock<IValidator<BundleCancelReferralModel>>().Object);
-
         var referralValidationService = new ReferralBundleValidationService(
+            createBundleValidator,
+            cancelBundleValidator,
             fhirBundleProfileValidator,
-            eventLogger,
-            serviceProvider.Object
+            eventLogger
         );
 
         var referralWorkflowProcessor = new ReferralWorkflowProcessor(
