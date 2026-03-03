@@ -7,30 +7,30 @@ namespace NWRI.eReferralsService.API.Services;
 public class StaticFileCapabilityStatementService : ICapabilityStatementService
 {
     private const string ResourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
-    private readonly ConcurrentDictionary<string, string> _cache = new();
-    private readonly IFileProvider _files;
+    private readonly ConcurrentDictionary<string, string> _capabilityStatementResponseCache = new();
+    private readonly IFileProvider _fileProvider;
 
     public StaticFileCapabilityStatementService(IFileProvider files)
     {
-        _files = files;
+        _fileProvider = files;
     }
 
     public async Task<string> GetCapabilityStatementAsync(CancellationToken cancellationToken)
     {
-        if (_cache.TryGetValue(ResourcePath, out var cached))
+        if (_capabilityStatementResponseCache.TryGetValue(ResourcePath, out var cached))
         {
             return cached;
         }
 
         var result = await LoadResourceAsync(ResourcePath, cancellationToken);
-        _cache.TryAdd(ResourcePath, result);
+        _capabilityStatementResponseCache.TryAdd(ResourcePath, result);
 
         return result;
     }
 
     private async Task<string> LoadResourceAsync(string resourcePath, CancellationToken cancellationToken)
     {
-        var fileInfo = _files.GetFileInfo(resourcePath);
+        var fileInfo = _fileProvider.GetFileInfo(resourcePath);
 
         if (!fileInfo.Exists)
         {
