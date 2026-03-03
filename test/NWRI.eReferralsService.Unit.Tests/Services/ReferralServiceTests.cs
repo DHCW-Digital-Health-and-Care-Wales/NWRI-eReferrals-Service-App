@@ -37,7 +37,7 @@ public class ReferralServiceTests
         var hostEnvironment = new Mock<IHostEnvironment>();
         hostEnvironment
             .SetupGet(x => x.ContentRootPath)
-            .Returns(Path.Combine(GetRepoRootPath(), "test", "NWRI.eReferralsService.Unit.Tests", "TestData"));
+            .Returns(Path.Combine(GetRepoRootPath(), "src", "NWRI.eReferralsService.API"));
 
         return new WpasJsonSchemaValidator(hostEnvironment.Object);
     });
