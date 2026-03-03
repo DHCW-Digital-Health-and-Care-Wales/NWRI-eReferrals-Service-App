@@ -12,7 +12,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Services;
 
 public class StaticFileCapabilityStatementServiceTests
 {
-    private const string ExpectedResourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+    private const string ExpectedCapabilityStatementResponseJsonFilePath = "Resources/Fhir/metadata-capability-statement-response.json";
     private const string ValidJsonContent = """{"resourceType":"CapabilityStatement","status":"active"}""";
 
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
@@ -57,7 +57,7 @@ public class StaticFileCapabilityStatementServiceTests
 
         ex.Which.Message.Should().Contain("CapabilityStatement");
         ex.Which.Errors.Should().ContainSingle();
-        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedCapabilityStatementResponseJsonFilePath);
         ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain("File does not exist");
     }
 
@@ -69,7 +69,7 @@ public class StaticFileCapabilityStatementServiceTests
         fileInfoMock.Setup(f => f.Exists).Returns(true);
         fileInfoMock.Setup(f => f.CreateReadStream()).Throws(new IOException("disk read failure"));
 
-        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedCapabilityStatementResponseJsonFilePath)).Returns(fileInfoMock.Object);
 
         var sut = CreateSut();
 
@@ -80,7 +80,7 @@ public class StaticFileCapabilityStatementServiceTests
         var ex = await act.Should().ThrowAsync<CapabilityStatementUnavailableException>();
 
         ex.Which.Errors.Should().ContainSingle();
-        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedResourcePath);
+        ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain(ExpectedCapabilityStatementResponseJsonFilePath);
         ex.Which.Errors.Single().DiagnosticsMessage.Should().Contain("disk read failure");
     }
 
@@ -99,7 +99,7 @@ public class StaticFileCapabilityStatementServiceTests
         first.Should().Be(ValidJsonContent);
         second.Should().Be(ValidJsonContent);
 
-        _fileProviderMock.Verify(fp => fp.GetFileInfo(ExpectedResourcePath), Times.Once);
+        _fileProviderMock.Verify(fp => fp.GetFileInfo(ExpectedCapabilityStatementResponseJsonFilePath), Times.Once);
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public class StaticFileCapabilityStatementServiceTests
             return new MemoryStream(Encoding.UTF8.GetBytes(ValidJsonContent));
         });
 
-        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedCapabilityStatementResponseJsonFilePath)).Returns(fileInfoMock.Object);
 
         var sut = CreateSut();
         const int concurrentCalls = 10;
@@ -144,6 +144,6 @@ public class StaticFileCapabilityStatementServiceTests
                 .Returns(() => new MemoryStream(Encoding.UTF8.GetBytes(content)));
         }
 
-        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedResourcePath)).Returns(fileInfoMock.Object);
+        _fileProviderMock.Setup(fp => fp.GetFileInfo(ExpectedCapabilityStatementResponseJsonFilePath)).Returns(fileInfoMock.Object);
     }
 }

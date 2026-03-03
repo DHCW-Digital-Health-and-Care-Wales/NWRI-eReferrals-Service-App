@@ -9,13 +9,13 @@ public class CapabilityStatementUnavailableExceptionTests
     public void ShouldCreateWithNotFoundError()
     {
         // Arrange
-        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+        const string CapabilityStatementResponseJsonFilePath = "Resources/Fhir/metadata-capability-statement-response.json";
         const string cause = "File does not exist.";
         var expectedDiagnostics =
-            $"CapabilityStatement resource unavailable. ResourcePath='{resourcePath}'. Cause='{cause}'.";
+            $"CapabilityStatement resource unavailable. ResourcePath='{CapabilityStatementResponseJsonFilePath}'. Cause='{cause}'.";
 
         // Act
-        var exception = new CapabilityStatementUnavailableException(resourcePath, cause);
+        var exception = new CapabilityStatementUnavailableException(CapabilityStatementResponseJsonFilePath, cause);
 
         // Assert
         exception.Message.Should().Be(expectedDiagnostics);
@@ -27,13 +27,13 @@ public class CapabilityStatementUnavailableExceptionTests
     public void ShouldCreateWithLoadError()
     {
         // Arrange
-        const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
+        const string CapabilityStatementResponseJsonFilePath = "Resources/Fhir/metadata-capability-statement-response.json";
         const string cause = "disk read failure";
         var expectedDiagnostics =
-            $"CapabilityStatement resource unavailable. ResourcePath='{resourcePath}'. Cause='{cause}'.";
+            $"CapabilityStatement resource unavailable. ResourcePath='{CapabilityStatementResponseJsonFilePath}'. Cause='{cause}'.";
 
         // Act
-        var exception = new CapabilityStatementUnavailableException(resourcePath, cause);
+        var exception = new CapabilityStatementUnavailableException(CapabilityStatementResponseJsonFilePath, cause);
 
         // Assert
         exception.Message.Should().Be(expectedDiagnostics);
