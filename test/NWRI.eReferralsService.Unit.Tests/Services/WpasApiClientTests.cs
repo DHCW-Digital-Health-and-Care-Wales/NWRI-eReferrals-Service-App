@@ -55,8 +55,7 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
 
         // Act
         var result = await sut.CreateReferralAsync(request, CancellationToken.None);
@@ -86,8 +85,7 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
 
         // Act
         var result = await sut.CancelReferralAsync(requestBody, CancellationToken.None);
@@ -116,8 +114,7 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
 
         // Act
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
@@ -145,8 +142,7 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
 
         // Act
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
@@ -171,8 +167,7 @@ public class WpasApiClientTests
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
 
-        var logger = Mock.Of<ILogger<WpasApiClient>>();
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object, logger);
+        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
 
         // Act
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);

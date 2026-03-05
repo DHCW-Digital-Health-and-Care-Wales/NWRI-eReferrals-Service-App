@@ -39,7 +39,8 @@ public static class ServiceCollectionExtensions
 
             var clientId = configuration.GetRequiredSection(ManagedIdentityConfig.SectionName)
                 .GetValue<string>(nameof(ManagedIdentityConfig.ClientId));
-            config.SetAzureTokenCredential(new ManagedIdentityCredential(clientId));
+            var managedIdentityId = ManagedIdentityId.FromUserAssignedClientId(clientId);
+            config.SetAzureTokenCredential(new ManagedIdentityCredential(managedIdentityId));
         });
     }
 
