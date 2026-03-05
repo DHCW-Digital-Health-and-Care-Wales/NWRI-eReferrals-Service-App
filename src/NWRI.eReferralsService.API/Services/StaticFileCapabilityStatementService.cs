@@ -10,9 +10,9 @@ public class StaticFileCapabilityStatementService : ICapabilityStatementService
     private readonly ConcurrentDictionary<string, string> _capabilityStatementResponseCache = new();
     private readonly IFileProvider _fileProvider;
 
-    public StaticFileCapabilityStatementService(IFileProvider files)
+    public StaticFileCapabilityStatementService(IFileProvider fileProvider)
     {
-        _fileProvider = files;
+        _fileProvider = fileProvider;
     }
 
     public async Task<string> GetCapabilityStatementAsync(CancellationToken cancellationToken)
