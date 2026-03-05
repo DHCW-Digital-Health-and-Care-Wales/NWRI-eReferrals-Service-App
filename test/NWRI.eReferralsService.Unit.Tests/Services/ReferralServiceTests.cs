@@ -7,6 +7,7 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
@@ -27,23 +28,16 @@ using Task = System.Threading.Tasks.Task;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
 
-public class ReferralServiceTests
+public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaValidatorFixture>
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
+    private readonly WpasJsonSchemaValidator _schemaValidator;
 
-    private static readonly Lazy<WpasJsonSchemaValidator> SharedSchemaValidator = new(() =>
+    public ReferralServiceTests(SchemaValidatorFixture schemaValidatorFixture)
     {
-        var hostEnvironment = new Mock<IHostEnvironment>();
-        hostEnvironment
-            .SetupGet(x => x.ContentRootPath)
-            .Returns(Path.Combine(GetRepoRootPath(), "src", "NWRI.eReferralsService.API"));
+        _schemaValidator = schemaValidatorFixture.Sut;
 
-        return new WpasJsonSchemaValidator(hostEnvironment.Object);
-    });
-
-    public ReferralServiceTests()
-    {
         _fixture.Register(() => new Bundle
         {
             Id = _fixture.Create<string>(),
@@ -78,11 +72,7 @@ public class ReferralServiceTests
 
         _fixture.Register(() => new WpasCreateReferralRequestMapper());
 
-        _fixture.Mock<IHostEnvironment>()
-            .SetupGet(x => x.ContentRootPath)
-            .Returns(Path.Combine(GetRepoRootPath(), "test", "NWRI.eReferralsService.Unit.Tests", "TestData"));
-
-        _fixture.Register(() => SharedSchemaValidator.Value);
+        _fixture.Register(() => _schemaValidator);
     }
 
     private static string GetRepoRootPath()
@@ -573,7 +563,7 @@ public class ReferralServiceTests
         var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
         var wpasCreateReferralRequestMapper = _fixture.Create<WpasCreateReferralRequestMapper>();
-        var wpasJsonSchemaValidator = SharedSchemaValidator.Value;
+        var wpasJsonSchemaValidator = _schemaValidator;
 
         var referralValidationService = new ReferralBundleValidationService(
             createBundleValidator,
@@ -598,6 +588,26 @@ public class ReferralServiceTests
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object,
             referralWorkflowProcessor
         );
+    }
+
+    public sealed class SchemaValidatorFixture
+    {
+        public WpasJsonSchemaValidator Sut { get; }
+
+        public SchemaValidatorFixture()
+        {
+            var apiProjectPath = Path.Combine(GetRepoRootPath(), "src", "NWRI.eReferralsService.API");
+            var hostEnvironment = new TestHostEnvironment(apiProjectPath);
+            Sut = new WpasJsonSchemaValidator(hostEnvironment);
+        }
+
+        private sealed class TestHostEnvironment(string contentRootPath) : IHostEnvironment
+        {
+            public string EnvironmentName { get; set; } = Environments.Development;
+            public string ApplicationName { get; set; } = "UnitTests";
+            public string ContentRootPath { get; set; } = contentRootPath;
+            public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+        }
     }
 
     private static Bundle CreateMessageBundle(string reasonCode, RequestStatus? serviceRequestStatus = RequestStatus.Active)
