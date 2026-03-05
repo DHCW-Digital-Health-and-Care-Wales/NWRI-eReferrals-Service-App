@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
@@ -22,9 +23,12 @@ public class InvalidHeaderErrorTests
         var error = new InvalidHeaderError(validationMessage);
 
         //Assert
-        error.Code.Should().Be(FhirHttpErrorCodes.SenderBadRequest);
-        error.IssueType.Should().Be(OperationOutcome.IssueType.Invalid);
-        error.DiagnosticsMessage.Should().Be(validationMessage);
-        error.Display.Should().Be(expectedDisplayMessage);
+        using (new AssertionScope())
+        {
+            error.Code.Should().Be(FhirHttpErrorCodes.SenderBadRequest);
+            error.IssueType.Should().Be(OperationOutcome.IssueType.Invalid);
+            error.DiagnosticsMessage.Should().Be(validationMessage);
+            error.Display.Should().Be(expectedDisplayMessage);
+        }
     }
 }

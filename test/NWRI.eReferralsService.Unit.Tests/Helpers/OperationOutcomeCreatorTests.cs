@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
@@ -32,10 +33,13 @@ public class OperationOutcomeCreatorTests
         var result = OperationOutcomeCreator.CreateOperationOutcome(errors);
 
         //Assert
-        result.Id.Should().NotBeEmpty();
-        result.Meta.Should().NotBeNull();
-        result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
-        result.Issue.Should().BeEquivalentTo(expectedIssues);
+        using (new AssertionScope())
+        {
+            result.Id.Should().NotBeEmpty();
+            result.Meta.Should().NotBeNull();
+            result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
+            result.Issue.Should().BeEquivalentTo(expectedIssues);
+        }
     }
 
     [Fact]
@@ -59,9 +63,12 @@ public class OperationOutcomeCreatorTests
         var result = OperationOutcomeCreator.CreateOperationOutcome(exception);
 
         //Assert
-        result.Id.Should().NotBeEmpty();
-        result.Meta.Should().NotBeNull();
-        result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
-        result.Issue.Should().BeEquivalentTo(expectedIssues);
+        using (new AssertionScope())
+        {
+            result.Id.Should().NotBeEmpty();
+            result.Meta.Should().NotBeNull();
+            result.Meta.Profile.Should().BeEquivalentTo(new List<string> { FhirConstants.OperationOutcomeProfile });
+            result.Issue.Should().BeEquivalentTo(expectedIssues);
+        }
     }
 }
