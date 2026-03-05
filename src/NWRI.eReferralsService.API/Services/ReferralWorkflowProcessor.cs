@@ -87,7 +87,7 @@ public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
         catch (Exception ex)
         {
             _eventLogger.LogError(new EventCatalogue.MapFhirToWpasFailed(), ex);
-            throw new BundleValidationException([new ValidationFailure("", "Mapping FHIR Bundle to WPAS payload failed.")]);
+            throw new BundleValidationException([new ValidationFailure("WpasPayload", "Mapping FHIR Bundle to WPAS payload failed.")]);
         }
     }
 
