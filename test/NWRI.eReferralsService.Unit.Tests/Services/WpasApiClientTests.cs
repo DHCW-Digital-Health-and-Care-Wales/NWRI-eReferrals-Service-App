@@ -13,6 +13,7 @@ using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
+using NWRI.eReferralsService.API.Models.WPAS.Responses;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 using NWRI.eReferralsService.Unit.Tests.TestFixtures;
@@ -44,7 +45,16 @@ public class WpasApiClientTests
         var request = WpasCreateReferralRequestBuilder.CreateValid();
         var expectedRequestJson = JsonSerializer.Serialize(request);
         var expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
-        var expectedResponseJson = $@"{{""System"":""Welsh PAS"",""AssigningAuthority"":""some-authority"",""OrganisationCode"":""A1234"",""OrganisationName"":""Some Organisation"",""ReferralCreationTimestamp"":""2026-02-26T10:00:00Z"",""ReferralId"":""{expectedReferralId}""}}";
+        var expectedResponse = new WpasCreateReferralResponse
+        {
+            System = "Welsh PAS",
+            AssigningAuthority = "some-authority",
+            OrganisationCode = "A1234",
+            OrganisationName = "Some Organisation",
+            ReferralCreationTimestamp = "2026-02-26T10:00:00Z",
+            ReferralId = expectedReferralId
+        };
+        var expectedResponseJson = JsonSerializer.Serialize(expectedResponse);
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
