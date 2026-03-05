@@ -12,8 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Hl7.Fhir.R4" Version="6.0.2" />
-    <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="6.0.2" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="6.1.0" />
+    <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="6.1.0" />
     <PackageReference Include="Firely.Fhir.Packages" Version="5.0.1" />
     <PackageReference Include="Firely.Fhir.Validation.R4" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="[8.0.24,9.0.0)" />
