@@ -8,7 +8,7 @@ public class CapabilityStatementUnavailableExceptionTests
     [Theory]
     [InlineData("File does not exist.")]
     [InlineData("disk read failure")]
-    public void ShouldCreateWithExpectedDiagnostics(string cause)
+    public void ShouldCreateWithGivenCause(string cause)
     {
         // Arrange
         const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
