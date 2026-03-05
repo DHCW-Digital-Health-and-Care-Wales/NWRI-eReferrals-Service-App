@@ -15,7 +15,7 @@ public sealed class WpasApiClient : IWpasApiClient
     private readonly HttpClient _httpClient;
     private readonly WpasApiConfig _wpasApiConfig;
 
-    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions, ILogger<WpasApiClient> logger)
+    public WpasApiClient(HttpClient httpClient, IOptions<WpasApiConfig> wpasApiOptions)
     {
         _httpClient = httpClient;
         _wpasApiConfig = wpasApiOptions.Value;

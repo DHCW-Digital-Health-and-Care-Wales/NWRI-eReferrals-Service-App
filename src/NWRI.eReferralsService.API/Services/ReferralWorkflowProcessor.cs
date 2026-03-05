@@ -99,7 +99,7 @@ public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
             var errors = results.Details?
                 .Where(d => !d.IsValid && d.Errors != null)
                 .Select(d => new { d.InstanceLocation, d.Errors });
-            var details = JsonSerializer.Serialize(new { IsValid = false, Errors = errors }, _jsonSerializerOptions);
+            var details = JsonSerializer.Serialize(new { IsValid = false, Errors = errors });
             throw new WpasSchemaValidationException(details);
         }
     }
