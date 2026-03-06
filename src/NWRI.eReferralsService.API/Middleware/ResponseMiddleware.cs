@@ -134,6 +134,14 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(proxyNotImplementedException);
                 break;
 
+            case CapabilityStatementUnavailableException capabilityStatementUnavailableException:
+                _logger.CapabilityStatementUnavailable(capabilityStatementUnavailableException);
+                _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), capabilityStatementUnavailableException);
+
+                statusCode = HttpStatusCode.InternalServerError;
+                body = OperationOutcomeCreator.CreateOperationOutcome(capabilityStatementUnavailableException);
+                break;
+
             default:
                 _logger.UnexpectedError(exception);
                 _eventLogger.LogError(new EventCatalogue.InternalHandlerError(), exception);
