@@ -40,6 +40,7 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<ProcessMessageOperationFilter>();
     options.OperationFilter<ReferralsOperationFilter>();
     options.OperationFilter<BookingsOperationFilter>();
+    options.OperationFilter<MetadataOperationFilter>();
 });
 
 builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), builder.Configuration);
