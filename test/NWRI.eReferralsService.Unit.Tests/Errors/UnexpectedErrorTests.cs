@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
@@ -23,9 +24,12 @@ public class UnexpectedErrorTests
         var error = new UnexpectedError(exceptionMessage);
 
         //Assert
-        error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
-        error.IssueType.Should().Be(OperationOutcome.IssueType.Transient);
-        error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
-        error.Display.Should().Be(expectedDisplayMessage);
+        using (new AssertionScope())
+        {
+            error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
+            error.IssueType.Should().Be(OperationOutcome.IssueType.Transient);
+            error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
+            error.Display.Should().Be(expectedDisplayMessage);
+        }
     }
 }

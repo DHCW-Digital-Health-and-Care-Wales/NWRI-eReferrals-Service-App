@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
@@ -26,14 +27,17 @@ public class HeadersModelTests
         var model = HeadersModel.FromHeaderDictionary(headers);
 
         //Assert
-        model.TargetIdentifier.Should().NotBeNull();
-        model.EndUserOrganisation.Should().NotBeNull();
-        model.RequestingSoftware.Should().NotBeNull();
-        model.RequestId.Should().NotBeNull();
-        model.RequestingPractitioner.Should().NotBeNull();
-        model.CorrelationId.Should().NotBeNull();
-        model.UseContext.Should().NotBeNull();
-        model.Accept.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            model.TargetIdentifier.Should().NotBeNull();
+            model.EndUserOrganisation.Should().NotBeNull();
+            model.RequestingSoftware.Should().NotBeNull();
+            model.RequestId.Should().NotBeNull();
+            model.RequestingPractitioner.Should().NotBeNull();
+            model.CorrelationId.Should().NotBeNull();
+            model.UseContext.Should().NotBeNull();
+            model.Accept.Should().NotBeNull();
+        }
     }
 
     [Fact]
@@ -46,13 +50,16 @@ public class HeadersModelTests
         var model = HeadersModel.FromHeaderDictionary(headers);
 
         //Assert
-        model.TargetIdentifier.Should().BeNull();
-        model.EndUserOrganisation.Should().BeNull();
-        model.RequestingSoftware.Should().BeNull();
-        model.RequestId.Should().BeNull();
-        model.RequestingPractitioner.Should().BeNull();
-        model.CorrelationId.Should().BeNull();
-        model.UseContext.Should().BeNull();
-        model.Accept.Should().BeNull();
+        using (new AssertionScope())
+        {
+            model.TargetIdentifier.Should().BeNull();
+            model.EndUserOrganisation.Should().BeNull();
+            model.RequestingSoftware.Should().BeNull();
+            model.RequestId.Should().BeNull();
+            model.RequestingPractitioner.Should().BeNull();
+            model.CorrelationId.Should().BeNull();
+            model.UseContext.Should().BeNull();
+            model.Accept.Should().BeNull();
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Hl7.Fhir.Model;
 using Microsoft.Extensions.Logging.Abstractions;
 using NWRI.eReferralsService.API.Extensions;
@@ -84,10 +85,13 @@ public class FhirBase64DecoderTests
         var success = _decoder.TryDecode<Identifier>(base64, out var result);
 
         //Assert
-        success.Should().BeTrue();
-        result.Should().NotBeNull();
-        result.System.Should().Be(expected.System);
-        result.Value.Should().Be(expected.Value);
+        using (new AssertionScope())
+        {
+            success.Should().BeTrue();
+            result.Should().NotBeNull();
+            result.System.Should().Be(expected.System);
+            result.Value.Should().Be(expected.Value);
+        }
     }
 
     [Fact]
@@ -101,10 +105,13 @@ public class FhirBase64DecoderTests
         var success = _decoder.TryDecode<Identifier>(base64, out var result);
 
         //Assert
-        success.Should().BeTrue();
-        result.Should().NotBeNull();
-        result.System.Should().Be(expected.System);
-        result.Value.Should().Be(expected.Value);
+        using (new AssertionScope())
+        {
+            success.Should().BeTrue();
+            result.Should().NotBeNull();
+            result.System.Should().Be(expected.System);
+            result.Value.Should().Be(expected.Value);
+        }
     }
 
     private string ToBase64Json<T>(T value)

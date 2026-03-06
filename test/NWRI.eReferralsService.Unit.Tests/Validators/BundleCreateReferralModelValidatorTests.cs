@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
@@ -130,7 +131,61 @@ public class BundleCreateReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenPatientBirthDateMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Patient!.BirthDate = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.BirthDate is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenConditionsMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Conditions = [];
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "The required FHIR bundle entity 'Condition' is missing");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenReceivingPerformingOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{ReceivingPerformingOrganisationName}' is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenSenderOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{SenderOrganisationName}' is required");
     }
 
     [Fact]

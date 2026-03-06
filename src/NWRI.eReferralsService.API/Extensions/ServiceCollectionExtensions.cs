@@ -10,6 +10,7 @@ using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
+using NWRI.eReferralsService.API.Mappers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Validators;
@@ -39,7 +40,8 @@ public static class ServiceCollectionExtensions
 
             var clientId = configuration.GetRequiredSection(ManagedIdentityConfig.SectionName)
                 .GetValue<string>(nameof(ManagedIdentityConfig.ClientId));
-            config.SetAzureTokenCredential(new ManagedIdentityCredential(clientId));
+            var managedIdentityId = ManagedIdentityId.FromUserAssignedClientId(clientId);
+            config.SetAzureTokenCredential(new ManagedIdentityCredential(managedIdentityId));
         });
     }
 
@@ -48,6 +50,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
         services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
+        services.AddSingleton<WpasJsonSchemaValidator>();
+    }
+
+    public static void AddMappers(this IServiceCollection services)
+    {
+        services.AddSingleton<WpasCreateReferralRequestMapper>();
     }
 
     public static void AddHttpClients(this IServiceCollection services)
@@ -61,6 +70,8 @@ public static class ServiceCollectionExtensions
 
     public static void AddServices(this IServiceCollection services)
     {
+        services.AddScoped<ReferralBundleValidationService>();
+        services.AddScoped<IReferralWorkflowProcessor, ReferralWorkflowProcessor>();
         services.AddSingleton<IFileProvider>(sp => sp.GetRequiredService<IWebHostEnvironment>().ContentRootFileProvider);
         services.AddScoped<IReferralService, ReferralService>();
         services.AddSingleton<ICapabilityStatementService, StaticFileCapabilityStatementService>();
