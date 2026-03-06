@@ -19,7 +19,7 @@ public class CapabilityStatementErrorTests
         var cause = _fixture.Create<string>();
         var expectedDiagnostics =
             $"CapabilityStatement resource unavailable. ResourcePath='{resourcePath}'. Cause='{cause}'.";
-        const string expectedDisplayMessage = "500: The Proxy encountered an internal error while processing the request.";
+        const string expectedDisplayMessage = "500: The Proxy has encountered an error processing the request.";
 
         // Act
         var error = new CapabilityStatementError(resourcePath, cause);
