@@ -35,6 +35,7 @@ public class WpasJsonSchemaValidatorTests : IClassFixture<WpasJsonSchemaValidato
         result.IsValid.Should().BeTrue();
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class SchemaValidatorFixture
     {
         public WpasJsonSchemaValidator Sut { get; }

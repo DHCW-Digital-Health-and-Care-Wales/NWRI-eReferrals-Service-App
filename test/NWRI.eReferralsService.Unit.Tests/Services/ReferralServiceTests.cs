@@ -576,7 +576,6 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             referralValidationService,
             wpasCreateReferralRequestMapper,
             wpasJsonSchemaValidator,
-            jsonSerializerOptions,
             wpasApiClient,
             eventLogger
         );
@@ -590,6 +589,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         );
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class SchemaValidatorFixture
     {
         public WpasJsonSchemaValidator Sut { get; }

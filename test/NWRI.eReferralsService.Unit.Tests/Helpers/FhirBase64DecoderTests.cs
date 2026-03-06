@@ -89,8 +89,8 @@ public class FhirBase64DecoderTests
         {
             success.Should().BeTrue();
             result.Should().NotBeNull();
-            result?.System.Should().Be(expected.System);
-            result?.Value.Should().Be(expected.Value);
+            result.System.Should().Be(expected.System);
+            result.Value.Should().Be(expected.Value);
         }
     }
 
@@ -109,8 +109,8 @@ public class FhirBase64DecoderTests
         {
             success.Should().BeTrue();
             result.Should().NotBeNull();
-            result?.System.Should().Be(expected.System);
-            result?.Value.Should().Be(expected.Value);
+            result.System.Should().Be(expected.System);
+            result.Value.Should().Be(expected.Value);
         }
     }
 

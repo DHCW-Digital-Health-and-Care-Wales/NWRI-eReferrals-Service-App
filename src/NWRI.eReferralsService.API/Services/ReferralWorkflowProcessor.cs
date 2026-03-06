@@ -18,7 +18,6 @@ public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
     private readonly ReferralBundleValidationService _referralBundleValidationService;
     private readonly WpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
     private readonly WpasJsonSchemaValidator _wpasJsonSchemaValidator;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IWpasApiClient _wpasApiClient;
     private readonly IEventLogger _eventLogger;
 
@@ -26,14 +25,12 @@ public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
         ReferralBundleValidationService referralBundleValidationService,
         WpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
         WpasJsonSchemaValidator wpasJsonSchemaValidator,
-        JsonSerializerOptions jsonSerializerOptions,
         IWpasApiClient wpasApiClient,
         IEventLogger eventLogger)
     {
         _referralBundleValidationService = referralBundleValidationService;
         _wpasCreateReferralRequestMapper = wpasCreateReferralRequestMapper;
         _wpasJsonSchemaValidator = wpasJsonSchemaValidator;
-        _jsonSerializerOptions = jsonSerializerOptions;
         _wpasApiClient = wpasApiClient;
         _eventLogger = eventLogger;
     }
