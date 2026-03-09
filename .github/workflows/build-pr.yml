@@ -30,7 +30,7 @@ jobs:
         run: dotnet test --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --logger trx --collect "XPlat Code Coverage" --settings coverlet.runsettings
 
       - name: "Coverage Report Generator"
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.1
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.3
         with:
           reports: "**/*.cobertura.xml"
           targetdir: "${{ github.workspace }}"
