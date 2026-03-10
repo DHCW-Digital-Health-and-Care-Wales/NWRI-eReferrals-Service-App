@@ -68,8 +68,8 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
-        // TODO: To be implemented as part of story 565927, for now returning empty string to return 200 OK with empty body to the sender system
-        return string.Empty;
+        // TODO: To be implemented as part of story 565927, for now returning exact request body to return 200 OK to the sender system
+        return requestBody;
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
