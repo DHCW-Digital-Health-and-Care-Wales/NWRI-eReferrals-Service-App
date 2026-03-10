@@ -68,7 +68,7 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
-        // TODO: To be implemented as part of story 565927, for now returning exact request body to return 200 OK to the sender system
+        // TODO: To be implemented as part of story 565927. For now, we echo the exact request body to the sender
         return requestBody;
     }
 

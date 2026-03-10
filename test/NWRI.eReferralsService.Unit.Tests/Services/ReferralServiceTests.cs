@@ -185,7 +185,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
-        result.Should().NotBeEmpty();
+        result.Should().Be(bundleJson);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -411,7 +411,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
-        result.Should().NotBeEmpty();
+        result.Should().Be(bundleJson);
     }
 
     [Fact]
@@ -443,7 +443,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeEmpty();
+        result.Should().Be(bundleJson);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -476,7 +476,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeEmpty();
+        result.Should().Be(bundleJson);
     }
 
     [Fact]
