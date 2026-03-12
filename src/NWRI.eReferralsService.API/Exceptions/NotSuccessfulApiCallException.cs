@@ -30,7 +30,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
         var errors = GetErrors(problemDetails).ToList();
         Errors = errors;
 
-        ExceptionMessage = $"API cal returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
+        ExceptionMessage = $"API call returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
     }
 
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
@@ -48,7 +48,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
                 wpasMessage)
         ];
 
-        ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
+        ExceptionMessage = $"API call returned: {(int)statusCode}. Raw content: {rawContent}";
     }
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
@@ -79,7 +79,12 @@ public class NotSuccessfulApiCallException : BaseFhirException
 
         if (problemDetails.Detail is null)
         {
-            return [new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverUnavailable, "Unexpected error")];
+            return
+            [
+                new NotSuccessfulApiResponseError(
+                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                    "Unexpected error")
+            ];
         }
 
         return
