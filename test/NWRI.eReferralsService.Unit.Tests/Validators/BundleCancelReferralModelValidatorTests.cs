@@ -107,26 +107,26 @@ public class BundleCancelReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-
-        // Remove NHS number identifier
-        model.Patient!.Identifier = model.Patient.Identifier
-            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        model.Patient!.Identifier =
+        [
+            new Identifier
+            {
+                System = "https://example.org/local-patient-id",
+                Value = "ABC123"
+            }
+        ];
 
         var result = _sut.TestValidate(model);
-
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
     [Fact]
     public void ShouldContainErrorWhenServiceRequestOccurrencePeriodMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-
         model.ServiceRequest!.Occurrence = null;
 
         var result = _sut.TestValidate(model);
-
         result.Errors.Should().Contain(e =>
             e.ErrorMessage == ValidationMessages.MissingEntityField<ServiceRequest>("occurrencePeriod"));
     }
@@ -135,12 +135,54 @@ public class BundleCancelReferralModelValidatorTests
     public void ShouldContainErrorWhenOrganizationsMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-
         model.Organizations = [];
 
         var result = _sut.TestValidate(model);
-
         result.ShouldHaveValidationErrorFor(x => x.Organizations)
             .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Organization)));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Identifier = null;
+
+        var result = _sut.TestValidate(model);
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>(nameof(Organization.Identifier)));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenMessageHeaderSenderMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.MessageHeader!.Sender = null;
+
+        var result = _sut.TestValidate(model);
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<MessageHeader>(nameof(MessageHeader.Sender)));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenServiceRequestMetaMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.ServiceRequest!.Meta = null;
+
+        var result = _sut.TestValidate(model);
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<ServiceRequest>(nameof(ServiceRequest.Meta)));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenPatientIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Patient!.Identifier = [];
+
+        var result = _sut.TestValidate(model);
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Patient>(nameof(Patient.Identifier)));
     }
 }
