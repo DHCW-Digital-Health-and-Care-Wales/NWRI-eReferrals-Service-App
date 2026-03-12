@@ -182,10 +182,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         //Assert
-        ExtractServiceRequestId(result).Should().Be(expectedResponse.ReferralId);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -409,10 +411,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         //Assert
-        ExtractServiceRequestId(result).Should().Be(expectedResponse.ReferralId);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
     }
 
     [Fact]
@@ -441,10 +445,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         // Assert
-        ExtractServiceRequestId(result).Should().Be(expectedResponse.ReferralId);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -474,10 +480,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         // Assert
-        ExtractServiceRequestId(result).Should().Be(expectedResponse.ReferralId);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
     }
 
     [Fact]
@@ -588,12 +596,6 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object,
             referralWorkflowProcessor
         );
-    }
-
-    private string? ExtractServiceRequestId(string bundleJson)
-    {
-        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, _jsonSerializerOptions)!;
-        return bundle.ResourceByType<ServiceRequest>()?.Id;
     }
 
     // ReSharper disable once ClassNeverInstantiated.Global
