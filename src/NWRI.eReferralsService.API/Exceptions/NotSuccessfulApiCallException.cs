@@ -11,14 +11,6 @@ public class NotSuccessfulApiCallException : BaseFhirException
     private const string ValidationErrorsKey = "validationErrors";
     private string ExceptionMessage { get; }
 
-    private readonly Dictionary<HttpStatusCode, string> _fhirErrorCodeDictionary = new()
-    {
-        { HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest },
-        { HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests },
-        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity },
-        { HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound }
-    };
-
     public HttpStatusCode StatusCode { get; init; }
     public override IEnumerable<BaseFhirHttpError> Errors { get; }
     public override string Message => ExceptionMessage;
@@ -44,7 +36,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
         Errors =
         [
             new NotSuccessfulApiResponseError(
-                _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                GetFhirErrorCode(StatusCode),
                 wpasMessage)
         ];
 
@@ -61,7 +53,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
                 var errorList = JsonSerializer.Deserialize<List<string>>(validationErrorsJson);
                 if (errorList != null)
                 {
-                    return errorList.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
+                    return errorList.Select(e => new NotSuccessfulApiResponseError(GetFhirErrorCode(StatusCode), e));
                 }
             }
         }
@@ -72,7 +64,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
             return
             [
                 new NotSuccessfulApiResponseError(
-                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                    GetFhirErrorCode(StatusCode),
                     string.Join(";", errorParts))
             ];
         }
@@ -82,7 +74,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
             return
             [
                 new NotSuccessfulApiResponseError(
-                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                    GetFhirErrorCode(StatusCode),
                     "Unexpected error")
             ];
         }
@@ -90,7 +82,14 @@ public class NotSuccessfulApiCallException : BaseFhirException
         return
         [
             new NotSuccessfulApiResponseError(
-                _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable), problemDetails.Detail)
+                GetFhirErrorCode(StatusCode), problemDetails.Detail)
         ];
+    }
+
+    private static string GetFhirErrorCode(HttpStatusCode statusCode)
+    {
+        return statusCode == HttpStatusCode.InternalServerError
+            ? FhirHttpErrorCodes.ReceiverServerError
+            : FhirHttpErrorCodes.ReceiverUnprocessableEntity;
     }
 }

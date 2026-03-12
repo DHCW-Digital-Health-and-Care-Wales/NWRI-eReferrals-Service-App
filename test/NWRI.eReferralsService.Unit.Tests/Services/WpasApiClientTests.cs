@@ -135,9 +135,9 @@ public class WpasApiClientTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
-    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
+    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
     public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode, string errorCode)
     {
         // Arrange
