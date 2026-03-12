@@ -9,6 +9,7 @@ public static class FhirHttpErrorHelper
         { FhirHttpErrorCodes.SenderBadRequest, "400: The API was unable to process the request." },
         { FhirHttpErrorCodes.ReceiverBadRequest, "400: The Receiver was unable to process the request." },
         { FhirHttpErrorCodes.ReceiverNotFound, "404: The Receiver was unable to find the specified resource." },
+        { FhirHttpErrorCodes.ReceiverUnprocessableEntity, "422: The Receiver was unable to process the request." },
         { FhirHttpErrorCodes.TooManyRequests, "429: Too many requests have been made by this source in a given amount of time." },
         { FhirHttpErrorCodes.ProxyServerError, "500: The Proxy has encountered an error processing the request." },
         { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." },

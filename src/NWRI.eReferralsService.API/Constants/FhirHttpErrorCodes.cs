@@ -6,6 +6,7 @@ public static class FhirHttpErrorCodes
     public const string ReceiverBadRequest = "REC_BAD_REQUEST";
     public const string ReceiverServerError = "REC_SERVER_ERROR";
     public const string ReceiverUnavailable = "REC_UNAVAILABLE";
+    public const string ReceiverUnprocessableEntity = "REC_UNPROCESSABLE_ENTITY";
     public const string TooManyRequests = "TOO_MANY_REQUESTS";
     public const string ReceiverNotFound = "REC_NOT_FOUND";
     public const string ProxyNotImplemented = "PROXY_NOT_IMPLEMENTED";

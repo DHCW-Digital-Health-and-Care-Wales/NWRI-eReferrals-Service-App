@@ -48,7 +48,7 @@ public class ReferralsControllerTests
     }
 
     [Fact]
-    public async Task ProcessMessageShouldReturn200()
+    public async Task ProcessMessageShouldReturn201()
     {
         //Arrange
         var body = _fixture.Create<string>();
@@ -66,7 +66,7 @@ public class ReferralsControllerTests
 
         //Assert
         var contentResult = result.Should().BeOfType<ContentResult>().Subject;
-        contentResult.StatusCode.Should().Be(200);
+        contentResult.StatusCode.Should().Be(StatusCodes.Status201Created);
         contentResult.Content.Should().Be(outputBundleJson);
         contentResult.ContentType.Should().Be(FhirConstants.FhirMediaType);
     }

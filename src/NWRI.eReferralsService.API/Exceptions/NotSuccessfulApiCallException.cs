@@ -15,7 +15,7 @@ public class NotSuccessfulApiCallException : BaseFhirException
     {
         { HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest },
         { HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests },
-        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable },
+        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity },
         { HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound }
     };
 
@@ -36,7 +36,18 @@ public class NotSuccessfulApiCallException : BaseFhirException
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
     {
         StatusCode = statusCode;
-        Errors = [new UnexpectedError("WPAS API call failed.")];
+
+        var wpasMessage = string.IsNullOrWhiteSpace(rawContent)
+            ? "WPAS API call failed."
+            : rawContent;
+
+        Errors =
+        [
+            new NotSuccessfulApiResponseError(
+                _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                wpasMessage)
+        ];
+
         ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
     }
 

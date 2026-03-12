@@ -1,0 +1,25 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "b907e1e9-f97f-40e0-b139-9fc25824104f",
+  "meta": {
+    "profile": [
+      "https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome"
+    ]
+  },
+  "issue": [
+    {
+      "severity": "error",
+      "code": "transient",
+      "details": {
+        "coding": [
+          {
+            "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
+            "code": "REC_UNPROCESSABLE_ENTITY",
+            "display": "422: The Receiver was unable to process the request."
+          }
+        ]
+      },
+      "diagnostics": "Receiver error. The receiver could not process the request payload."
+    }
+  ]
+}

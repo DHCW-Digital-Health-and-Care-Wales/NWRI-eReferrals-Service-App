@@ -42,7 +42,7 @@ public class NotSuccessfulApiCallExceptionTests
 
     [Theory]
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension(HttpStatusCode statusCode, string errorCode)
@@ -99,7 +99,7 @@ public class NotSuccessfulApiCallExceptionTests
 
     [Theory]
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRegularError(HttpStatusCode statusCode, string errorCode)
@@ -124,11 +124,13 @@ public class NotSuccessfulApiCallExceptionTests
             .Which.Code.Should().Be(errorCode));
     }
 
-    [Fact]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRawContent()
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
+    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRawContent(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
-        var statusCode = _fixture.Create<HttpStatusCode>();
         var rawContent = _fixture.Create<string>();
 
         var expectedMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
@@ -139,6 +141,11 @@ public class NotSuccessfulApiCallExceptionTests
         //Assert
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
-        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+        exception.Errors.Should().AllSatisfy(e =>
+        {
+            e.Should().BeOfType<NotSuccessfulApiResponseError>();
+            e.Code.Should().Be(errorCode);
+            e.DiagnosticsMessage.Should().Contain(rawContent);
+        });
     }
 }
