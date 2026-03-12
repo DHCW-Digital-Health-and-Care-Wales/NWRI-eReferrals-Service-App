@@ -120,17 +120,30 @@ public class BundleCreateReferralModelValidatorTests
     }
 
     [Fact]
+    public void ShouldContainErrorWhenPatientIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        model.Patient!.Identifier = [];
+
+        var result = _sut.TestValidate(model);
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Patient>(nameof(Patient.Identifier)));
+    }
+
+    [Fact]
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
-        // Remove NHS number identifier
-        model.Patient!.Identifier = model.Patient.Identifier
-            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        model.Patient!.Identifier =
+        [
+            new Identifier
+            {
+                System = "https://example.org/local-patient-id",
+                Value = "ABC123"
+            }
+        ];
 
         var result = _sut.TestValidate(model);
-
         result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
