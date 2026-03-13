@@ -206,3 +206,37 @@ Route parameter **id** should be a valid GUID.
   - 429 - Too many requests [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
   - 503 - WPAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+
+## Deploy Docker in Local Environment
+
+### Prerequisites
+- Docker and Docker Compose installed and running
+- WireMock configured and exposed locally (required for WPAS API mock)
+
+> **Note**: If targeting a real local WPAS API instance, update the `BaseUrl` in `docker-compose.yml` accordingly before starting.
+
+### Steps
+
+**1. Navigate to the source folder**
+```bash
+cd src/NWRI.eReferralsService.API
+```
+
+**2. Build and start the container**
+```bash
+docker compose -p nwri-ereferrals-service up --build -d
+```
+
+**3. Access the API**
+
+Open your browser and navigate to:
+```
+http://localhost:8080/swagger/index.html
+```
+
+**4. Stop the container**
+```bash
+docker compose -p nwri-ereferrals-service down
+```
+
+> **After code changes**: Re-run the `up --build` command (step 2) to rebuild and restart the container with the latest changes.
