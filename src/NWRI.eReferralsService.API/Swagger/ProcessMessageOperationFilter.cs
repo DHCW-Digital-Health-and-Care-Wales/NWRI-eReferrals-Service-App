@@ -34,7 +34,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 [FhirConstants.FhirMediaType] = new OpenApiMediaType
                 {
                     Example = new OpenApiString(
-                        File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
+                        File.ReadAllText("Swagger/Examples/process-message-payload.json"))
                 }
             }
         };
@@ -46,7 +46,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
         {
             ["201"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Created",
-                "Swagger/Examples/process-message-payload-and-response.json"),
+                "Swagger/Examples/process-message-created-response.json"),
             ["400"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Bad Request",
                 "Swagger/Examples/process-message-bad-request.json"),
