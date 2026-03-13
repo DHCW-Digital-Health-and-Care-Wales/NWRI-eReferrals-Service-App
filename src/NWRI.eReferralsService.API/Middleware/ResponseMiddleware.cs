@@ -97,8 +97,8 @@ public class ResponseMiddleware
                 _logger.NotSuccessfulApiResponseError(notSuccessfulApiCallException);
 
                 statusCode = notSuccessfulApiCallException.StatusCode == HttpStatusCode.InternalServerError
-                    ? HttpStatusCode.ServiceUnavailable
-                    : notSuccessfulApiCallException.StatusCode;
+                    ? HttpStatusCode.InternalServerError
+                    : HttpStatusCode.UnprocessableEntity;
 
                 _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), notSuccessfulApiCallException);
 

@@ -8,6 +8,7 @@ public static class FhirConstants
     public const string BarsMessageReasonSystem = "https://fhir.nhs.uk/CodeSystem/message-reason-bars";
     public const string BarsMessageReasonNew = "new";
     public const string BarsMessageReasonUpdate = "update";
+    public const string BarsServiceRequestRequestReferral = "BARSServiceRequest-request-referral";
     public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
     public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
     public const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";

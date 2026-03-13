@@ -14,7 +14,7 @@ namespace NWRI.eReferralsService.API.Validators;
 
 public class FhirBundleProfileValidator : IFhirBundleProfileValidator, IDisposable
 {
-    private const string WarmupExampleFilePath = "Swagger/Examples/process-message-payload-and-response.json";
+    private const string WarmupExampleFilePath = "Swagger/Examples/process-message-payload.json";
     private const string FhirPackagesDirectory = "FhirPackages";
 
     private readonly FhirBundleProfileValidationConfig _config;

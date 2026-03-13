@@ -35,7 +35,7 @@ public class ReferralsController : ControllerBase
         return new ContentResult
         {
             Content = outputBundleJson,
-            StatusCode = 200,
+            StatusCode = StatusCodes.Status201Created,
             ContentType = FhirConstants.FhirMediaType
         };
     }

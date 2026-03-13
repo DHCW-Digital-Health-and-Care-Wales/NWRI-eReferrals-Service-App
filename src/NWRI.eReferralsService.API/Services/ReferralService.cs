@@ -68,8 +68,16 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
-        // TODO: To be implemented as part of story 565927. For now, we echo the exact request body to the sender
-        return requestBody;
+        return GenerateResponse(bundle, response.ReferralId);
+    }
+
+    private string GenerateResponse(Bundle bundle, string referralId)
+    {
+        var serviceRequest = bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestRequestReferral).FirstOrDefault()
+                             ?? bundle.ResourceByType<ServiceRequest>()!;
+
+        serviceRequest.Id = referralId;
+        return JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
     }
 
     private static ReferralWorkflowAction DetermineReferralWorkflowAction(Bundle bundle)
